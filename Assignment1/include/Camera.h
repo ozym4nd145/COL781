@@ -5,7 +5,7 @@
 #include "DS.h"
 
 class Camera {
-    typedef Triple<float> Vec;
+    typedef Triple<float> Vector3f;
     private:
         Ray _world_view;
         Ray _camera_view; // camera at origin, pointing to -z direction
@@ -20,7 +20,7 @@ class Camera {
         }
     public:
         Camera(const Ray& view ,float ar ,float fov_degree):
-            _world_view{view}, _camera_view(Point(0),Vec(0,0,-1)), _ar{ar}, _fov_degree{fov_degree} {
+            _world_view{view}, _camera_view(Point(0),Vector3f(0,0,-1)), _ar{ar}, _fov_degree{fov_degree} {
             // convert field of view to radians
             _x_correction = tan((_fov_degree*_pi)/360.0); // tan_inv(theta/2);
             _y_correction = _x_correction/_ar;
@@ -36,7 +36,7 @@ class Camera {
             float y = 1-2*j; // [-1,1]
             float x_corr = x*_x_correction; // [-tan(theta/2),tan(theta/2)]
             float y_corr = y*_y_correction; // [-tan(theta/2)/ar,tan(theta/2)/ar]
-            Ray r(_camera_view.src,Vec(x_corr,y_corr,-1));
+            Ray r(_camera_view.src,Vector3f(x_corr,y_corr,-1));
             return transformCameraToWorld(r);
         }
 
