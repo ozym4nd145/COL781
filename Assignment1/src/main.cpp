@@ -8,8 +8,8 @@
 using namespace std;
 
 int main() {
-    const int width = 100;
-    const int height = 100;
+    const int width = 1000;
+    const int height = 1000;
     Image i1{width,height};
 
     Camera cam(Ray(Point(0),Triple<float>(0,0,-1)),1,90);
