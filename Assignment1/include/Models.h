@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <optional>
+#include <Eigen/Dense>
 #include "DS.h"
 
 class Model {
@@ -226,11 +227,47 @@ class Plane: public Model {
             return t;
         }
         std::optional<Ray> getNormal(const Point& p) const { // returns outward normal
-            // TODO: check if point on the plange
+            // TODO: check if point on the plane
             return _normal;
         }
         friend std::ostream& operator<<(std::ostream& os, const Plane& pl) {
             return os<<"Plane{normal="<<pl._normal<<"}";
+        }
+};
+
+class Triangle: public Model {
+    private:
+        const Point _p1;
+        const Point _p2;
+        const Point _p3;
+        const Plane _plane;
+        const float _area;
+
+        static float getArea(Point a,Point b,Point c) {
+            return fabs((a-b).cross(a-c).norm()/2);
+        }
+
+    public:
+        Triangle(const Point& p1, const Point& p2, const Point& p3, const Material& mat):
+        Model{mat}, _p1{p1},_p2{p2},_p3{p3},
+        _plane{Ray(_p1,((_p1-_p2).cross(_p1-_p3))),mat},
+        _area{getArea(_p1,_p2,_p3)}
+        {}
+        std::optional<float> getIntersectionLength(const Ray& r) const {
+            auto intersection_len = _plane.getIntersectionLength(r);
+            if(!intersection_len) return {};
+            Point interp = r.src+intersection_len.value()*r.dir;
+            float a1 = getArea(_p1,_p2,interp);
+            float a2 = getArea(_p1,_p3,interp);
+            float a3 = getArea(_p2,_p3,interp);
+            if(fabs(a1+a2+a3-_area)<=EPSILON) return intersection_len;
+            return {};
+        }
+        std::optional<Ray> getNormal(const Point& p) const { // returns outward normal
+            return _plane.getNormal(p);
+        }
+        friend std::ostream& operator<<(std::ostream& os, const Triangle& tr) {
+            return os<<"Triangle{p1="<<tr._p1<<",p2="<<tr._p2<<",p3="<<tr._p3<<"}";
         }
 };
 

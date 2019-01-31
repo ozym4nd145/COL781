@@ -56,9 +56,6 @@ int main() {
     mirror.specular_coeff = 1425;
 
     Matrix4f world_camera=Matrix4f::Identity();
-    // world_camera(0,3) = 1;
-    // world_camera(1,3) = 1;
-    // world_camera(2,3) = 0;
     world_camera(3,0) = 1;
     world_camera(3,1) = 1;
     world_camera(3,2) = 0;
@@ -73,12 +70,15 @@ int main() {
 
     Plane pl1(Ray(Point(0,-4,0),Vector3f(0,1,0)),blue_rubber);
 
+    Triangle tr1(Point(2,1,-10),Point(-1,1,-11),Point(0,4,-12),mirror);
+
     vector<Model*> models;
     models.push_back(&sp1);
     models.push_back(&sp2);
     models.push_back(&sp3);
     models.push_back(&sp4);
     models.push_back(&pl1);
+    models.push_back(&tr1);
 
     Light lg1(Point(-20,20,20),Color::Constant(1.5));
     Light lg2(Point(30,50,-25),Color::Constant(1.8));
