@@ -2,6 +2,7 @@
 #include <limits>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include "Image.h"
 #include "Camera.h"
 #include "Models.h"
@@ -18,10 +19,13 @@ class RenderEngine {
         std::vector<const Model*> _models;
         std::vector<const Light*> _lights;
         const int max_trace_depth = 4;
+        const int num_sample = 5;
+
     public:
         RenderEngine(const Camera& cam,Image& img, const std::vector<Model*>& models, const std::vector<Light*>& lights, const Color ambient):
             _cam{cam}, _img{img}, _models{models.begin(),models.end()}, _lights{lights.begin(),lights.end()}, _ambient{ambient}
-        {}
+        {
+        }
 
         void addModel(const Model* model) {
             _models.push_back(model);
@@ -110,24 +114,22 @@ class RenderEngine {
         }
 
         void render() {
+            std::random_device rd;  //Will be used to obtain a seed for the random number engine
+            std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+            std::uniform_real_distribution<> dis(0.0, 1.0);
+
             const int width = _img.width;
             const int height = _img.height;
             for(int i=0;i<width;i++) {
                 for(int j=0;j<height;j++) {
-                    // int i = 84;
-                    // int j = 43;
-                    float x = ((float)i+0.5)/width;
-                    float y = ((float)j+0.5)/height;
-                    Ray r = _cam.getRay(x,y).value();
-                    // Ray r(Point(0,0,0),Vector3f(0,0,-1));
-                    Color c = trace(r,1,0);
-                    // std::cout<<"i: "<<i<<" | j: "<<j<<" Final Color: "<<c<<std::endl;
-                    // if(c.x < 0.1 && c.y <0.1 && c.z<0.1) {
-                    //     std::cout<<"i: "<<i<<" | j: "<<j<<" Final Color: "<<c<<std::endl;
-                    //     if(i==84 && j==43) {
-                    //         // c = Color(0,1,0);
-                    //     }
-                    // }
+                    Color c(0);
+                    for(int k=0;k<this->num_sample;k++) {
+                        float x = ((float)i+dis(gen))/width;
+                        float y = ((float)j+dis(gen))/height;
+                        Ray r = _cam.getRay(x,y).value();
+                        c += trace(r,1,0);
+                    }
+                    c = c/this->num_sample;
                     _img.set(i,j,c);
                 }
             }
