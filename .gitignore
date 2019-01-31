@@ -34,3 +34,6 @@
 
 ## CUSTOM
 ignore/
+
+.vscode/
+build/
