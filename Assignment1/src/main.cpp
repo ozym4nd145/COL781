@@ -28,7 +28,7 @@ int main() {
     glass.Ks = Vector3f::Constant(0.5);
     glass.Krg = Vector3f::Constant(0.1);
     glass.Ktg = Vector3f::Constant(0.8);
-    glass.refractive_index = 1.5; // TODO: 1.5
+    glass.refractive_index = 1.0; // TODO: 1.5
     glass.specular_coeff = 125.0;
 
     red_rubber.Ka = Vector3f::Constant(0);
@@ -81,6 +81,9 @@ int main() {
     col1.addModel(new Triangle(Point(2,0,-6),Point(2,2,-5),Point(0,2,-5),blue_rubber));
     col1.addModel(new Triangle(Point(2,0,-6),Point(0,0,-6),Point(0,2,-5),red_rubber));
 
+    Box b1(Vector3f(-1,-1,-6),Vector3f(-1,-1,1),Vector3f(1,0,0),3,3,3,glass);
+
+
     vector<Model*> models;
     models.push_back(&sp1);
     models.push_back(&sp2);
@@ -90,6 +93,7 @@ int main() {
     models.push_back(&pl1);
     models.push_back(&tr1);
     models.push_back(&col1);
+    models.push_back(&b1);
 
     Light lg1(Point(-20,20,20),Color::Constant(1.5));
     Light lg2(Point(30,50,-25),Color::Constant(1.8));
