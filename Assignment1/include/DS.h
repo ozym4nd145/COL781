@@ -18,6 +18,19 @@ class Ray {
 
 struct QuadricParams {
     float A, B, C, D, E, F, G, H, I, J;
+    QuadricParams(const vector<float>& qp) {
+        assert(qp.size() == 10);
+        A = qp[0];
+        B = qp[1];
+        C = qp[2];
+        D = qp[3];
+        E = qp[4];
+        F = qp[5];
+        G = qp[6];
+        H = qp[7];
+        I = qp[8];
+        J = qp[9];
+    }
 };
 
 struct Material {
@@ -31,4 +44,20 @@ struct Material {
           Ktg{Vector3f::Zero()},
           refractive_index{-1},
           specular_coeff{1} {}
+    Material(const Vector3f& ka, const Vector3f& kd, const Vector3f& ks,
+             const Vector3f& krg, const Vector3f& ktg, float ri, float sc)
+        : Ka{ka},
+          Kd{kd},
+          Ks{ks},
+          Krg{krg},
+          Ktg{ktg},
+          refractive_index{ri},
+          specular_coeff{sc} {}
 };
+
+// struct State{
+//     vector<Model*> models;
+//     vector<Light*> lights;
+//     unordered_map<string,Material*> materials;
+//     Camera *cam;
+// };

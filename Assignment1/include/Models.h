@@ -1,17 +1,17 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <cassert>
 #include <cmath>
 #include <iostream>
 #include <optional>
-#include <Eigen/Dense>
 #include "DS.h"
 
 class Model {
    public:
     const Material mat;
 
-    Model(const Material &mat) : mat{mat} {}
+    Model(const Material& mat) : mat{mat} {}
     virtual ~Model() = default;
 
     std::optional<float> getRefractiveIndex(Vector3f incident,
@@ -125,12 +125,13 @@ class Model {
                 // light strikes from opposite side
                 continue;
             }
-            Vector3f reflected = 2 * (cos_theta)*normal_corr -incident; 
+            Vector3f reflected = 2 * (cos_theta)*normal_corr - incident;
             // some duplicate code with getReflected function
             final_color += ((this->mat).Kd).cwiseProduct(intensity) * cos_theta;
             float cos_alpha = reflected.dot(view_corr);
             if (cos_alpha > 0) {
-                final_color += ((this->mat).Ks).cwiseProduct(intensity) * pow(cos_alpha,(this->mat).specular_coeff);
+                final_color += ((this->mat).Ks).cwiseProduct(intensity) *
+                               pow(cos_alpha, (this->mat).specular_coeff);
             }
         }
 
@@ -226,7 +227,6 @@ class Sphere : public Model {
     }
 };
 
-
 class Plane: public Model {
     private:
         const Ray _normal;
@@ -255,17 +255,17 @@ class Plane: public Model {
         }
 };
 
-class Triangle: public Model {
-    private:
-        const Point _p1;
-        const Point _p2;
-        const Point _p3;
-        const Plane _plane;
-        const float _area;
+class Triangle : public Model {
+   private:
+    const Point _p1;
+    const Point _p2;
+    const Point _p3;
+    const Plane _plane;
+    const float _area;
 
-        static float getArea(Point a,Point b,Point c) {
-            return fabs((a-b).cross(a-c).norm()/2);
-        }
+    static float getArea(Point a, Point b, Point c) {
+        return fabs((a - b).cross(a - c).norm() / 2);
+    }
 
     public:
         Triangle(const Point& p1, const Point& p2, const Point& p3, const Material& mat):
@@ -363,8 +363,7 @@ class Quadric : public Model {
 
    public:
     using Model::Model;
-    Quadric(const QuadricParams& qp, const Material& mp)
-        : _qp(qp), Model(mp) {
+    Quadric(const QuadricParams& qp, const Material& mp) : _qp(qp), Model(mp) {
         M << qp.A, qp.B, qp.C, qp.D, qp.B, qp.E, qp.F, qp.G, qp.C, qp.F, qp.H,
             qp.I, qp.D, qp.G, qp.I, qp.J;
     }

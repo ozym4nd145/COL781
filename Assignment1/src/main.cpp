@@ -72,7 +72,7 @@ int main() {
     Sphere sp4(Point(7,5,-18),4,mirror);
 
     Plane pl1(Ray(Point(0,-4,0),Vector3f(0,1,0)),blue_rubber);
-    QuadricParams qp =  {1,0,0,-3,-1.0/16,0,4.0/16,1,8,72};
+    QuadricParams qp({1,0,0,-3,-1.0/16,0,4.0/16,1,8,72});
     Quadric q1(qp,ivory);
 
     Triangle tr1(Point(2,1,-10),Point(-1,1,-11),Point(0,4,-12),mirror);
