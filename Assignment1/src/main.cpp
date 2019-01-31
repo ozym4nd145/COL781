@@ -29,7 +29,7 @@ int main() {
     glass.Ks = Vector3f(0.5);
     glass.Krg = Vector3f(0.1);
     glass.Ktg = Vector3f(0.8);
-    glass.refractive_index = 1.5; // TODO: 1.5
+    glass.refractive_index = 10.0; // TODO: 1.5
     glass.specular_coeff = 125.0;
 
     red_rubber.Ka = Vector3f(0);
