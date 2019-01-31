@@ -85,7 +85,7 @@
         {
             "type": "quadric",
             "material": "ivory",
-            "qp": [1,0,0,-3,0.0625,0,0.25,1,8,72]
+            "qp": [1,0,0,-3,-0.0625,0,0.25,1,8,72]
         },
         {
             "type": "triangle",
@@ -93,6 +93,36 @@
             "p1": [2,1,-10],
             "p2": [-1,1,-11],
             "p3": [0,4,-12]
+        },
+        {
+            "type": "collection",
+            "material": "red_rubber",
+            "elements":[
+                {
+                    "type": "triangle",
+                    "material": "blue_rubber",
+                    "p1": [2,0,-6],
+                    "p2": [2,2,-5],
+                    "p3": [0,2,-5]
+                },
+                {
+                    "type": "triangle",
+                    "material": "red_rubber",
+                    "p1": [2,0,-6],
+                    "p2": [0,0,-6],
+                    "p3": [0,2,-5]
+                }
+            ]
+        },
+        {
+            "type": "box",
+            "material" : "glass",
+            "center": [-1,-1,-6],
+            "x_axis": [-1,-1,1],
+            "y_axis": [1,0,0],
+            "length": 3.0,
+            "breadth": 3.0,
+            "height": 3.0
         }
     ],
     "lights":[

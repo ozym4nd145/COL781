@@ -5,7 +5,9 @@
 #include <cmath>
 #include <iostream>
 #include <optional>
+#include "Camera.h"
 #include "DS.h"
+#include "defs.h"
 
 class Model {
    public:
@@ -15,17 +17,12 @@ class Model {
     virtual ~Model() = default;
 
     std::optional<float> getRefractiveIndex(Vector3f incident,
-                                            Vector3f normal) const {
-        if ((this->mat).refractive_index < 0) return {};
-        // if hit from inside the return refractive index as 1 for the outside
-        // world
-        return ((incident.dot(normal) < 0) ? ((this->mat).refractive_index)
-                                           : 1.0);
-    }
+                                            Vector3f normal) const;
+    // This function return the intersection length and a pointer to the base
+    // part for getting normal efficiently
+    virtual std::optional<std::pair<float, const Model*>>
+    getIntersectionLengthAndPart(const Ray&) const = 0;
 
-    //This function return the intersection length and a pointer to the base part for getting normal efficiently
-    virtual std::optional<std::pair<float,const Model*>> getIntersectionLengthAndPart(const Ray&) const = 0;
-    
     virtual std::optional<Ray> getNormal(const Point&) const = 0;
 
     virtual bool isOnSurface(const Point&) const = 0;
@@ -43,17 +40,7 @@ class Model {
      * @return {Ray} Reflected ray pointing away from point of contact with
      * source at point of contact
      */
-    static Ray getReflected(const Ray& incident, const Ray& normal) {
-        const float angle = (normal.dir).dot(incident.dir);
-        const bool isInside = angle > 0;
-        const float abs_angle = fabs(angle);
-        Vector3f true_normal = isInside ? (-normal.dir) : (normal.dir);
-        Vector3f reflected_dir = (2 * abs_angle * true_normal) + incident.dir;
-
-        return Ray(normal.src + (true_normal * EPSILON),
-                   reflected_dir);  // Made the starting point slightly outside
-                                    // along reflection dir
-    }
+    static Ray getReflected(const Ray& incident, const Ray& normal);
 
     /**
      * @param{normal} Normal ray with source at the point of contact
@@ -64,31 +51,7 @@ class Model {
      */
     static Ray getRefracted(const Ray& incident, const Ray& normal,
                             const float incident_ref_idx,
-                            const float transfer_ref_idx) {
-        const float cos_theta_i = (normal.dir).dot(incident.dir);
-        const bool isInside = cos_theta_i > 0;
-        const float abs_cos_theta_i = fabs(cos_theta_i);
-        const float abs_sin_theta_i =
-            sqrt(1 - (abs_cos_theta_i * abs_cos_theta_i));
-        const float ref_ratio = incident_ref_idx / transfer_ref_idx;
-        const float abs_sin_theta_t = (ref_ratio * abs_sin_theta_i);
-        const float abs_cos_theta_t =
-            sqrt(1 - (abs_sin_theta_t * abs_sin_theta_t));
-
-        Vector3f true_normal = isInside ? (-normal.dir) : (normal.dir);
-
-        Vector3f refracted_dir =
-            ((ref_ratio * (incident.dir + true_normal * abs_cos_theta_i)) -
-             (abs_cos_theta_t * true_normal))
-                .normalized();
-
-        // std::cout<<"Normal src: "<<normal.src<<"RefractedDir:
-        // "<<refracted_dir<<" delta: "<<(refracted_dir*EPSILON)<<std::endl;
-        return Ray(normal.src - (true_normal * EPSILON),
-                   refracted_dir);  // Made the starting point slightly outside
-                                    // along refraction dir
-    }
-
+                            const float transfer_ref_idx);
     /**
      * @param{normal} Normal direction at the point of color
      * @param{view} View direction pointing away from the point of color
@@ -102,53 +65,7 @@ class Model {
         const Vector3f& normal, const Vector3f& view,
         const std::vector<std::pair<Color, Vector3f>>& lights,
         const Color* ambient, const Color* reflected,
-        const Color* refracted) const {
-        Vector3f view_corr = view;
-        Vector3f normal_corr = normal;
-        if (view_corr.dot(normal_corr) < 0) {
-            // std::cout<<"NORMAL AND VIEW OPPOSITE!!"<<std::endl;
-
-            // we are vieweing wrong normal (maybe the ray in inside the
-            // object?)
-            normal_corr = -normal_corr;
-        }
-
-        Color final_color(0, 0, 0);
-
-        // assert(lights.size()==1);
-
-        for (const auto pr : lights) {
-            Color intensity = pr.first;
-            Vector3f incident = pr.second;
-            float cos_theta = incident.dot(normal_corr);
-            if (cos_theta < 0) {
-                // light strikes from opposite side
-                continue;
-            }
-            Vector3f reflected = 2 * (cos_theta)*normal_corr - incident;
-            // some duplicate code with getReflected function
-            final_color += ((this->mat).Kd).cwiseProduct(intensity) * cos_theta;
-            float cos_alpha = reflected.dot(view_corr);
-            if (cos_alpha > 0) {
-                final_color += ((this->mat).Ks).cwiseProduct(intensity) *
-                               pow(cos_alpha, (this->mat).specular_coeff);
-            }
-        }
-
-        if (ambient) {
-            final_color += ((this->mat).Ka).cwiseProduct(*ambient);
-        }
-
-        if (reflected) {
-            final_color += ((this->mat).Krg).cwiseProduct(*reflected);
-        }
-
-        if (refracted) {
-            final_color += ((this->mat).Ktg).cwiseProduct(*refracted);
-        }
-
-        return final_color;
-    }
+        const Color* refracted) const;
 };
 
 class Light {
@@ -186,73 +103,25 @@ class Sphere : public Model {
           _radius_sq{s._radius_sq} {}
     Sphere& operator=(const Sphere& s) = delete;
 
-    std::optional<std::pair<float,const Model*>> getIntersectionLengthAndPart(const Ray& r) const {
-        // TODO: check intersection inside Sphere
-        Ray src_center(r.src, _center - r.src);
-        const float cos_theta = src_center.dir.dot(r.dir);
-        if (src_center.length > _radius && cos_theta <= 0) {
-            return {};  // ray can't intersect
-        }
-
-        const float src_center_sq = src_center.length * src_center.length;
-        const float src_center_proj = src_center.length * cos_theta;
-        const float center_ray_sq =
-            src_center_sq - src_center_proj * src_center_proj;
-
-        if (center_ray_sq > _radius_sq) return {};  // not intersecting
-        const float d = sqrt(_radius_sq - center_ray_sq);
-        const float t0 = src_center_proj + d;
-        const float t1 = src_center_proj - d;
-
-        float min_dist = std::min(t0, t1);
-        float max_dist = std::max(t0, t1);
-        float dist =
-            (min_dist < 0) ? max_dist : min_dist;  // use correct distance
-        return std::make_pair(dist,this);
-    }
-
-    bool isOnSurface(const Point& p) const {
-        return (fabs((p-_center).norm()-_radius)<=EPSILON);
-    }
-    
+    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+        const Ray& r) const;
+    bool isOnSurface(const Point& p) const;
     // returns outward normal
-    std::optional<Ray> getNormal(const Point& p) const {
-        if(!isOnSurface(p)) return {};
-        auto normal = Ray(p, p - _center);
-        return normal;
-    };
-
-    std::ostream& print(std::ostream& os) const {
-        return os << "Sphere{center=" << _center << ",radius=" << _radius << "}";
-    }
+    std::optional<Ray> getNormal(const Point& p) const;
+    std::ostream& print(std::ostream& os) const;
 };
 
-class Plane: public Model {
-    private:
-        const Ray _normal;
-    public:
-        Plane(const Ray& normal, Material mat): Model{mat}, _normal{normal} {}
+class Plane : public Model {
+   private:
+    const Ray _normal;
 
-        std::optional<std::pair<float,const Model*>> getIntersectionLengthAndPart(const Ray& r) const {
-            float cos_theta = r.dir.dot(_normal.dir);
-            if(fabs(cos_theta)<=EPSILON) return {}; // not intersecting case
-            float t = ((_normal.src-r.src).dot(_normal.dir))/cos_theta;
-            if(t<0) return {};
-            return std::make_pair(t,this);
-        }
-
-        bool isOnSurface(const Point& p) const {
-            return (fabs((_normal.src-p).dot(_normal.dir))<=EPSILON);
-        }
-
-        std::optional<Ray> getNormal(const Point& p) const {
-            if(!isOnSurface(p)) return {};
-            return _normal;
-        };
-
-        std::ostream& print(std::ostream& os) const {
-            return os<<"Plane{normal="<<_normal<<"}";
-        }
+   public:
+    Plane(const Ray& normal, Material mat) : Model{mat}, _normal{normal} {}
+    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+        const Ray& r) const;
+    bool isOnSurface(const Point& p) const;
+    std::optional<Ray> getNormal(const Point& p) const;
+    std::ostream& print(std::ostream& os) const;
 };
 
 class Triangle : public Model {
@@ -262,102 +131,49 @@ class Triangle : public Model {
     const Point _p3;
     const Plane _plane;
     const float _area;
-
     static float getArea(Point a, Point b, Point c) {
         return fabs((a - b).cross(a - c).norm() / 2);
     }
 
-    public:
-        Triangle(const Point& p1, const Point& p2, const Point& p3, const Material& mat):
-        Model{mat}, _p1{p1},_p2{p2},_p3{p3},
-        _plane{Ray(_p1,((_p1-_p2).cross(_p1-_p3))),mat},
-        _area{getArea(_p1,_p2,_p3)}
-        {}
-
-        bool isOnSurface(const Point& p) const {
-            float a1 = getArea(_p1,_p2,p);
-            float a2 = getArea(_p1,_p3,p);
-            float a3 = getArea(_p2,_p3,p);
-            return (fabs(a1+a2+a3-_area)<=EPSILON);
-        }
-        
-        std::optional<std::pair<float,const Model*>> getIntersectionLengthAndPart(const Ray& r) const {
-            auto intersection_part = _plane.getIntersectionLengthAndPart(r);
-            if(!intersection_part) return {};
-            Point interp = r.src+intersection_part.value().first*r.dir;
-            if(isOnSurface(interp)) return intersection_part;
-            return {};
-        }
-
-
-        std::optional<Ray> getNormal(const Point& p) const {
-            if(!isOnSurface(p)) return {};
-            return _plane.getNormal(p);
-        };
-
-        std::ostream& print(std::ostream& os) const {
-            return os<<"Triangle{p1="<<_p1<<",p2="<<_p2<<",p3="<<_p3<<"}";
-        }
+   public:
+    Triangle(const Point& p1, const Point& p2, const Point& p3,
+             const Material& mat)
+        : Model{mat},
+          _p1{p1},
+          _p2{p2},
+          _p3{p3},
+          _plane{Ray(_p1, ((_p1 - _p2).cross(_p1 - _p3))), mat},
+          _area{getArea(_p1, _p2, _p3)} {}
+    bool isOnSurface(const Point& p) const;
+    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+        const Ray& r) const;
+    std::optional<Ray> getNormal(const Point& p) const;
+    std::ostream& print(std::ostream& os) const;
 };
 
-class Collection: public Model {
+class Collection : public Model {
     // TODO: CHANGE TO UNIQUE_PTR
-    private:
-        std::vector<const Model*> _parts;
+   private:
+    std::vector<const Model*> _parts;
+    std::optional<const Model*> getWhichPart(const Point& p) const;
 
-        std::optional<const Model*> getWhichPart(const Point& p) const {
-            for (auto part : _parts) {
-                if(part->isOnSurface(p)) return part;
-            }
-            return {};
-        }
-    
-    public:
-        Collection(Material mat):Model{mat} {
-        }
+   public:
+    Collection(Material mat) : Model{mat} {}
 
-        void addModel(Model* part) {
-            _parts.push_back(part);
-        }
+    void addModel(Model* part) { _parts.push_back(part); }
 
-        std::optional<std::pair<float,const Model*>> getIntersectionLengthAndPart(const Ray& r) const {
-            const Model* closest_model_part = NULL;
-            float closest_distance = std::numeric_limits<float>::infinity();
+    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+        const Ray& r) const;
 
-            for (auto part : _parts) {
-                auto intersection_part = part->getIntersectionLengthAndPart(r);
-                if (!intersection_part) continue;
-                auto len = intersection_part.value().first;
-                if (len < closest_distance) {
-                    closest_distance = len;
-                    closest_model_part = part;
-                }
-            }
+    bool isOnSurface(const Point& p) const;
 
-            if(!closest_model_part) return {};
-            return std::make_pair(closest_distance,closest_model_part);
-        }
+    std::optional<Ray> getNormal(const Point& p) const;
 
-
-        bool isOnSurface(const Point& p) const {
-            return getWhichPart(p).has_value();
-        }
-
-        std::optional<Ray> getNormal(const Point& p) const { // returns outward normal
-            auto part_opt = getWhichPart(p);
-            if(!part_opt) return {};
-            auto part = part_opt.value();
-            return part->getNormal(p);
-        }
-
-        std::ostream& print(std::ostream& os) const {
-            return os<<"Collection{num_parts="<<_parts.size()<<"}";
-        }
+    std::ostream& print(std::ostream& os) const;
 };
 
 class Quadric : public Model {
-    private:
-
+   private:
     const QuadricParams _qp;
     Matrix4f M;
 
@@ -368,99 +184,38 @@ class Quadric : public Model {
             qp.I, qp.D, qp.G, qp.I, qp.J;
     }
 
-    std::optional<std::pair<float,const Model*>> getIntersectionLengthAndPart(const Ray& r) const {
-        auto Ro = augment(r.src, 1.0);
-        auto Rd = augment(r.dir, 0.0);
-        float Aq = Rd * M * (Rd.transpose());
-        float Bq = Rd * M * (Ro.transpose());
-        Bq += Ro * M * (Rd.transpose());
-        float Cq = Ro * M * (Ro.transpose());
-        auto inters = solve_quadratic(Aq, Bq, Cq);
-        if (!inters) return {};
-        auto min_pos_dist = (inters.value().first < 0)?(inters.value().second):(inters.value().first);
-        if(min_pos_dist<0) return {};
-        return std::make_pair(min_pos_dist,this);
-    }
-    
-    bool isOnSurface(const Point& p) const {
-        float val = augment(p, 1.0) * M * (augment(p, 1.0).transpose());
-        return (abs(val) <= 10*EPSILON);
-    }
+    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+        const Ray& r) const;
+    bool isOnSurface(const Point& p) const;
+    std::optional<Ray> getNormal(const Point& p) const;
 
-    std::optional<Ray> getNormal(const Point& p) const {
-        if(!isOnSurface(p)) return {};
-        float nx = 2.0 * (_qp.A * p[0] + _qp.B * p[1] + _qp.C * p[2] + _qp.D);
-        float ny = 2.0 * (_qp.B * p[0] + _qp.E * p[1] + _qp.F * p[2] + _qp.G);
-        float nz = 2.0 * (_qp.C * p[0] + _qp.F * p[1] + _qp.H * p[2] + _qp.I);
-        return Ray(p, Vector3f(nx, ny, nz));
-    }
-
-    std::ostream& print(std::ostream& os) const {
-        return os<<"Quadric{Matrix="<<std::endl<<M<<std::endl<<"}";
-    }
+    std::ostream& print(std::ostream& os) const;
 };
 
-class Box: public Model {
-    private:
-        const Point _center;
-        const float _l;
-        const float _b;
-        const float _h;
-        const Vector3f _ax;
-        const Vector3f _az;
-        const Vector3f _ay;
-        Collection _coll;
-    public:
-        Box(const Point& center, const Vector3f& x, const Vector3f& y, float l, float b, float h, const Material& mat):
-        Model{mat}, _center{center}, _l{l}, _b{b}, _h{h}, _ax{x.normalized()},
-        _az{(_ax.cross(y)).normalized()}, _ay{(_az.cross(_ax)).normalized()},_coll{mat}
-        {
-            float l2 = _l/2;
-            float b2 = _b/2;
-            float h2 = _h/2;
-            Point c = _center;
-            Point ubl = c + _az*b2 + _ay*h2 - _ax*l2; // upper bottom left
-            Point ubr = c + _az*b2 + _ay*h2 + _ax*l2; // upper bottom right
-            Point utl = c - _az*b2 + _ay*h2 - _ax*l2; // upper top left
-            Point utr = c - _az*b2 + _ay*h2 + _ax*l2; // upper top right
-            Point lbl = c + _az*b2 - _ay*h2 - _ax*l2; // lower bottom left
-            Point lbr = c + _az*b2 - _ay*h2 + _ax*l2; // lower bottom right
-            Point ltl = c - _az*b2 - _ay*h2 - _ax*l2; // lower top left
-            Point ltr = c - _az*b2 - _ay*h2 + _ax*l2; // lower top right
+class Box : public Model {
+   private:
+    const Point _center;
+    const float _l;
+    const float _b;
+    const float _h;
+    const Vector3f _ax;
+    const Vector3f _az;
+    const Vector3f _ay;
+    Collection _coll;
 
-            // top face
-            _coll.addModel(new Triangle(utl,utr,ubr,mat));
-            _coll.addModel(new Triangle(utl,ubl,ubr,mat));
-            // bottom face
-            _coll.addModel(new Triangle(ltl,ltr,lbr,mat));
-            _coll.addModel(new Triangle(ltl,lbl,lbr,mat));
-            // front face
-            _coll.addModel(new Triangle(ubl,ubr,lbr,mat));
-            _coll.addModel(new Triangle(ubl,lbl,lbr,mat));
-            // back face
-            _coll.addModel(new Triangle(utl,utr,ltr,mat));
-            _coll.addModel(new Triangle(utl,ltl,lbr,mat));
-            // left face
-            _coll.addModel(new Triangle(ubl,utl,ltl,mat));
-            _coll.addModel(new Triangle(ubl,lbl,ltl,mat));
-            // right face
-            _coll.addModel(new Triangle(ubr,utr,ltr,mat));
-            _coll.addModel(new Triangle(ubr,lbr,ltr,mat));
-        }
+   public:
+    Box(const Point& center, const Vector3f& x, const Vector3f& y, float l,
+        float b, float h, const Material& mat);
+    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+        const Ray& r) const;
+    bool isOnSurface(const Point& p) const;
+    std::optional<Ray> getNormal(const Point& p) const;
+    std::ostream& print(std::ostream& os) const;
+};
 
-        std::optional<std::pair<float,const Model*>> getIntersectionLengthAndPart(const Ray& r) const {
-            return _coll.getIntersectionLengthAndPart(r);
-        }
-
-        bool isOnSurface(const Point& p) const {
-            return _coll.isOnSurface(p);
-        }
-
-        std::optional<Ray> getNormal(const Point& p) const {
-            return _coll.getNormal(p);
-        }
-     
-        std::ostream& print(std::ostream& os) const {
-           return os<<"Box{l="<<_l<<",b="<<_b<<",h="<<_h<<",ax="<<_ax<<",ay="<<_ay<<",az="<<_az<<"}";
-        }
+struct State {
+    std::vector<Model*> models;
+    std::vector<Light*> lights;
+    std::unordered_map<std::string, Material*> materials;
+    Camera* cam;
 };

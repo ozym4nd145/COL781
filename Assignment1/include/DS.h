@@ -1,8 +1,7 @@
 #pragma once
 
-#include <math.h>
-#include <iostream>
-#include "utils.h"
+#include <bits/stdc++.h>
+#include "defs.h"
 
 class Ray {
    public:
@@ -18,7 +17,7 @@ class Ray {
 
 struct QuadricParams {
     float A, B, C, D, E, F, G, H, I, J;
-    QuadricParams(const vector<float>& qp) {
+    QuadricParams(const std::vector<float>& qp) {
         assert(qp.size() == 10);
         A = qp[0];
         B = qp[1];
@@ -54,10 +53,3 @@ struct Material {
           refractive_index{ri},
           specular_coeff{sc} {}
 };
-
-// struct State{
-//     vector<Model*> models;
-//     vector<Light*> lights;
-//     unordered_map<string,Material*> materials;
-//     Camera *cam;
-// };
