@@ -188,3 +188,24 @@ class Sphere: public Model {
             return os<<"Sphere{center="<<sp._center<<",radius="<<sp._radius<<"}";
         }
 };
+
+class Plane: public Model {
+    private:
+        const Ray _normal;
+    public:
+        Plane(const Ray& normal, Material mat): Model{mat}, _normal{normal} {}
+        std::optional<float> getIntersectionLength(const Ray& r) const {
+            float cos_theta = r.dir.dot(_normal.dir);
+            if(fabs(cos_theta)<=EPSILON) return {}; // not intersecting case
+            float t = ((_normal.src-r.src).dot(_normal.dir))/cos_theta;
+            if(t<0) return {};
+            return t;
+        }
+        std::optional<Ray> getNormal(const Point& p) const { // returns outward normal
+            // TODO: check if point on the plange
+            return _normal;
+        }
+        friend std::ostream& operator<<(std::ostream& os, const Plane& pl) {
+            return os<<"Plane{normal="<<pl._normal<<"}";
+        }
+};

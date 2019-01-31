@@ -14,7 +14,7 @@ int main() {
     const int height = 1000;
     Image i1{width,height};
 
-    Material ivory, glass, red_rubber, mirror;
+    Material ivory, glass, red_rubber, blue_rubber, mirror;
 
     ivory.Ka = Vector3f(0);
     ivory.Kd = 0.6*Vector3f(0.4,0.4,0.3);
@@ -29,7 +29,7 @@ int main() {
     glass.Ks = Vector3f(0.5);
     glass.Krg = Vector3f(0.1);
     glass.Ktg = Vector3f(0.8);
-    glass.refractive_index = 10.0; // TODO: 1.5
+    glass.refractive_index = 1.5; // TODO: 1.5
     glass.specular_coeff = 125.0;
 
     red_rubber.Ka = Vector3f(0);
@@ -40,6 +40,14 @@ int main() {
     red_rubber.refractive_index = 1.0;
     red_rubber.specular_coeff = 10.0;
 
+    blue_rubber.Ka = Vector3f(0);
+    blue_rubber.Kd = 0.9*Vector3f(0.1,0.1,0.3);
+    blue_rubber.Ks = Vector3f(0.1);
+    blue_rubber.Krg = Vector3f(0);
+    blue_rubber.Ktg = Vector3f(0);
+    blue_rubber.refractive_index = 1.0;
+    blue_rubber.specular_coeff = 10.0;
+
     mirror.Ka = Vector3f(0);
     mirror.Kd = 0*Vector3f(1);
     mirror.Ks = Vector3f(10);
@@ -48,18 +56,21 @@ int main() {
     mirror.refractive_index = 1.0;
     mirror.specular_coeff = 1425;
 
-    Camera cam(Ray(Point(0),Triple<float>(0,0,-1)),1,75);
+    Camera cam(Ray(Point(0),Triple<float>(0,0,-1)),1,90);
     
     Sphere sp1(Point(-3,0,-16),2,ivory);
     Sphere sp2(Point(-1,-1.5,-12),2,glass);
     Sphere sp3(Point(1.5,-0.5,-18),3,red_rubber);
     Sphere sp4(Point(7,5,-18),4,mirror);
 
+    Plane pl1(Ray(Point(0,-4,0),Vector3f(0,1,0)),blue_rubber);
+
     vector<Model*> models;
     models.push_back(&sp1);
     models.push_back(&sp2);
     models.push_back(&sp3);
     models.push_back(&sp4);
+    models.push_back(&pl1);
 
     Light lg1(Point(-20,20,20),Color(1.5));
     Light lg2(Point(30,50,-25),Color(1.8));
