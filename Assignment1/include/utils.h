@@ -10,7 +10,7 @@ typedef Vector3f Point;
 typedef Vector3f Color;
 
 const double PI = 3.14159265358979323846;
-const double EPSILON = 1e-4;
+const double EPSILON = 1e-3;
 
 Vector4f augment(const Vector3f &vec, float val) {
     Vector4f new_vec;

@@ -59,10 +59,10 @@ int main() {
     // world_camera(0,3) = 1;
     // world_camera(1,3) = 1;
     // world_camera(2,3) = 0;
-    world_camera(3,0) = 1;
-    world_camera(3,1) = 1;
-    world_camera(3,2) = 0;
-    cout<<"WorldCamera Matrix:\n"<<world_camera<<endl;
+    // world_camera(3,0) = 7;
+    // world_camera(3,1) = 5;
+    // world_camera(3,2) = 0;
+    // cout<<"WorldCamera Matrix:\n"<<world_camera<<endl;
 
     Camera cam(world_camera,1.0,90.0);
     
@@ -72,11 +72,14 @@ int main() {
     Sphere sp4(Point(7,5,-18),4,mirror);
 
     Plane pl1(Ray(Point(0,-4,0),Vector3f(0,1,0)),blue_rubber);
+    QuadricParams qp =  {1,0,0,-3,-1.0/16,0,4.0/16,1,8,72};
+    Quadric q1(qp,ivory);
 
     vector<Model*> models;
     models.push_back(&sp1);
     models.push_back(&sp2);
     models.push_back(&sp3);
+    models.push_back(&q1);
     models.push_back(&sp4);
     models.push_back(&pl1);
 
@@ -90,7 +93,6 @@ int main() {
     lights.push_back(&lg3);
 
     RenderEngine render_man(cam,i1,models,lights,Color(0.2,0.2,0.2));
-    // RenderEngine render_man(cam,i1,models,lights,Color(0,0,0));
     render_man.render();
     render_man.writeImage("./sphere.ppm");
 

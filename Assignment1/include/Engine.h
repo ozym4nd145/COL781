@@ -18,7 +18,7 @@ class RenderEngine {
     Image& _img;
     std::vector<const Model*> _models;
     std::vector<const Light*> _lights;
-    const int max_trace_depth = 3;
+    const int max_trace_depth = 4;
     const int num_sample = 5;
     // const int num_sample = 1;
 
@@ -35,8 +35,7 @@ class RenderEngine {
     void addModel(const Model* model) { _models.push_back(model); }
 
     Color trace(Ray r, float refractive_index, int depth) {
-        // cout<<"trace begin: "<<r<<" refIdx: "<<refractive_index<<" depth:
-        // "<<depth<<endl;
+        // cout<<"trace begin: "<<r<<" refIdx: "<<refractive_index<<" depth:"<<depth<<endl;
 
         const Model* closest_model = NULL;
         float closest_distance = std::numeric_limits<float>::infinity();
@@ -51,15 +50,17 @@ class RenderEngine {
         }
 
         if (!closest_model) {
-            // cout<<"Background hit! "<<Color(0,0.2,0.2)<<endl;
+            // cout<<"Background hit! "<<Color(0,0,0)<<endl;
             return Color(0.2, 0.7, 0.8);  // TODO: Change this to background
+            // return Color(0, 0, 0);  // TODO: Change this to background
+
         }
         Point intersection_point_true = r.src + (closest_distance)*r.dir;
         auto normal_opt = closest_model->getNormal(intersection_point_true);
 
         if (!normal_opt) {
             // Don't know why normal not returned
-            cout << "NORMAL NOT RETURNED!!!!" << endl;
+            // cout << "NORMAL NOT RETURNED!!!!" << endl;
             return Color(0, 0, 0);
         }
         Ray normal = normal_opt.value();
@@ -76,8 +77,8 @@ class RenderEngine {
 
         std::vector<std::pair<Color, Vector3f>> light_rays;
 
-        // cout<<"Intersection point true: "<<intersection_point_true<<" |
-        // Intersection point: "<<intersection_point<<endl;
+        // cout<<"Intersection point true: "<<intersection_point_true<<" | Intersection point: "<<intersection_point<<endl;
+        // cout<<"Normal: "<<normal<<endl;
 
         // shadow rays
         for (auto light : _lights) {
@@ -90,9 +91,9 @@ class RenderEngine {
                     break;
                 }
             }
-            // if (is_occluded) {
-            //     std::cout<<"IS OCCLUDED!!!!! from "<<*light<<std::endl;
-            // }
+            if (is_occluded) {
+                // std::cout<<"IS OCCLUDED!!!!! from "<<*light<<std::endl;
+            }
             if (!is_occluded) {
                 light_rays.push_back(
                     std::make_pair(light->getIntensity(), shadow_ray.dir));
@@ -140,8 +141,6 @@ class RenderEngine {
         const int height = _img.height;
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                // int i=width/2;
-                // int j=height/2;
                 Color c(0,0,0);
                 for (int k = 0; k < this->num_sample; k++) {
                     float x = ((float)i + dis(gen)) / width;

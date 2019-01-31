@@ -6,9 +6,9 @@
 
 class Ray {
    public:
-    Point src;
-    Vector3f dir;
-    float length;
+    const Point src;
+    const Vector3f dir;
+    const float length;
     Ray(const Point& source, const Vector3f& direction)
         : src{source}, dir{direction.normalized()}, length{direction.norm()} {}
     friend std::ostream& operator<<(std::ostream& os, const Ray& r) {

@@ -246,7 +246,7 @@ class Quadric : public Model {
             qp.I, qp.D, qp.G, qp.I, qp.J;
     }
 
-    std::optional<float> getIntersectionPoint(const Ray& r) {
+    std::optional<float> getIntersectionLength(const Ray& r) const{
         auto Ro = augment(r.src, 1.0);
         auto Rd = augment(r.dir, 0.0);
         float Aq = Rd * M * (Rd.transpose());
@@ -255,16 +255,14 @@ class Quadric : public Model {
         float Cq = Ro * M * (Ro.transpose());
         auto inters = solve_quadratic(Aq, Bq, Cq);
         if (!inters) return {};
-        return inters.value().first;
+        auto min_pos_dist = (inters.value().first < 0)?(inters.value().second):(inters.value().first);
+        if(min_pos_dist<0) return {};
+        return min_pos_dist;
     }
 
-    std::optional<float> getIntersectionLength(const Ray& r) {
-        return getIntersectionPoint(r);
-    }
-
-    std::optional<Ray> getNormal(const Point& p) {
+    std::optional<Ray> getNormal(const Point& p) const {
         float val = augment(p, 1.0) * M * (augment(p, 1.0).transpose());
-        if (val != 0) return {};
+        if (abs(val) > 10*EPSILON) return {};
         float nx = 2.0 * (_qp.A * p[0] + _qp.B * p[1] + _qp.C * p[2] + _qp.D);
         float ny = 2.0 * (_qp.B * p[0] + _qp.E * p[1] + _qp.F * p[2] + _qp.G);
         float nz = 2.0 * (_qp.C * p[0] + _qp.F * p[1] + _qp.H * p[2] + _qp.I);
