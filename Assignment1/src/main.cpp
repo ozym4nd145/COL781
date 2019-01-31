@@ -75,6 +75,8 @@ int main() {
     QuadricParams qp =  {1,0,0,-3,-1.0/16,0,4.0/16,1,8,72};
     Quadric q1(qp,ivory);
 
+    Triangle tr1(Point(2,1,-10),Point(-1,1,-11),Point(0,4,-12),mirror);
+
     vector<Model*> models;
     models.push_back(&sp1);
     models.push_back(&sp2);
@@ -82,6 +84,7 @@ int main() {
     models.push_back(&q1);
     models.push_back(&sp4);
     models.push_back(&pl1);
+    models.push_back(&tr1);
 
     Light lg1(Point(-20,20,20),Color::Constant(1.5));
     Light lg2(Point(30,50,-25),Color::Constant(1.8));
