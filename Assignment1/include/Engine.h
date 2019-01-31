@@ -38,14 +38,17 @@ class RenderEngine {
         // cout<<"trace begin: "<<r<<" refIdx: "<<refractive_index<<" depth:"<<depth<<endl;
 
         const Model* closest_model = NULL;
+        const Model* closest_model_part = NULL;
         float closest_distance = std::numeric_limits<float>::infinity();
+
         for (auto mod : _models) {
-            auto intersection = mod->getIntersectionLength(r);
-            if (!intersection) continue;
-            auto len = intersection.value();
+            auto part = mod->getIntersectionLengthAndPart(r);
+            if (!part) continue;
+            auto len = part.value().first;
             if (len < closest_distance) {
                 closest_distance = len;
                 closest_model = mod;
+                closest_model_part = part.value().second;
             }
         }
 
@@ -56,19 +59,19 @@ class RenderEngine {
 
         }
         Point intersection_point_true = r.src + (closest_distance)*r.dir;
-        auto normal_opt = closest_model->getNormal(intersection_point_true);
+        auto normal_opt = closest_model_part->getNormal(intersection_point_true);
 
         if (!normal_opt) {
             // Don't know why normal not returned
-            // cout << "NORMAL NOT RETURNED!!!!" << endl;
+            // std::cerr<<"WARNING: Inconsistency Error! Intersected point doesn't have a normal! intersected_part:"<<(*closest_model_part)<<std::endl;
             return Color(0, 0, 0);
         }
+
         Ray normal = normal_opt.value();
 
         // taking intersection point slightly outside of intersection in
         // opposite direction of ray
-        Point intersection_point =
-            intersection_point_true +
+        Point intersection_point = intersection_point_true +
             ((normal.dir.dot(r.dir) > 0) ? (-EPSILON) : (EPSILON)) * normal.dir;
         // auto intersection_point = intersection_point_true - EPSILON*r.dir;
         std::optional<Color> reflected;
@@ -85,8 +88,8 @@ class RenderEngine {
             auto shadow_ray = light->getRayToLight(intersection_point);
             bool is_occluded = false;
             for (auto mod : _models) {
-                auto intersection = mod->getIntersectionLength(shadow_ray);
-                if (intersection && intersection.value() < shadow_ray.length) {
+                auto intersection_part = mod->getIntersectionLengthAndPart(shadow_ray);
+                if (intersection_part && intersection_part.value().first < shadow_ray.length) {
                     is_occluded = true;
                     break;
                 }

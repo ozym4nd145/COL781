@@ -77,6 +77,10 @@ int main() {
 
     Triangle tr1(Point(2,1,-10),Point(-1,1,-11),Point(0,4,-12),mirror);
 
+    Collection col1(red_rubber);
+    col1.addModel(new Triangle(Point(2,0,-6),Point(2,2,-5),Point(0,2,-5),blue_rubber));
+    col1.addModel(new Triangle(Point(2,0,-6),Point(0,0,-6),Point(0,2,-5),red_rubber));
+
     vector<Model*> models;
     models.push_back(&sp1);
     models.push_back(&sp2);
@@ -85,6 +89,7 @@ int main() {
     models.push_back(&sp4);
     models.push_back(&pl1);
     models.push_back(&tr1);
+    models.push_back(&col1);
 
     Light lg1(Point(-20,20,20),Color::Constant(1.5));
     Light lg2(Point(30,50,-25),Color::Constant(1.8));
