@@ -3,7 +3,6 @@
 #include "DS.h"
 #include "Models.h"
 #include "defs.h"
-
 Box::Box(const Point& center, const Vector3f& x, const Vector3f& y, float l,
          float b, float h, const Material& mat)
     : Model{mat},

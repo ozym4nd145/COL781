@@ -123,6 +123,17 @@
             "length": 3.0,
             "breadth": 3.0,
             "height": 3.0
+        },
+        {
+            "type": "polygon",
+            "material": "red_rubber",
+            "points":[
+                [2,0,-3],
+                [0,1,-3],
+                [-2,0,-3],
+                [-1,-1,-3],
+                [1,-1,-3]
+            ]
         }
     ],
     "lights":[

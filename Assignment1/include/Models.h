@@ -117,10 +117,13 @@ class Plane : public Model {
 
    public:
     Plane(const Ray& normal, Material mat) : Model{mat}, _normal{normal} {}
+
     std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
         const Ray& r) const;
+
     bool isOnSurface(const Point& p) const;
     std::optional<Ray> getNormal(const Point& p) const;
+
     std::ostream& print(std::ostream& os) const;
 };
 
@@ -218,4 +221,20 @@ struct State {
     std::vector<Light*> lights;
     std::unordered_map<std::string, Material*> materials;
     Camera* cam;
+};
+
+class Polygon : public Model {
+   private:
+    std::vector<Point> _points;
+    Plane* _plane;
+
+   public:
+    // assume that points are given in counter clockwise order and outward
+    // normal is given by right hand curl rule
+    Polygon(const std::vector<Point>& points, const Material& mat);
+    bool isOnSurface(const Point& p) const;
+    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+        const Ray& r) const;
+    std::optional<Ray> getNormal(const Point& p) const;
+    std::ostream& print(std::ostream& os) const;
 };

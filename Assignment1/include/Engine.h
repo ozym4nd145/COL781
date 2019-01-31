@@ -21,6 +21,7 @@ class RenderEngine {
     std::vector<const Model*> _models;
     std::vector<const Light*> _lights;
     const int max_trace_depth = 4;
+    // const int max_trace_depth = 1;
     const int num_sample = 5;
 
    public:

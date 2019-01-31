@@ -4,8 +4,7 @@
 #include "Models.h"
 #include "defs.h"
 
-std::optional<std::pair<float, const Model*>>
-Plane::getIntersectionLengthAndPart(const Ray& r) const {
+std::optional<std::pair<float, const Model*>> Plane::getIntersectionLengthAndPart(const Ray& r) const {
     float cos_theta = r.dir.dot(_normal.dir);
     if (fabs(cos_theta) <= EPSILON) return {};  // not intersecting case
     float t = ((_normal.src - r.src).dot(_normal.dir)) / cos_theta;
@@ -19,7 +18,7 @@ bool Plane::isOnSurface(const Point& p) const {
 
 std::optional<Ray> Plane::getNormal(const Point& p) const {
     if (!isOnSurface(p)) return {};
-    return _normal;
+    return Ray(p, _normal.dir);
 };
 
 std::ostream& Plane::print(std::ostream& os) const {

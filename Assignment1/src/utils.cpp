@@ -85,6 +85,13 @@ Model *parse_model(const json &j,
         float height = j["height"];
         m = new Box(center, x_axis, y_axis, length, breadth, height,
                     *materials[mat]);
+    } else if (type == "polygon") {
+        json pj = j["points"];
+        std::vector<Point> points;
+        for (auto &el : pj) {
+            points.push_back(get_vector3f(el));
+        }
+        m = new Polygon(points, *materials[mat]);
     }
     return m;
 }
