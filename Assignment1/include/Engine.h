@@ -19,6 +19,7 @@ class RenderEngine {
     std::vector<const Model*> _models;
     std::vector<const Light*> _lights;
     const int max_trace_depth = 4;
+    // const int max_trace_depth = 1;
     const int num_sample = 5;
     // const int num_sample = 1;
 
@@ -53,7 +54,7 @@ class RenderEngine {
         }
 
         if (!closest_model) {
-            // cout<<"Background hit! "<<Color(0,0,0)<<endl;
+            // cout<<"Background hit! "<<Color(0.2,0.7,0.8)<<endl;
             return Color(0.2, 0.7, 0.8);  // TODO: Change this to background
             // return Color(0, 0, 0);  // TODO: Change this to background
 
@@ -63,7 +64,7 @@ class RenderEngine {
 
         if (!normal_opt) {
             // Don't know why normal not returned
-            // std::cerr<<"WARNING: Inconsistency Error! Intersected point doesn't have a normal! intersected_part:"<<(*closest_model_part)<<std::endl;
+            std::cerr<<"WARNING: Inconsistency Error! Intersected point doesn't have a normal! intersected_part:"<<(*closest_model_part)<<std::endl;
             return Color(0, 0, 0);
         }
 
@@ -150,6 +151,8 @@ class RenderEngine {
                     float y = ((float)j + dis(gen)) / height;
                     Ray r = _cam.getRay(x, y).value();
                     // cout<<"i: "<<i<<" j: "<<j<<" x: "<<x<<" y: "<<y<<" ray: "<<r<<endl;
+                    // Ray r = Ray(Point(0,0,0),Vector3f(0.5,-0.5,-3));
+                    // cout<<"Ray: "<<r<<endl;
                     c += trace(r, 1, 0);
                     // cout<<"final color: "<<c<<endl;
                 }

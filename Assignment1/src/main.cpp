@@ -83,17 +83,22 @@ int main() {
 
     Box b1(Vector3f(-1,-1,-6),Vector3f(-1,-1,1),Vector3f(1,0,0),3,3,3,glass);
 
+    Polygon pg1({Vector3f(2,0,-3),Vector3f(0,1,-3),Vector3f(-2,0,-3),Vector3f(-1,-1,-3),Vector3f(1,-1,-3)},red_rubber);
+    // Polygon pg1({Vector3f(2,-1,-3),Vector3f(0,1,-3),Vector3f(-2,-1,-3)},red_rubber);
+    // Triangle pg1(Point(2,-1,-3),Point(0,1,-3),Point(-2,-1,-3),red_rubber);
+    cout<<"Polygon: "<<pg1<<endl;
 
     vector<Model*> models;
-    models.push_back(&sp1);
-    models.push_back(&sp2);
-    models.push_back(&sp3);
-    models.push_back(&q1);
-    models.push_back(&sp4);
-    models.push_back(&pl1);
-    models.push_back(&tr1);
-    models.push_back(&col1);
-    models.push_back(&b1);
+    // models.push_back(&sp1);
+    // models.push_back(&sp2);
+    // models.push_back(&sp3);
+    // models.push_back(&q1);
+    // models.push_back(&sp4);
+    // models.push_back(&pl1);
+    // models.push_back(&tr1);
+    // models.push_back(&col1);
+    // models.push_back(&b1);
+    models.push_back(&pg1);
 
     Light lg1(Point(-20,20,20),Color::Constant(1.5));
     Light lg2(Point(30,50,-25),Color::Constant(1.8));
