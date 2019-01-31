@@ -14,46 +14,61 @@ int main() {
     const int height = 1000;
     Image i1{width,height};
 
-    IllumParams ip1,ip2, ip3;
-    ip1.Ka = Vector3f(0.9,0.1,0.1);
-    ip1.Kd = Vector3f(0.9,0.1,0.1);
-    ip1.Ks = Vector3f(0.9,0.1,0.1);
-    ip1.Krg = Vector3f(0.9,0.1,0.1);
-    ip1.Ktg = Vector3f(0.9,0.1,0.1);
+    Material ivory, glass, red_rubber, mirror;
 
-    ip2.Ka = Vector3f(0,0,0);
-    ip2.Kd = Vector3f(0,0,0);
-    ip2.Ks = Vector3f(0,0,0);
-    ip2.Krg = Vector3f(0,0,0);
-    ip2.Ktg = Vector3f(1,1,1);
+    ivory.Ka = Vector3f(0);
+    ivory.Kd = 0.6*Vector3f(0.4,0.4,0.3);
+    ivory.Ks = Vector3f(0.3);
+    ivory.Krg = Vector3f(0.1);
+    ivory.Ktg = Vector3f(0);
+    ivory.refractive_index = 1.0;
+    ivory.specular_coeff = 50.0;
 
-    ip3.Ka = Vector3f(1,1,1);
-    ip3.Kd = Vector3f(0.7,0.7,0.7);
-    ip3.Ks = Vector3f(0.5,0.5,0.5);
-    ip3.Krg = Vector3f(1,1,1);
-    ip3.Ktg = Vector3f(1,1,1);
+    glass.Ka = Vector3f(0);
+    glass.Kd = 0*Vector3f(0.6,0.7,0.8);
+    glass.Ks = Vector3f(0.5);
+    glass.Krg = Vector3f(0.1);
+    glass.Ktg = Vector3f(0.8);
+    glass.refractive_index = 1.5; // TODO: 1.5
+    glass.specular_coeff = 125.0;
 
+    red_rubber.Ka = Vector3f(0);
+    red_rubber.Kd = 0.9*Vector3f(0.3,0.1,0.1);
+    red_rubber.Ks = Vector3f(0.1);
+    red_rubber.Krg = Vector3f(0);
+    red_rubber.Ktg = Vector3f(0);
+    red_rubber.refractive_index = 1.0;
+    red_rubber.specular_coeff = 10.0;
 
-    Camera cam(Ray(Point(0),Triple<float>(0,0,-1)),1,90);
-    // Sphere sp3(Point(-0.5,-0.5,-2),1,ip1);
-    Sphere sp3(Point(-1,0,-6),1,ip1);
-    // Sphere sp1(Point(-1,0,-3),0.7,ip2,1);
-    Sphere sp1(Point(0,0,-6),1.5,ip2,1);
-    Sphere sp2(Point(1,0,-6),1,ip3);
-    // Sphere sp2(Point(0,0,-5),2,ip2);
-    // Sphere sp2(Point(0,0,-5),2,ip3);
-    // Sphere sp2(Point(0,0,-10),2,ip3);
-    // Light lg1(Point(9,9,9),Color(1,1,1));
-    // Light lg1(Point(0,0,-4),Color(1,1,1));
-    Light lg2(Point(0,0,10),Color(1,1,1));
+    mirror.Ka = Vector3f(0);
+    mirror.Kd = 0*Vector3f(1);
+    mirror.Ks = Vector3f(10);
+    mirror.Krg = Vector3f(0.8);
+    mirror.Ktg = Vector3f(0);
+    mirror.refractive_index = 1.0;
+    mirror.specular_coeff = 1425;
+
+    Camera cam(Ray(Point(0),Triple<float>(0,0,-1)),1,75);
+    
+    Sphere sp1(Point(-3,0,-16),2,ivory);
+    Sphere sp2(Point(-1,-1.5,-12),2,glass);
+    Sphere sp3(Point(1.5,-0.5,-18),3,red_rubber);
+    Sphere sp4(Point(7,5,-18),4,mirror);
+
     vector<Model*> models;
     models.push_back(&sp1);
     models.push_back(&sp2);
     models.push_back(&sp3);
+    models.push_back(&sp4);
+
+    Light lg1(Point(-20,20,20),Color(1.5));
+    Light lg2(Point(30,50,-25),Color(1.8));
+    Light lg3(Point(30,20,30),Color(1.7));
 
     vector<Light*> lights;
-    // lights.push_back(&lg1);
+    lights.push_back(&lg1);
     lights.push_back(&lg2);
+    lights.push_back(&lg3);
 
     RenderEngine render_man(cam,i1,models,lights,Color(0.2,0.2,0.2));
     // RenderEngine render_man(cam,i1,models,lights,Color(0,0,0));

@@ -8,30 +8,28 @@
 
 const double EPSILON = 1e-4;
 
-struct IllumParams {
+struct Material {
     typedef Triple<float> Vector3f;
 
     Vector3f Ka,Kd,Ks,Krg,Ktg;
+    float refractive_index, specular_coeff;
 
-    IllumParams(): Ka{0},Kd{0},Ks{0},Krg{0},Ktg{0} {}
+    Material(): Ka{0},Kd{0},Ks{0},Krg{0},Ktg{0}, refractive_index{-1}, specular_coeff{1} {}
 };
 
 class Model {
     public:
         typedef Triple<float> Vector3f;
         
-        const IllumParams ip;
-        const float refractive_index;
-        const float specular_coeff=10;
-        // const float specular_coeff=1;
+        const Material mat;
 
-        std::optional<float> getRefractiveIndex() const {
-            return ((refractive_index<0) ? (std::nullopt):(std::optional(refractive_index)));
+        std::optional<float> getRefractiveIndex(Vector3f incident, Vector3f normal) const {
+            if((this->mat).refractive_index<0) return {};
+            // if hit from inside the return refractive index as 1 for the outside world
+            return ((incident.dot(normal)<0)? ((this->mat).refractive_index):1.0);
         }
 
-        Model(IllumParams ip,float refractive_index): ip{ip}, refractive_index{refractive_index}{
-        }
-        Model(IllumParams ip): ip{ip}, refractive_index{-1} {
+        Model(Material mat): mat{mat} {
         }
 
         virtual ~Model() = default;
@@ -49,7 +47,8 @@ class Model {
             const float abs_angle = fabs(angle);
             Vector3f true_normal = isInside?(-normal.dir):(normal.dir);
             Vector3f reflected_dir = (2*abs_angle*true_normal) + incident.dir;
-            return Ray(normal.src+(reflected_dir*EPSILON),reflected_dir); // Made the starting point slightly outside along reflection dir
+
+            return Ray(normal.src+(true_normal*EPSILON),reflected_dir); // Made the starting point slightly outside along reflection dir
         }
 
         /**
@@ -71,7 +70,7 @@ class Model {
             Vector3f refracted_dir = ((ref_ratio*(incident.dir + true_normal*abs_cos_theta_i)) - (abs_cos_theta_t*true_normal)).normalize();
             
             // std::cout<<"Normal src: "<<normal.src<<"RefractedDir: "<<refracted_dir<<" delta: "<<(refracted_dir*EPSILON)<<std::endl;
-            return Ray(normal.src+(refracted_dir*EPSILON),refracted_dir); // Made the starting point slightly outside along refraction dir
+            return Ray(normal.src-(true_normal*EPSILON),refracted_dir); // Made the starting point slightly outside along refraction dir
         }
 
         /**
@@ -106,23 +105,23 @@ class Model {
                 }
                 auto reflected = 2*(cos_theta)*normal_corr - incident; // some duplicate code with getReflected function
 
-                final_color += ((this->ip).Kd)*intensity*cos_theta; //TODO: convert according to eigen
+                final_color += ((this->mat).Kd)*intensity*cos_theta; //TODO: convert according to eigen
                 float cos_alpha = reflected.dot(view_corr);
                 if(cos_alpha > 0) {
-                    final_color += ((this->ip).Ks)*intensity*pow(cos_alpha,this->specular_coeff); //TODO: convert according to eigen
+                    final_color += ((this->mat).Ks)*intensity*pow(cos_alpha,(this->mat).specular_coeff); //TODO: convert according to eigen
                 }
             }
 
             if (ambient) {
-                final_color += ((this->ip).Ka)*(*ambient);
+                final_color += ((this->mat).Ka)*(*ambient);
             }
 
             if (reflected) {
-                final_color += ((this->ip).Krg)*(*reflected);
+                final_color += ((this->mat).Krg)*(*reflected);
             }
 
             if (refracted) {
-                final_color += ((this->ip).Ktg)*(*refracted);
+                final_color += ((this->mat).Ktg)*(*refracted);
             }
 
             return final_color;
@@ -152,9 +151,9 @@ class Sphere: public Model {
         const float _radius;
         const float _radius_sq;
     public:
-        Sphere(Point center, float radius, IllumParams illp, float refractive_index=-1): Model{illp,refractive_index}, _center{center}, _radius{radius}, _radius_sq{_radius*_radius}
+        Sphere(Point center, float radius, Material mat): Model{mat}, _center{center}, _radius{radius}, _radius_sq{_radius*_radius}
         {}
-        Sphere(const Sphere& s): Model{s.ip,s.refractive_index}, _center{s._center},_radius{s._radius},_radius_sq{s._radius_sq} {}
+        Sphere(const Sphere& s): Model{s.mat}, _center{s._center},_radius{s._radius},_radius_sq{s._radius_sq} {}
         Sphere& operator=(const Sphere& s) = delete;
         
 
