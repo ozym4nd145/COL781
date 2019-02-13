@@ -66,6 +66,12 @@ class Model {
         const std::vector<std::pair<Color, Vector3f>>& lights,
         const Color* ambient, const Color* reflected,
         const Color* refracted) const;
+    
+    /**
+     * @param{intensity} Intensity of illumination at the point of interest
+     * @param{p} point of interest for which texture value is required
+     */
+    virtual Color getTexture(const Color& intensity, const Point& p) const;
 };
 
 class Light {
@@ -109,6 +115,8 @@ class Sphere : public Model {
     // returns outward normal
     std::optional<Ray> getNormal(const Point& p) const;
     std::ostream& print(std::ostream& os) const;
+
+    Color getTexture(const Color& intensity, const Point& p) const override;
 };
 
 class Plane : public Model {
@@ -152,6 +160,7 @@ class Triangle : public Model {
         const Ray& r) const;
     std::optional<Ray> getNormal(const Point& p) const;
     std::ostream& print(std::ostream& os) const;
+    Color getTexture(const Color& intensity, const Point& p) const override;
 };
 
 class Collection : public Model {

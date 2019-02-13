@@ -1,5 +1,6 @@
 #include <iostream>
 #include <optional>
+#include <cmath>
 #include "DS.h"
 #include "Models.h"
 #include "defs.h"
@@ -42,4 +43,24 @@ std::optional<Ray> Sphere::getNormal(const Point& p) const {
 
 std::ostream& Sphere::print(std::ostream& os) const {
     return os << "Sphere{center=" << _center << ",radius=" << _radius << "}";
+}
+
+Color Sphere::getTexture(const Color& intensity, const Point& p) const {
+    if((this->mat).img == NULL) return intensity;
+
+    auto direction = (p-_center).normalized();
+    float u = 0.5 + atan2(direction[2],direction[0])/(2*PI);
+    float v = 0.5 - asin(direction[1])/PI;
+
+    auto& img = *((this->mat).img);
+
+    int w = u*img.width();
+    int h = v*img.height();
+
+    float r = (float)(*img.data(w,h,0,0))/255.0;
+    float g = (float)(*img.data(w,h,0,1))/255.0;
+    float b = (float)(*img.data(w,h,0,2))/255.0;
+    Vector3f color{r,g,b};
+
+    return color.cwiseProduct(intensity);
 }

@@ -52,25 +52,33 @@ Model *parse_model(const json &j,
     string mat = j["material"];
     Model *m = NULL;
     if (materials.find(mat) == materials.end()) return m;
+    bool texture_present = j.find("img")!=j.end();
+
+    Material material = *materials[mat];
+
+    if(texture_present) {
+        material.setTexture(j["img"]);
+    }
+
     if (type == "sphere") {
         Point center = get_vector3f(j["center"]);
         float radius = j["radius"];
-        m = new Sphere(center, radius, *materials[mat]);
+        m = new Sphere(center, radius, material);
     } else if (type == "plane") {
         Point ray_src = get_vector3f(j["ray_src"]);
         Vector3f ray_normal = get_vector3f(j["ray_normal"]);
-        m = new Plane(Ray(ray_src, ray_normal), *materials[mat]);
+        m = new Plane(Ray(ray_src, ray_normal), material);
     } else if (type == "quadric") {
         QuadricParams qp(j["qp"]);
-        m = new Quadric(qp, *materials[mat]);
+        m = new Quadric(qp, material);
     } else if (type == "triangle") {
         Point p1 = get_vector3f(j["p1"]);
         Point p2 = get_vector3f(j["p2"]);
         Point p3 = get_vector3f(j["p3"]);
-        m = new Triangle(p1, p2, p3, *materials[mat]);
+        m = new Triangle(p1, p2, p3, material);
     } else if (type == "collection") {
         json cj = j["elements"];
-        Collection *coll = new Collection(*materials[mat]);
+        Collection *coll = new Collection(material);
         for (auto &el : cj) {
             Model *temp = parse_model(el, materials);
             coll->addModel(temp);
@@ -84,14 +92,14 @@ Model *parse_model(const json &j,
         float breadth = j["breadth"];
         float height = j["height"];
         m = new Box(center, x_axis, y_axis, length, breadth, height,
-                    *materials[mat]);
+                    material);
     } else if (type == "polygon") {
         json pj = j["points"];
         std::vector<Point> points;
         for (auto &el : pj) {
             points.push_back(get_vector3f(el));
         }
-        m = new Polygon(points, *materials[mat]);
+        m = new Polygon(points, material);
     }
     return m;
 }

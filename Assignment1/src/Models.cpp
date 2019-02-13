@@ -102,3 +102,7 @@ Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
 
     return final_color;
 }
+
+Color Model::getTexture(const Color& intensity, const Point& p) const {
+    return intensity;
+}

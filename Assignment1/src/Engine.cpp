@@ -94,7 +94,7 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
 
         // refracted ray
         auto trans_refractive_index =
-            closest_model->getRefractiveIndex(r.dir, normal.dir);
+            closest_model_part->getRefractiveIndex(r.dir, normal.dir);
         if (trans_refractive_index) {
             auto refracted_ray = Model::getRefracted(
                 r, normal, refractive_index, trans_refractive_index.value());
@@ -105,13 +105,17 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
     }
 
     // negating r.dir so that direction is away from point of intersection
+    // using closest_model_part since we want to get the final_intensity of the model_part
     Color final_intensity =
-        closest_model->getIntensity(normal.dir, -r.dir, light_rays, &_ambient,
+        closest_model_part->getIntensity(normal.dir, -r.dir, light_rays, &_ambient,
                                     reflected ? (&reflected.value()) : NULL,
                                     refracted ? (&refracted.value()) : NULL);
-
+    
+    // getting the final texture at the intersection point using the intensity computed above
+    // using closest_model since we want to get global texture
+    Color final_texture = closest_model->getTexture(final_intensity,intersection_point_true);
     // cout<<"final intensity: "<<final_intensity<<endl;
-    return final_intensity;
+    return final_texture;
 }
 
 void RenderEngine::render() {
