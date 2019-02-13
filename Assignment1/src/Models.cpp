@@ -9,15 +9,15 @@
 #include "defs.h"
 #include "utils.h"
 
-std::optional<float> Model::getRefractiveIndex(Vector3f incident,
-                                               Vector3f normal) const {
+std::optional<float> Model::_getRefractiveIndex(Vector3f incident,
+                                                Vector3f normal) const {
     if ((this->mat).refractive_index < 0) return {};
     // if hit from inside the return refractive index as 1 for the outside
     // world
     return ((incident.dot(normal) < 0) ? ((this->mat).refractive_index) : 1.0);
 }
 
-Ray Model::getReflected(const Ray& incident, const Ray& normal) {
+Ray Model::_getReflected(const Ray& incident, const Ray& normal) const {
     const float angle = (normal.dir).dot(incident.dir);
     const bool isInside = angle > 0;
     const float abs_angle = fabs(angle);
@@ -28,9 +28,9 @@ Ray Model::getReflected(const Ray& incident, const Ray& normal) {
                reflected_dir);  // Made the starting point slightly outside
                                 // along reflection dir
 }
-Ray Model::getRefracted(const Ray& incident, const Ray& normal,
-                        const float incident_ref_idx,
-                        const float transfer_ref_idx) {
+Ray Model::_getRefracted(const Ray& incident, const Ray& normal,
+                         const float incident_ref_idx,
+                         const float transfer_ref_idx) const {
     const float cos_theta_i = (normal.dir).dot(incident.dir);
     const bool isInside = cos_theta_i > 0;
     const float abs_cos_theta_i = fabs(cos_theta_i);
@@ -52,10 +52,10 @@ Ray Model::getRefracted(const Ray& incident, const Ray& normal,
                refracted_dir);  // Made the starting point slightly outside
                                 // along refraction dir
 }
-Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
-                          const std::vector<std::pair<Color, Vector3f>>& lights,
-                          const Color* ambient, const Color* reflected,
-                          const Color* refracted) const {
+Color Model::_getIntensity(
+    const Vector3f& normal, const Vector3f& view,
+    const std::vector<std::pair<Color, Vector3f>>& lights, const Color* ambient,
+    const Color* reflected, const Color* refracted) const {
     Vector3f view_corr = view;
     Vector3f normal_corr = normal;
     if (view_corr.dot(normal_corr) < 0) {
@@ -79,7 +79,7 @@ Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
             continue;
         }
         Vector3f reflected = 2 * (cos_theta)*normal_corr - incident;
-        // some duplicate code with getReflected function
+        // some duplicate code with _getReflected function
         final_color += ((this->mat).Kd).cwiseProduct(intensity) * cos_theta;
         float cos_alpha = reflected.dot(view_corr);
         if (cos_alpha > 0) {
@@ -101,4 +101,89 @@ Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
     }
 
     return final_color;
+}
+
+std::optional<float> Model::getRefractiveIndex(Vector3f incident,
+                                               Vector3f normal) const {
+    Vector3f transformed_incident =
+        apply_transformation(incident, this->trans, true, true, false);
+    Vector3f transformed_normal =
+        apply_transformation(normal, this->trans, true, true, true);
+    return this->_getRefractiveIndex(transformed_incident, transformed_normal);
+}
+
+std::optional<std::pair<float, const Model*>>
+Model::getIntersectionLengthAndPart(const Ray& r) const {
+    Ray transformed_ray = apply_transformation(r, this->trans, true, false);
+    // std::cout<<r<<"  and transformed ray is "<<transformed_ray<<std::endl;
+    auto el = this->_getIntersectionLengthAndPart(transformed_ray);
+    if (!el) return {};
+
+    Vector3f original_pt =
+        transformed_ray.src + el.value().first * transformed_ray.dir;
+    Vector3f world_point =
+        apply_transformation(original_pt, this->trans, false, false, false);
+    float dist = (r.src - world_point).norm();
+
+    return std::make_pair(dist, el.value().second);
+}
+
+std::optional<Ray> Model::getNormal(const Point& p) const {
+    Vector3f transformed_point =
+        apply_transformation(p, this->trans, true, false, false);
+
+    auto returned_ray = this->_getNormal(transformed_point);
+    if (!returned_ray) return {};
+
+    Ray r = returned_ray.value();
+    return apply_transformation(r, this->trans, false, true);
+};
+bool Model::isOnSurface(const Point& p) const {
+    Vector3f transformed_point =
+        apply_transformation(p, this->trans, true, false, false);
+    return this->_isOnSurface(transformed_point);
+};
+
+Ray Model::getReflected(const Ray& incident, const Ray& normal) const {
+    Ray transformed_incident =
+        apply_transformation(incident, this->trans, true, false);
+    Ray transformed_normal =
+        apply_transformation(normal, this->trans, true, true);
+
+    auto returned_ray =
+        this->_getReflected(transformed_incident, transformed_normal);
+    return apply_transformation(returned_ray, this->trans, false, false);
+}
+Ray Model::getRefracted(const Ray& incident, const Ray& normal,
+                        const float incident_ref_idx,
+                        const float transfer_ref_idx) const {
+    Ray transformed_incident =
+        apply_transformation(incident, this->trans, true, false);
+    Ray transformed_normal =
+        apply_transformation(normal, this->trans, true, true);
+
+    auto returned_ray =
+        this->_getRefracted(transformed_incident, transformed_normal,
+                            incident_ref_idx, transfer_ref_idx);
+    return apply_transformation(returned_ray, this->trans, false, false);
+}
+Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
+                          const std::vector<std::pair<Color, Vector3f>>& lights,
+                          const Color* ambient, const Color* reflected,
+                          const Color* refracted) const {
+    Vector3f transformed_normal =
+        apply_transformation(normal, this->trans, true, true, true);
+    Vector3f transformed_view =
+        apply_transformation(view, this->trans, true, true, false);
+
+    std::vector<std::pair<Color, Vector3f>> transformed_lights;
+    for (auto el : lights) {
+        Vector3f transformed_light_dir =
+            apply_transformation(el.second, this->trans, true, true, true);
+        transformed_lights.push_back({el.first, transformed_light_dir});
+    }
+
+    return this->_getIntensity(transformed_normal, transformed_view,
+                               transformed_lights, ambient, reflected,
+                               refracted);
 }

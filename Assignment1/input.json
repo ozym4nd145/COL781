@@ -55,8 +55,23 @@
         {
             "type": "sphere",
             "material": "ivory",
-            "center": [-3,0,-16],
-            "radius": 2.0
+            "center": [0,0,0],
+            "radius": 2.0,
+            "transformation":{
+                "M": [2,0,0,0,0.5,0.86602540,0,-0.86602540,0.5],
+                "R": [0,-3,-16]
+            }
+        },
+        {
+            "type": "triangle",
+            "material": "mirror",
+            "p1": [2,1,0],
+            "p2": [-1,1,0],
+            "p3": [0,4,0],
+            "transformation":{
+                "M": [1,0,0,0,0.5,0.86602540,0,-0.86602540,0.5],
+                "R": [0,0,-10]
+            }
         },
         {
             "type": "sphere",

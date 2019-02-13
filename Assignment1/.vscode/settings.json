@@ -50,5 +50,6 @@
         "valarray": "cpp",
         "cstring": "cpp",
         "forward_list": "cpp"
-    }
+    },
+    "cSpell.enabled": false
 }

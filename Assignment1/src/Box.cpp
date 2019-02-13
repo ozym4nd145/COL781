@@ -4,8 +4,8 @@
 #include "Models.h"
 #include "defs.h"
 Box::Box(const Point& center, const Vector3f& x, const Vector3f& y, float l,
-         float b, float h, const Material& mat)
-    : Model{mat},
+         float b, float h, const Material& mat, const Transformation& t)
+    : Model{mat,t},
       _center{center},
       _l{l},
       _b{b},
@@ -13,7 +13,7 @@ Box::Box(const Point& center, const Vector3f& x, const Vector3f& y, float l,
       _ax{x.normalized()},
       _az{(_ax.cross(y)).normalized()},
       _ay{(_az.cross(_ax)).normalized()},
-      _coll{mat} {
+      _coll{mat,t} {
     float l2 = _l / 2;
     float b2 = _b / 2;
     float h2 = _h / 2;
@@ -28,34 +28,34 @@ Box::Box(const Point& center, const Vector3f& x, const Vector3f& y, float l,
     Point ltr = c - _az * b2 - _ay * h2 + _ax * l2;  // lower top right
 
     // top face
-    _coll.addModel(new Triangle(utl, utr, ubr, mat));
-    _coll.addModel(new Triangle(utl, ubl, ubr, mat));
+    _coll.addModel(new Triangle(utl, utr, ubr, mat, t));
+    _coll.addModel(new Triangle(utl, ubl, ubr, mat, t));
     // bottom face
-    _coll.addModel(new Triangle(ltl, ltr, lbr, mat));
-    _coll.addModel(new Triangle(ltl, lbl, lbr, mat));
+    _coll.addModel(new Triangle(ltl, ltr, lbr, mat, t));
+    _coll.addModel(new Triangle(ltl, lbl, lbr, mat, t));
     // front face
-    _coll.addModel(new Triangle(ubl, ubr, lbr, mat));
-    _coll.addModel(new Triangle(ubl, lbl, lbr, mat));
+    _coll.addModel(new Triangle(ubl, ubr, lbr, mat, t));
+    _coll.addModel(new Triangle(ubl, lbl, lbr, mat, t));
     // back face
-    _coll.addModel(new Triangle(utl, utr, ltr, mat));
-    _coll.addModel(new Triangle(utl, ltl, lbr, mat));
+    _coll.addModel(new Triangle(utl, utr, ltr, mat, t));
+    _coll.addModel(new Triangle(utl, ltl, lbr, mat, t));
     // left face
-    _coll.addModel(new Triangle(ubl, utl, ltl, mat));
-    _coll.addModel(new Triangle(ubl, lbl, ltl, mat));
+    _coll.addModel(new Triangle(ubl, utl, ltl, mat, t));
+    _coll.addModel(new Triangle(ubl, lbl, ltl, mat, t));
     // right face
-    _coll.addModel(new Triangle(ubr, utr, ltr, mat));
-    _coll.addModel(new Triangle(ubr, lbr, ltr, mat));
+    _coll.addModel(new Triangle(ubr, utr, ltr, mat, t));
+    _coll.addModel(new Triangle(ubr, lbr, ltr, mat, t));
 }
 
-std::optional<std::pair<float, const Model*>> Box::getIntersectionLengthAndPart(
+std::optional<std::pair<float, const Model*>> Box::_getIntersectionLengthAndPart(
     const Ray& r) const {
-    return _coll.getIntersectionLengthAndPart(r);
+    return _coll._getIntersectionLengthAndPart(r);
 }
 
-bool Box::isOnSurface(const Point& p) const { return _coll.isOnSurface(p); }
+bool Box::_isOnSurface(const Point& p) const { return _coll._isOnSurface(p); }
 
-std::optional<Ray> Box::getNormal(const Point& p) const {
-    return _coll.getNormal(p);
+std::optional<Ray> Box::_getNormal(const Point& p) const {
+    return _coll._getNormal(p);
 }
 
 std::ostream& Box::print(std::ostream& os) const {

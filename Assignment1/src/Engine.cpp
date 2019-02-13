@@ -20,6 +20,7 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
     const Model* closest_model_part = NULL;
     float closest_distance = std::numeric_limits<float>::infinity();
     for (auto mod : _models) {
+        // cout<<"Checking Model: "<<(*mod)<<endl;
         auto part = mod->getIntersectionLengthAndPart(r);
         if (!part) continue;
         auto len = part.value().first;
@@ -31,7 +32,7 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
     }
 
     if (!closest_model) {
-        // cout<<"Background hit! "<<Color(0,0,0)<<endl;
+        // cout<<"Background hit! "<<Color(0.2, 0.7, 0.8)<<endl;
         return Color(0.2, 0.7, 0.8);  // TODO: Change this to background
         // return Color(0, 0, 0);  // TODO: Change this to background
     }
@@ -81,14 +82,14 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
         }
         if (!is_occluded) {
             light_rays.push_back(
-                std::make_pair(light->getIntensity(), shadow_ray.dir));
+                std::make_pair(light->_getIntensity(), shadow_ray.dir));
         }
     }
 
     if (depth < max_trace_depth) {  // if recursion depth is not reached and
                                     // normal is present
         // reflected ray
-        auto reflected_ray = Model::getReflected(r, normal);
+        auto reflected_ray = closest_model->getReflected(r, normal);
         // cout<<"Tracing reflected!"<<endl;
         reflected = trace(reflected_ray, refractive_index, depth + 1);
 
@@ -96,7 +97,7 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
         auto trans_refractive_index =
             closest_model->getRefractiveIndex(r.dir, normal.dir);
         if (trans_refractive_index) {
-            auto refracted_ray = Model::getRefracted(
+            auto refracted_ray = closest_model->getRefracted(
                 r, normal, refractive_index, trans_refractive_index.value());
             // cout<<"Tracing refracted!"<<endl;
             refracted =
@@ -130,8 +131,8 @@ void RenderEngine::render() {
                 float x = ((float)i + dis(gen)) / width;
                 float y = ((float)j + dis(gen)) / height;
                 Ray r = _cam.getRay(x, y).value();
-                // cout<<"i: "<<i<<" j: "<<j<<" x: "<<x<<" y: "<<y<<" ray:
-                // "<<r<<endl;
+                // Ray r = _cam.getRay(0.5, 0.5).value();
+                // cout<<" ray:"<<r<<endl;
                 c += trace(r, 1, 0);
                 // cout<<"final color: "<<c<<endl;
             }

@@ -12,7 +12,7 @@ std::optional<const Model*> Collection::getWhichPart(const Point& p) const {
 }
 
 std::optional<std::pair<float, const Model*>>
-Collection::getIntersectionLengthAndPart(const Ray& r) const {
+Collection::_getIntersectionLengthAndPart(const Ray& r) const {
     const Model* closest_model_part = NULL;
     float closest_distance = std::numeric_limits<float>::infinity();
 
@@ -30,11 +30,11 @@ Collection::getIntersectionLengthAndPart(const Ray& r) const {
     return std::make_pair(closest_distance, closest_model_part);
 }
 
-bool Collection::isOnSurface(const Point& p) const {
+bool Collection::_isOnSurface(const Point& p) const {
     return getWhichPart(p).has_value();
 }
 
-std::optional<Ray> Collection::getNormal(
+std::optional<Ray> Collection::_getNormal(
     const Point& p) const {  // returns outward normal
     auto part_opt = getWhichPart(p);
     if (!part_opt) return {};
