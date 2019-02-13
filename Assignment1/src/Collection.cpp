@@ -6,7 +6,7 @@
 
 std::optional<const Model*> Collection::getWhichPart(const Point& p) const {
     for (auto part : _parts) {
-        if (part->isOnSurface(p)) return part;
+        if (part->_isOnSurface(p)) return part;
     }
     return {};
 }
@@ -17,7 +17,7 @@ Collection::_getIntersectionLengthAndPart(const Ray& r) const {
     float closest_distance = std::numeric_limits<float>::infinity();
 
     for (auto part : _parts) {
-        auto intersection_part = part->getIntersectionLengthAndPart(r);
+        auto intersection_part = part->_getIntersectionLengthAndPart(r);
         if (!intersection_part) continue;
         auto len = intersection_part.value().first;
         if (len < closest_distance) {
@@ -39,7 +39,7 @@ std::optional<Ray> Collection::_getNormal(
     auto part_opt = getWhichPart(p);
     if (!part_opt) return {};
     auto part = part_opt.value();
-    return part->getNormal(p);
+    return part->_getNormal(p);
 }
 
 std::ostream& Collection::print(std::ostream& os) const {

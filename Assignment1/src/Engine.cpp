@@ -89,15 +89,15 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
     if (depth < max_trace_depth) {  // if recursion depth is not reached and
                                     // normal is present
         // reflected ray
-        auto reflected_ray = closest_model->getReflected(r, normal);
+        auto reflected_ray = closest_model_part->getReflected(r, normal);
         // cout<<"Tracing reflected!"<<endl;
         reflected = trace(reflected_ray, refractive_index, depth + 1);
 
         // refracted ray
         auto trans_refractive_index =
-            closest_model->getRefractiveIndex(r.dir, normal.dir);
+            closest_model_part->getRefractiveIndex(r.dir, normal.dir);
         if (trans_refractive_index) {
-            auto refracted_ray = closest_model->getRefracted(
+            auto refracted_ray = closest_model_part->getRefracted(
                 r, normal, refractive_index, trans_refractive_index.value());
             // cout<<"Tracing refracted!"<<endl;
             refracted =
