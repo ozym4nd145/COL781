@@ -45,8 +45,8 @@ std::ostream& Sphere::print(std::ostream& os) const {
     return os << "Sphere{center=" << _center << ",radius=" << _radius << "}";
 }
 
-Color Sphere::getTexture(const Color& intensity, const Point& p) const {
-    if((this->mat).img == NULL) return intensity;
+std::optional<Color> Sphere::getTexture(const Point& p) const {
+    if((this->mat).img == NULL) return {};
 
     auto direction = (p-_center).normalized();
     float u = 0.5 + atan2(direction[2],direction[0])/(2*PI);
@@ -62,5 +62,5 @@ Color Sphere::getTexture(const Color& intensity, const Point& p) const {
     float b = (float)(*img.data(w,h,0,2))/255.0;
     Vector3f color{r,g,b};
 
-    return color.cwiseProduct(intensity);
+    return color;
 }

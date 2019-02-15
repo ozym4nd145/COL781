@@ -65,13 +65,13 @@ class Model {
         const Vector3f& normal, const Vector3f& view,
         const std::vector<std::pair<Color, Vector3f>>& lights,
         const Color* ambient, const Color* reflected,
-        const Color* refracted) const;
+        const Color* refracted, std::optional<Color> texture) const;
     
     /**
      * @param{intensity} Intensity of illumination at the point of interest
      * @param{p} point of interest for which texture value is required
      */
-    virtual Color getTexture(const Color& intensity, const Point& p) const;
+    virtual std::optional<Color> getTexture(const Point& p) const;
 };
 
 class Light {
@@ -116,7 +116,7 @@ class Sphere : public Model {
     std::optional<Ray> getNormal(const Point& p) const;
     std::ostream& print(std::ostream& os) const;
 
-    Color getTexture(const Color& intensity, const Point& p) const override;
+    std::optional<Color> getTexture(const Point& p) const override;
 };
 
 class Plane : public Model {
@@ -160,7 +160,7 @@ class Triangle : public Model {
         const Ray& r) const;
     std::optional<Ray> getNormal(const Point& p) const;
     std::ostream& print(std::ostream& os) const;
-    Color getTexture(const Color& intensity, const Point& p) const override;
+    std::optional<Color> getTexture(const Point& p) const override;
 };
 
 class Collection : public Model {
@@ -225,12 +225,6 @@ class Box : public Model {
     std::ostream& print(std::ostream& os) const;
 };
 
-struct State {
-    std::vector<Model*> models;
-    std::vector<Light*> lights;
-    std::unordered_map<std::string, Material*> materials;
-    Camera* cam;
-};
 
 class Polygon : public Model {
    private:
@@ -246,4 +240,36 @@ class Polygon : public Model {
         const Ray& r) const;
     std::optional<Ray> getNormal(const Point& p) const;
     std::ostream& print(std::ostream& os) const;
+};
+
+class Background {
+    private:
+        Sphere* world;
+        Color background;
+        bool has_background;
+    public:
+        Background(Color c): world(NULL),background(c),has_background(false) {}
+        Background(const std::string& img_path): world(NULL),background(Vector3f::Zero()),has_background(true) {
+            Material background_material;
+            background_material.setTexture(img_path);
+            world = new Sphere(Vector3f::Zero(),1,background_material);
+        }
+        Color getTexture(const Ray& r) const {
+            if(!has_background) return background;
+            auto texture = world->getTexture(r.dir);
+            if(!(texture)) {
+                std::cerr<<"WARNING: Background did not return any texture for ray: "<<r<<" with sphere as: "<<world<<std::endl;
+                return background;
+            }
+            return texture.value();
+        }
+};
+
+
+struct State {
+    std::vector<Model*> models;
+    std::vector<Light*> lights;
+    std::unordered_map<std::string, Material*> materials;
+    Camera* cam;
+    Background* bg;
 };

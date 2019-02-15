@@ -31,8 +31,8 @@ std::ostream& Triangle::print(std::ostream& os) const {
     return os << "Triangle{p1=" << _p1 << ",p2=" << _p2 << ",p3=" << _p3 << "}";
 }
 
-Color Triangle::getTexture(const Color& intensity, const Point& p) const {
-    if((this->mat).img == NULL) return intensity;
+std::optional<Color> Triangle::getTexture(const Point& p) const {
+    if((this->mat).img == NULL) return {};
 
     float a3 = getArea(_p1, _p2, p)/_area;
     float a2 = getArea(_p1, _p3, p)/_area;
@@ -54,5 +54,5 @@ Color Triangle::getTexture(const Color& intensity, const Point& p) const {
     float b = (float)(*img.data(w,h,0,2))/255.0;
     Vector3f color{r,g,b};
 
-    return color.cwiseProduct(intensity);
+    return color;
 }

@@ -161,6 +161,17 @@ Camera *get_camera(const json &j) {
     return c;
 }
 
+Background *get_background(const json &j) {
+    json jc = j["background"];
+    bool texture_present = jc.find("img")!=jc.end();
+
+    if(texture_present) {
+        return new Background(jc["img"]);
+    } else {
+        return new Background(get_vector3f(jc["color"]));
+    }
+}
+
 State get_state(string filename) {
     std::ifstream ifile(filename);
     json j;
@@ -169,10 +180,12 @@ State get_state(string filename) {
     vector<Model *> models;
     vector<Light *> lights;
     Camera *cam;
+    Background* bg;
     get_materials(j, materials);
     get_models(j, models, materials);
     get_lights(j, lights);
     cam = get_camera(j);
-    State s = {models, lights, materials, cam};
+    bg = get_background(j);
+    State s = {models, lights, materials, cam, bg};
     return s;
 }

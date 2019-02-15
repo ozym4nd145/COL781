@@ -55,7 +55,7 @@ Ray Model::getRefracted(const Ray& incident, const Ray& normal,
 Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
                           const std::vector<std::pair<Color, Vector3f>>& lights,
                           const Color* ambient, const Color* reflected,
-                          const Color* refracted) const {
+                          const Color* refracted, std::optional<Color> texture) const {
     Vector3f view_corr = view;
     Vector3f normal_corr = normal;
     if (view_corr.dot(normal_corr) < 0) {
@@ -67,6 +67,11 @@ Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
     }
 
     Color final_color(0, 0, 0);
+
+    Vector3f surface_property = (this->mat).Kd;
+    if(texture) {
+        surface_property = (surface_property)*0.5 + 0.5*texture.value();
+    }
 
     // assert(lights.size()==1);
 
@@ -80,7 +85,7 @@ Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
         }
         Vector3f reflected = 2 * (cos_theta)*normal_corr - incident;
         // some duplicate code with getReflected function
-        final_color += ((this->mat).Kd).cwiseProduct(intensity) * cos_theta;
+        final_color += (surface_property).cwiseProduct(intensity) * cos_theta;
         float cos_alpha = reflected.dot(view_corr);
         if (cos_alpha > 0) {
             final_color += ((this->mat).Ks).cwiseProduct(intensity) *
@@ -103,6 +108,6 @@ Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
     return final_color;
 }
 
-Color Model::getTexture(const Color& intensity, const Point& p) const {
-    return intensity;
+std::optional<Color> Model::getTexture(const Point& p) const {
+    return {};
 }

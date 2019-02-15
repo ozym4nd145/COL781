@@ -51,6 +51,10 @@
             "sc": 1425.0
         }
     ],
+    "background": {
+        "img": "/home/oz/Coding/Assignment/COL781/Assignment1/textures/aman.jpg",
+        "color": [0.2, 0.7, 0.8]
+    },
     "models":[
         {
             "type": "sphere",
@@ -83,20 +87,6 @@
             "material": "blue_rubber",
             "ray_src": [0,-4,0],
             "ray_normal": [0,1,0]
-        },
-        {
-            "type": "triangle",
-            "material": "ivory",
-            "img": "/home/oz/Coding/Assignment/COL781/Assignment1/textures/envmap.jpg",
-            "p1": [2,0,-6],
-            "p2": [2,2,-5],
-            "p3": [0,2,-5]
-
-        },
-        {
-            "type": "quadric",
-            "material": "ivory",
-            "qp": [1,0,0,-3,-0.0625,0,0.25,1,8,72]
         }
     ],
     "lights":[
