@@ -11,27 +11,14 @@
 
 class Model {
    public:
-    const Material mat;
-
-    Model(const Material& mat) : mat{mat} {}
-    virtual ~Model() = default;
-
-    std::optional<float> getRefractiveIndex(Vector3f incident,
-                                            Vector3f normal) const;
+    std::optional<float> _getRefractiveIndex(Vector3f incident,
+                                             Vector3f normal) const;
     // This function return the intersection length and a pointer to the base
     // part for getting normal efficiently
     virtual std::optional<std::pair<float, const Model*>>
-    getIntersectionLengthAndPart(const Ray&) const = 0;
-
-    virtual std::optional<Ray> getNormal(const Point&) const = 0;
-
-    virtual bool isOnSurface(const Point&) const = 0;
-
-    virtual std::ostream& print(std::ostream& os) const = 0;
-
-    friend std::ostream& operator<<(std::ostream& os, const Model& m) {
-        return m.print(os);
-    }
+    _getIntersectionLengthAndPart(const Ray&) const = 0;
+    virtual std::optional<Ray> _getNormal(const Point&) const = 0;
+    virtual bool _isOnSurface(const Point&) const = 0;
 
     /**
      * @param{normal} Normal ray with source at the point of contact
@@ -40,7 +27,7 @@ class Model {
      * @return {Ray} Reflected ray pointing away from point of contact with
      * source at point of contact
      */
-    static Ray getReflected(const Ray& incident, const Ray& normal);
+    Ray _getReflected(const Ray& incident, const Ray& normal) const;
 
     /**
      * @param{normal} Normal ray with source at the point of contact
@@ -49,9 +36,9 @@ class Model {
      * @return {Ray} Reflected ray pointing away from point of contact with
      * source at point of contact
      */
-    static Ray getRefracted(const Ray& incident, const Ray& normal,
-                            const float incident_ref_idx,
-                            const float transfer_ref_idx);
+    Ray _getRefracted(const Ray& incident, const Ray& normal,
+                             const float incident_ref_idx,
+                             const float transfer_ref_idx) const;
     /**
      * @param{normal} Normal direction at the point of color
      * @param{view} View direction pointing away from the point of color
@@ -61,7 +48,7 @@ class Model {
      * @param{reflected} reflected intensity at the point of color
      * @param{refracted} refracted intensity at the point of color
      */
-    virtual Color getIntensity(
+    virtual Color _getIntensity(
         const Vector3f& normal, const Vector3f& view,
         const std::vector<std::pair<Color, Vector3f>>& lights,
         const Color* ambient, const Color* reflected,
@@ -71,7 +58,36 @@ class Model {
      * @param{intensity} Intensity of illumination at the point of interest
      * @param{p} point of interest for which texture value is required
      */
-    virtual std::optional<Color> getTexture(const Point& p) const;
+    virtual std::optional<Color> _getTexture(const Point& p) const;
+
+    const Material mat;
+    Transformation trans;
+
+    Model(const Material& mat, const Transformation& trans)
+        : mat{mat}, trans(trans) {}
+    virtual ~Model() = default;
+
+    std::optional<float> getRefractiveIndex(Vector3f incident,
+                                            Vector3f normal) const;
+    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+        const Ray&) const;
+    std::optional<Ray> getNormal(const Point&) const;
+    bool isOnSurface(const Point&) const;
+
+    Ray getReflected(const Ray& incident, const Ray& normal) const;
+    Ray getRefracted(const Ray& incident, const Ray& normal,
+                            const float incident_ref_idx,
+                            const float transfer_ref_idx) const;
+    Color getIntensity(const Vector3f& normal, const Vector3f& view,
+                       const std::vector<std::pair<Color, Vector3f>>& lights,
+                       const Color* ambient, const Color* reflected,
+                       const Color* refracted, std::optional<Color> texture) const;
+    std::optional<Color> getTexture(const Point& p) const;
+
+    virtual std::ostream& print(std::ostream& os) const = 0;
+    friend std::ostream& operator<<(std::ostream& os, const Model& m) {
+        return m.print(os);
+    }
 };
 
 class Light {
@@ -83,7 +99,7 @@ class Light {
     Light(Point center, Color intensity)
         : _center{center}, _intensity{intensity} {}
     Ray getRayToLight(Point p) const { return Ray(p, _center - p); }
-    Color getIntensity() const { return _intensity; }
+    Color _getIntensity() const { return _intensity; }
     friend std::ostream& operator<<(std::ostream& os, const Light& lg) {
         return os << "Light{center=" << lg._center
                   << ",intensity=" << lg._intensity << "}";
@@ -97,26 +113,26 @@ class Sphere : public Model {
     const float _radius_sq;
 
    public:
-    Sphere(Point center, float radius, Material mat)
-        : Model{mat},
+    std::optional<std::pair<float, const Model*>> _getIntersectionLengthAndPart(
+        const Ray& r) const;
+    bool _isOnSurface(const Point& p) const;
+    // returns outward normal
+    std::optional<Ray> _getNormal(const Point& p) const;
+
+    Sphere(Point center, float radius, Material mat, Transformation t)
+        : Model{mat, t},
           _center{center},
           _radius{radius},
           _radius_sq{_radius * _radius} {}
     Sphere(const Sphere& s)
-        : Model{s.mat},
+        : Model{s.mat, s.trans},
           _center{s._center},
           _radius{s._radius},
           _radius_sq{s._radius_sq} {}
     Sphere& operator=(const Sphere& s) = delete;
-
-    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
-        const Ray& r) const;
-    bool isOnSurface(const Point& p) const;
-    // returns outward normal
-    std::optional<Ray> getNormal(const Point& p) const;
     std::ostream& print(std::ostream& os) const;
 
-    std::optional<Color> getTexture(const Point& p) const override;
+    std::optional<Color> _getTexture(const Point& p) const override;
 };
 
 class Plane : public Model {
@@ -124,14 +140,13 @@ class Plane : public Model {
     const Ray _normal;
 
    public:
-    Plane(const Ray& normal, Material mat) : Model{mat}, _normal{normal} {}
-
-    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+    std::optional<std::pair<float, const Model*>> _getIntersectionLengthAndPart(
         const Ray& r) const;
+    bool _isOnSurface(const Point& p) const;
+    std::optional<Ray> _getNormal(const Point& p) const;
 
-    bool isOnSurface(const Point& p) const;
-    std::optional<Ray> getNormal(const Point& p) const;
-
+    Plane(const Ray& normal, Material mat, Transformation t)
+        : Model{mat, t}, _normal{normal} {}
     std::ostream& print(std::ostream& os) const;
 };
 
@@ -147,20 +162,21 @@ class Triangle : public Model {
     }
 
    public:
+    bool _isOnSurface(const Point& p) const;
+    std::optional<std::pair<float, const Model*>> _getIntersectionLengthAndPart(
+        const Ray& r) const;
+    std::optional<Ray> _getNormal(const Point& p) const;
+
     Triangle(const Point& p1, const Point& p2, const Point& p3,
-             const Material& mat)
-        : Model{mat},
+             const Material& mat, const Transformation& t)
+        : Model{mat, t},
           _p1{p1},
           _p2{p2},
           _p3{p3},
-          _plane{Ray(_p1, ((_p1 - _p2).cross(_p1 - _p3))), mat},
+          _plane{Ray(_p1, ((_p1 - _p2).cross(_p1 - _p3))), mat, t},
           _area{getArea(_p1, _p2, _p3)} {}
-    bool isOnSurface(const Point& p) const;
-    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
-        const Ray& r) const;
-    std::optional<Ray> getNormal(const Point& p) const;
     std::ostream& print(std::ostream& os) const;
-    std::optional<Color> getTexture(const Point& p) const override;
+    std::optional<Color> _getTexture(const Point& p) const override;
 };
 
 class Collection : public Model {
@@ -170,16 +186,17 @@ class Collection : public Model {
     std::optional<const Model*> getWhichPart(const Point& p) const;
 
    public:
-    Collection(Material mat) : Model{mat} {}
-
-    void addModel(Model* part) { _parts.push_back(part); }
-
-    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+    std::optional<std::pair<float, const Model*>> _getIntersectionLengthAndPart(
         const Ray& r) const;
+    bool _isOnSurface(const Point& p) const;
+    std::optional<Ray> _getNormal(const Point& p) const;
 
-    bool isOnSurface(const Point& p) const;
+    Collection(Material mat, Transformation t) : Model{mat, t} {}
 
-    std::optional<Ray> getNormal(const Point& p) const;
+    void addModel(Model* part) { 
+        part->trans = this->trans;
+        _parts.push_back(part); 
+    }
 
     std::ostream& print(std::ostream& os) const;
 };
@@ -190,16 +207,18 @@ class Quadric : public Model {
     Matrix4f M;
 
    public:
+    std::optional<std::pair<float, const Model*>> _getIntersectionLengthAndPart(
+        const Ray& r) const;
+    bool _isOnSurface(const Point& p) const;
+    std::optional<Ray> _getNormal(const Point& p) const;
+
     using Model::Model;
-    Quadric(const QuadricParams& qp, const Material& mp) : _qp(qp), Model(mp) {
+    Quadric(const QuadricParams& qp, const Material& mp,
+            const Transformation& t)
+        : _qp(qp), Model(mp, t) {
         M << qp.A, qp.B, qp.C, qp.D, qp.B, qp.E, qp.F, qp.G, qp.C, qp.F, qp.H,
             qp.I, qp.D, qp.G, qp.I, qp.J;
     }
-
-    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
-        const Ray& r) const;
-    bool isOnSurface(const Point& p) const;
-    std::optional<Ray> getNormal(const Point& p) const;
 
     std::ostream& print(std::ostream& os) const;
 };
@@ -216,12 +235,13 @@ class Box : public Model {
     Collection _coll;
 
    public:
-    Box(const Point& center, const Vector3f& x, const Vector3f& y, float l,
-        float b, float h, const Material& mat);
-    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
+    std::optional<std::pair<float, const Model*>> _getIntersectionLengthAndPart(
         const Ray& r) const;
-    bool isOnSurface(const Point& p) const;
-    std::optional<Ray> getNormal(const Point& p) const;
+    bool _isOnSurface(const Point& p) const;
+    std::optional<Ray> _getNormal(const Point& p) const;
+
+    Box(const Point& center, const Vector3f& x, const Vector3f& y, float l,
+        float b, float h, const Material& mat, const Transformation& t);
     std::ostream& print(std::ostream& os) const;
 };
 
@@ -232,13 +252,15 @@ class Polygon : public Model {
     Plane* _plane;
 
    public:
+    bool _isOnSurface(const Point& p) const;
+    std::optional<std::pair<float, const Model*>> _getIntersectionLengthAndPart(
+        const Ray& r) const;
+    std::optional<Ray> _getNormal(const Point& p) const;
+
     // assume that points are given in counter clockwise order and outward
     // normal is given by right hand curl rule
-    Polygon(const std::vector<Point>& points, const Material& mat);
-    bool isOnSurface(const Point& p) const;
-    std::optional<std::pair<float, const Model*>> getIntersectionLengthAndPart(
-        const Ray& r) const;
-    std::optional<Ray> getNormal(const Point& p) const;
+    Polygon(const std::vector<Point>& points, const Material& mat,
+            const Transformation& t);
     std::ostream& print(std::ostream& os) const;
 };
 
@@ -252,7 +274,7 @@ class Background {
         Background(const std::string& img_path): world(NULL),background(Vector3f::Zero()),has_background(true) {
             Material background_material;
             background_material.setTexture(img_path);
-            world = new Sphere(Vector3f::Zero(),1,background_material);
+            world = new Sphere(Vector3f::Zero(),1,background_material,IDENTITY_TRANS);
         }
         Color getTexture(const Ray& r) const {
             if(!has_background) return background;

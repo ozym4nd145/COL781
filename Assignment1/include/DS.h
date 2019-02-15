@@ -33,6 +33,14 @@ struct QuadricParams {
     }
 };
 
+struct Transformation{
+    Matrix3f T_M_W, T_W_M;
+    Vector3f R_M_W, R_W_M;
+    Transformation(const Matrix3f &m, const Vector3f &r): T_M_W(m) , T_W_M(m.inverse()), R_M_W(r), R_W_M(-1*r*T_W_M) {}
+};
+
+extern const Transformation IDENTITY_TRANS;
+
 struct Material {
     Vector3f Ka, Kd, Ks, Krg, Ktg;
     float refractive_index, specular_coeff;

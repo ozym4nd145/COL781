@@ -6,7 +6,7 @@
 #include "utils.h"
 
 
-bool Triangle::isOnSurface(const Point& p) const {
+bool Triangle::_isOnSurface(const Point& p) const {
     float a1 = getArea(_p1, _p2, p);
     float a2 = getArea(_p1, _p3, p);
     float a3 = getArea(_p2, _p3, p);
@@ -14,24 +14,24 @@ bool Triangle::isOnSurface(const Point& p) const {
 }
 
 std::optional<std::pair<float, const Model*>>
-Triangle::getIntersectionLengthAndPart(const Ray& r) const {
-    auto intersection_part = _plane.getIntersectionLengthAndPart(r);
+Triangle::_getIntersectionLengthAndPart(const Ray& r) const {
+    auto intersection_part = _plane._getIntersectionLengthAndPart(r);
     if (!intersection_part) return {};
     Point interp = r.src + intersection_part.value().first * r.dir;
-    if (isOnSurface(interp)) return intersection_part;
+    if (_isOnSurface(interp)) return std::make_pair(intersection_part.value().first,this);
     return {};
 }
 
-std::optional<Ray> Triangle::getNormal(const Point& p) const {
-    if (!isOnSurface(p)) return {};
-    return _plane.getNormal(p);
+std::optional<Ray> Triangle::_getNormal(const Point& p) const {
+    if (!_isOnSurface(p)) return {};
+    return _plane._getNormal(p);
 };
 
 std::ostream& Triangle::print(std::ostream& os) const {
     return os << "Triangle{p1=" << _p1 << ",p2=" << _p2 << ",p3=" << _p3 << "}";
 }
 
-std::optional<Color> Triangle::getTexture(const Point& p) const {
+std::optional<Color> Triangle::_getTexture(const Point& p) const {
     if((this->mat).img == NULL) return {};
 
     float a3 = getArea(_p1, _p2, p)/_area;

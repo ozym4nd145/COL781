@@ -8,11 +8,41 @@
 using json = nlohmann::json;
 using namespace std;
 
+const Transformation IDENTITY_TRANS(Matrix3f::Identity(),Vector3f::Zero());
+
+
 Vector4f augment(const Vector3f &vec, float val) {
     Vector4f new_vec;
     new_vec.head(3) = vec;
     new_vec[3] = val;
     return new_vec;
+}
+
+Vector3f apply_transformation(const Vector3f &point, const Transformation &trans, bool do_world_to_model, bool isDir, bool isNormal) {
+    Vector3f R = Vector3f::Zero();
+    Matrix3f M;
+
+    if(isNormal && !isDir){
+        std::cerr<<"isNormal is true and isDir is false, IDK what to do"<<std::endl;
+        exit(-1);
+    }
+
+    if(isNormal)
+        M = (do_world_to_model ? trans.T_M_W.transpose() : trans.T_W_M.transpose());
+    else
+        M = (do_world_to_model ? trans.T_W_M : trans.T_M_W);
+    
+    if(!isDir)
+        R = (do_world_to_model ? trans.R_W_M : trans.R_M_W);
+
+    Vector3f new_point = point*M + R;
+    return new_point;
+}
+
+Ray apply_transformation(const Ray &r, const Transformation &trans, bool do_world_to_model, bool isNormal) {
+    Vector3f new_ray_src = apply_transformation(r.src,trans,do_world_to_model,false,false);
+    Vector3f new_ray_dir = apply_transformation(r.dir*r.length,trans,do_world_to_model,true,isNormal);
+    return Ray(new_ray_src,new_ray_dir);
 }
 
 Vector3f apply_transformation(const Vector3f &point, const Matrix4f &trans) {
@@ -46,10 +76,23 @@ Vector3f get_vector3f(const json &j) {
     return Vector3f(x, y, z);
 }
 
+Transformation get_transformation(const json &j){
+    auto t_it = j.find("transformation");
+    if(t_it == j.end())
+        return IDENTITY_TRANS;
+    
+    vector<float> M_vec = j["transformation"]["M"];
+    assert(M_vec.size() == 9);
+    Matrix3f M(M_vec.data());
+    Vector3f R = get_vector3f(j["transformation"]["R"]);
+    return Transformation(M,R);
+}
+
 Model *parse_model(const json &j,
                    unordered_map<string, Material *> &materials) {
     string type = j["type"];
     string mat = j["material"];
+    Transformation t = get_transformation(j); 
     Model *m = NULL;
     if (materials.find(mat) == materials.end()) return m;
     bool texture_present = j.find("img")!=j.end();
@@ -63,22 +106,22 @@ Model *parse_model(const json &j,
     if (type == "sphere") {
         Point center = get_vector3f(j["center"]);
         float radius = j["radius"];
-        m = new Sphere(center, radius, material);
+        m = new Sphere(center, radius, material,t);
     } else if (type == "plane") {
         Point ray_src = get_vector3f(j["ray_src"]);
         Vector3f ray_normal = get_vector3f(j["ray_normal"]);
-        m = new Plane(Ray(ray_src, ray_normal), material);
+        m = new Plane(Ray(ray_src, ray_normal), material,t);
     } else if (type == "quadric") {
         QuadricParams qp(j["qp"]);
-        m = new Quadric(qp, material);
+        m = new Quadric(qp, material,t);
     } else if (type == "triangle") {
         Point p1 = get_vector3f(j["p1"]);
         Point p2 = get_vector3f(j["p2"]);
         Point p3 = get_vector3f(j["p3"]);
-        m = new Triangle(p1, p2, p3, material);
+        m = new Triangle(p1, p2, p3, material,t);
     } else if (type == "collection") {
         json cj = j["elements"];
-        Collection *coll = new Collection(material);
+        Collection *coll = new Collection(material,t);
         for (auto &el : cj) {
             Model *temp = parse_model(el, materials);
             coll->addModel(temp);
@@ -92,14 +135,14 @@ Model *parse_model(const json &j,
         float breadth = j["breadth"];
         float height = j["height"];
         m = new Box(center, x_axis, y_axis, length, breadth, height,
-                    material);
+                    material,t);
     } else if (type == "polygon") {
         json pj = j["points"];
         std::vector<Point> points;
         for (auto &el : pj) {
             points.push_back(get_vector3f(el));
         }
-        m = new Polygon(points, material);
+        m = new Polygon(points, material,t);
     }
     return m;
 }

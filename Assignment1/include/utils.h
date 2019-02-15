@@ -8,9 +8,12 @@
 #include "CImg.h"
 
 Vector4f augment(const Vector3f &vec, float val);
+
 Vector3f apply_transformation(const Vector3f &point, const Matrix4f &trans);
-std::optional<std::pair<float, float>> solve_quadratic(float a, float b,
-                                                       float c);
+Vector3f apply_transformation(const Vector3f &point, const Transformation &trans, bool do_world_to_model, bool isDir, bool isNormal);
+Ray apply_transformation(const Ray &r, const Transformation &trans, bool do_world_to_model,bool isNormal);
+
+std::optional<std::pair<float, float>> solve_quadratic(float a, float b,float c);
 
 // Parsing Functions
 using json = nlohmann::json;

@@ -4,8 +4,8 @@
 #include "Models.h"
 #include "defs.h"
 
-Polygon::Polygon(const std::vector<Point>& points, const Material& mat)
-    : Model{mat}, _plane{NULL} {
+Polygon::Polygon(const std::vector<Point>& points, const Material& mat, const Transformation& t)
+    : Model{mat,t}, _plane{NULL} {
     assert(points.size() > 2);
     _points.push_back(points[0]);
     _points.push_back(points[1]);
@@ -13,10 +13,10 @@ Polygon::Polygon(const std::vector<Point>& points, const Material& mat)
     _plane =
         new Plane(Ray(_points[0],
                       (_points[0] - _points[1]).cross(_points[0] - _points[2])),
-                  mat);  // src as centroid
+                  mat,t);  // src as centroid
     std::vector<Point> rejected_points;
     for (int i = 3; i < points.size(); i++) {
-        if (!(_plane->isOnSurface(points[i])))
+        if (!(_plane->_isOnSurface(points[i])))
             rejected_points.push_back(points[i]);
         else
             _points.push_back(points[i]);
@@ -29,10 +29,10 @@ Polygon::Polygon(const std::vector<Point>& points, const Material& mat)
     }
 }
 
-bool Polygon::isOnSurface(const Point& p) const {
+bool Polygon::_isOnSurface(const Point& p) const {
     // std::cout<<"Checking for Point: "<<p<<std::endl;
 
-    if (!_plane || !(_plane->isOnSurface(p))) return false;
+    if (!_plane || !(_plane->_isOnSurface(p))) return false;
     // std::cout<<"Point is in plane "<<(*_plane)<<std::endl;
 
     Point other_p = (_points[0] + _points[1]) / 2;
@@ -42,7 +42,7 @@ bool Polygon::isOnSurface(const Point& p) const {
     }
 
     Vector3f d = (p - other_p).normalized();
-    Vector3f n = (d.cross((_plane->getNormal(p)).value().dir)).normalized();
+    Vector3f n = (d.cross((_plane->_getNormal(p)).value().dir)).normalized();
 
     // std::cout<<"Other_p "<<(other_p)<<std::endl;
     // std::cout<<"d "<<(d)<<std::endl;
@@ -84,18 +84,18 @@ bool Polygon::isOnSurface(const Point& p) const {
 }
 
 std::optional<std::pair<float, const Model*>>
-Polygon::getIntersectionLengthAndPart(const Ray& r) const {
+Polygon::_getIntersectionLengthAndPart(const Ray& r) const {
     if (!_plane) return {};
-    auto intersection_part = _plane->getIntersectionLengthAndPart(r);
+    auto intersection_part = _plane->_getIntersectionLengthAndPart(r);
     if (!intersection_part) return {};
     Point interp = r.src + intersection_part.value().first * r.dir;
-    if (isOnSurface(interp)) return intersection_part;
+    if (_isOnSurface(interp)) return intersection_part;
     return {};
 }
 
-std::optional<Ray> Polygon::getNormal(const Point& p) const {
-    if (!isOnSurface(p)) return {};
-    return _plane->getNormal(p);
+std::optional<Ray> Polygon::_getNormal(const Point& p) const {
+    if (!_isOnSurface(p)) return {};
+    return _plane->_getNormal(p);
 }
 
 std::ostream& Polygon::print(std::ostream& os) const {

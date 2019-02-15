@@ -6,7 +6,7 @@
 #include "defs.h"
 
 std::optional<std::pair<float, const Model*>>
-Sphere::getIntersectionLengthAndPart(const Ray& r) const {
+Sphere::_getIntersectionLengthAndPart(const Ray& r) const {
     // TODO: check intersection inside Sphere
     Ray src_center(r.src, _center - r.src);
     const float cos_theta = src_center.dir.dot(r.dir);
@@ -30,13 +30,13 @@ Sphere::getIntersectionLengthAndPart(const Ray& r) const {
     return std::make_pair(dist, this);
 }
 
-bool Sphere::isOnSurface(const Point& p) const {
+bool Sphere::_isOnSurface(const Point& p) const {
     return (fabs((p - _center).norm() - _radius) <= EPSILON);
 }
 
 // returns outward normal
-std::optional<Ray> Sphere::getNormal(const Point& p) const {
-    if (!isOnSurface(p)) return {};
+std::optional<Ray> Sphere::_getNormal(const Point& p) const {
+    if (!_isOnSurface(p)) return {};
     auto normal = Ray(p, p - _center);
     return normal;
 };
@@ -45,7 +45,7 @@ std::ostream& Sphere::print(std::ostream& os) const {
     return os << "Sphere{center=" << _center << ",radius=" << _radius << "}";
 }
 
-std::optional<Color> Sphere::getTexture(const Point& p) const {
+std::optional<Color> Sphere::_getTexture(const Point& p) const {
     if((this->mat).img == NULL) return {};
 
     auto direction = (p-_center).normalized();
