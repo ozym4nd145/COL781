@@ -16,19 +16,21 @@ using namespace std;
 class RenderEngine {
    private:
     const Camera& _cam;
-    const Color _ambient;
+    const Background& _background;
     Image& _img;
     std::vector<const Model*> _models;
     std::vector<const Light*> _lights;
+    const Color _ambient;
     const int max_trace_depth = 4;
     // const int max_trace_depth = 1;
     const int num_sample = 5;
 
    public:
-    RenderEngine(const Camera& cam, Image& img,
+    RenderEngine(const Camera& cam, Image& img, const Background& background,
                  const std::vector<Model*>& models,
                  const std::vector<Light*>& lights, const Color ambient)
         : _cam{cam},
+          _background{background},
           _img{img},
           _models{models.begin(), models.end()},
           _lights{lights.begin(), lights.end()},

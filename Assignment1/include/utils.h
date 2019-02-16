@@ -5,6 +5,7 @@
 #include "Models.h"
 #include "defs.h"
 #include "json.hpp"
+#include "CImg.h"
 
 Vector4f augment(const Vector3f &vec, float val);
 

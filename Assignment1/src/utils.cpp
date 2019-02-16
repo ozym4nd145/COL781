@@ -95,25 +95,33 @@ Model *parse_model(const json &j,
     Transformation t = get_transformation(j); 
     Model *m = NULL;
     if (materials.find(mat) == materials.end()) return m;
+    bool texture_present = j.find("img")!=j.end();
+
+    Material material = *materials[mat];
+
+    if(texture_present) {
+        material.setTexture(j["img"]);
+    }
+
     if (type == "sphere") {
         Point center = get_vector3f(j["center"]);
         float radius = j["radius"];
-        m = new Sphere(center, radius, *materials[mat],t);
+        m = new Sphere(center, radius, material,t);
     } else if (type == "plane") {
         Point ray_src = get_vector3f(j["ray_src"]);
         Vector3f ray_normal = get_vector3f(j["ray_normal"]);
-        m = new Plane(Ray(ray_src, ray_normal), *materials[mat],t);
+        m = new Plane(Ray(ray_src, ray_normal), material,t);
     } else if (type == "quadric") {
         QuadricParams qp(j["qp"]);
-        m = new Quadric(qp, *materials[mat],t);
+        m = new Quadric(qp, material,t);
     } else if (type == "triangle") {
         Point p1 = get_vector3f(j["p1"]);
         Point p2 = get_vector3f(j["p2"]);
         Point p3 = get_vector3f(j["p3"]);
-        m = new Triangle(p1, p2, p3, *materials[mat],t);
+        m = new Triangle(p1, p2, p3, material,t);
     } else if (type == "collection") {
         json cj = j["elements"];
-        Collection *coll = new Collection(*materials[mat],t);
+        Collection *coll = new Collection(material,t);
         for (auto &el : cj) {
             Model *temp = parse_model(el, materials);
             coll->addModel(temp);
@@ -127,14 +135,14 @@ Model *parse_model(const json &j,
         float breadth = j["breadth"];
         float height = j["height"];
         m = new Box(center, x_axis, y_axis, length, breadth, height,
-                    *materials[mat],t);
+                    material,t);
     } else if (type == "polygon") {
         json pj = j["points"];
         std::vector<Point> points;
         for (auto &el : pj) {
             points.push_back(get_vector3f(el));
         }
-        m = new Polygon(points, *materials[mat],t);
+        m = new Polygon(points, material,t);
     }
     return m;
 }
@@ -196,6 +204,17 @@ Camera *get_camera(const json &j) {
     return c;
 }
 
+Background *get_background(const json &j) {
+    json jc = j["background"];
+    bool texture_present = jc.find("img")!=jc.end();
+
+    if(texture_present) {
+        return new Background(jc["img"]);
+    } else {
+        return new Background(get_vector3f(jc["color"]));
+    }
+}
+
 State get_state(string filename) {
     std::ifstream ifile(filename);
     json j;
@@ -204,10 +223,12 @@ State get_state(string filename) {
     vector<Model *> models;
     vector<Light *> lights;
     Camera *cam;
+    Background* bg;
     get_materials(j, materials);
     get_models(j, models, materials);
     get_lights(j, lights);
     cam = get_camera(j);
-    State s = {models, lights, materials, cam};
+    bg = get_background(j);
+    State s = {models, lights, materials, cam, bg};
     return s;
 }

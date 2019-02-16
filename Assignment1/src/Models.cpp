@@ -52,10 +52,10 @@ Ray Model::_getRefracted(const Ray& incident, const Ray& normal,
                refracted_dir);  // Made the starting point slightly outside
                                 // along refraction dir
 }
-Color Model::_getIntensity(
-    const Vector3f& normal, const Vector3f& view,
-    const std::vector<std::pair<Color, Vector3f>>& lights, const Color* ambient,
-    const Color* reflected, const Color* refracted) const {
+Color Model::_getIntensity(const Vector3f& normal, const Vector3f& view,
+                          const std::vector<std::pair<Color, Vector3f>>& lights,
+                          const Color* ambient, const Color* reflected,
+                          const Color* refracted, std::optional<Color> texture) const {
     Vector3f view_corr = view;
     Vector3f normal_corr = normal;
     if (view_corr.dot(normal_corr) < 0) {
@@ -67,6 +67,11 @@ Color Model::_getIntensity(
     }
 
     Color final_color(0, 0, 0);
+
+    Vector3f surface_property = (this->mat).Kd;
+    if(texture) {
+        surface_property = (surface_property)*0.5 + 0.5*texture.value();
+    }
 
     // assert(lights.size()==1);
 
@@ -80,7 +85,7 @@ Color Model::_getIntensity(
         }
         Vector3f reflected = 2 * (cos_theta)*normal_corr - incident;
         // some duplicate code with _getReflected function
-        final_color += ((this->mat).Kd).cwiseProduct(intensity) * cos_theta;
+        final_color += (surface_property).cwiseProduct(intensity) * cos_theta;
         float cos_alpha = reflected.dot(view_corr);
         if (cos_alpha > 0) {
             final_color += ((this->mat).Ks).cwiseProduct(intensity) *
@@ -101,6 +106,10 @@ Color Model::_getIntensity(
     }
 
     return final_color;
+}
+
+std::optional<Color> Model::_getTexture(const Point& p) const {
+    return {};
 }
 
 std::optional<float> Model::getRefractiveIndex(Vector3f incident,
@@ -170,7 +179,7 @@ Ray Model::getRefracted(const Ray& incident, const Ray& normal,
 Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
                           const std::vector<std::pair<Color, Vector3f>>& lights,
                           const Color* ambient, const Color* reflected,
-                          const Color* refracted) const {
+                          const Color* refracted, std::optional<Color> texture) const {
     Vector3f transformed_normal =
         apply_transformation(normal, this->trans, true, true, true);
     Vector3f transformed_view =
@@ -185,5 +194,8 @@ Color Model::getIntensity(const Vector3f& normal, const Vector3f& view,
 
     return this->_getIntensity(transformed_normal, transformed_view,
                                transformed_lights, ambient, reflected,
-                               refracted);
+                               refracted,texture);
+}
+std::optional<Color> Model::getTexture(const Point& p) const {
+    return this->_getTexture(apply_transformation(p,this->trans,true, false,false));
 }

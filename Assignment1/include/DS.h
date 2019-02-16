@@ -2,6 +2,7 @@
 
 #include <bits/stdc++.h>
 #include "defs.h"
+#include "CImg.h"
 
 class Ray {
    public:
@@ -43,6 +44,8 @@ extern const Transformation IDENTITY_TRANS;
 struct Material {
     Vector3f Ka, Kd, Ks, Krg, Ktg;
     float refractive_index, specular_coeff;
+    cimg_library::CImg<unsigned char>* img;
+    
     Material()
         : Ka{Vector3f::Zero()},
           Kd{Vector3f::Zero()},
@@ -59,5 +62,14 @@ struct Material {
           Krg{krg},
           Ktg{ktg},
           refractive_index{ri},
-          specular_coeff{sc} {}
+          specular_coeff{sc},
+          img{NULL} {}
+    void setTexture(const std::string& path) {
+        using namespace cimg_library;
+        img = new CImg<unsigned char>(path.c_str());
+    }
+    void removeTexture() {
+        delete img;
+        img = NULL;
+    }
 };

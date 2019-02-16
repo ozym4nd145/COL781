@@ -52,10 +52,17 @@ class Model {
         const Vector3f& normal, const Vector3f& view,
         const std::vector<std::pair<Color, Vector3f>>& lights,
         const Color* ambient, const Color* reflected,
-        const Color* refracted) const;
+        const Color* refracted, std::optional<Color> texture) const;
+    
+    /**
+     * @param{intensity} Intensity of illumination at the point of interest
+     * @param{p} point of interest for which texture value is required
+     */
+    virtual std::optional<Color> _getTexture(const Point& p) const;
 
     const Material mat;
     Transformation trans;
+
     Model(const Material& mat, const Transformation& trans)
         : mat{mat}, trans(trans) {}
     virtual ~Model() = default;
@@ -74,7 +81,8 @@ class Model {
     Color getIntensity(const Vector3f& normal, const Vector3f& view,
                        const std::vector<std::pair<Color, Vector3f>>& lights,
                        const Color* ambient, const Color* reflected,
-                       const Color* refracted) const;
+                       const Color* refracted, std::optional<Color> texture) const;
+    std::optional<Color> getTexture(const Point& p) const;
 
     virtual std::ostream& print(std::ostream& os) const = 0;
     friend std::ostream& operator<<(std::ostream& os, const Model& m) {
@@ -123,6 +131,8 @@ class Sphere : public Model {
           _radius_sq{s._radius_sq} {}
     Sphere& operator=(const Sphere& s) = delete;
     std::ostream& print(std::ostream& os) const;
+
+    std::optional<Color> _getTexture(const Point& p) const override;
 };
 
 class Plane : public Model {
@@ -166,6 +176,7 @@ class Triangle : public Model {
           _plane{Ray(_p1, ((_p1 - _p2).cross(_p1 - _p3))), mat, t},
           _area{getArea(_p1, _p2, _p3)} {}
     std::ostream& print(std::ostream& os) const;
+    std::optional<Color> _getTexture(const Point& p) const override;
 };
 
 class Collection : public Model {
@@ -234,12 +245,6 @@ class Box : public Model {
     std::ostream& print(std::ostream& os) const;
 };
 
-struct State {
-    std::vector<Model*> models;
-    std::vector<Light*> lights;
-    std::unordered_map<std::string, Material*> materials;
-    Camera* cam;
-};
 
 class Polygon : public Model {
    private:
@@ -257,4 +262,36 @@ class Polygon : public Model {
     Polygon(const std::vector<Point>& points, const Material& mat,
             const Transformation& t);
     std::ostream& print(std::ostream& os) const;
+};
+
+class Background {
+    private:
+        Sphere* world;
+        Color background;
+        bool has_background;
+    public:
+        Background(Color c): world(NULL),background(c),has_background(false) {}
+        Background(const std::string& img_path): world(NULL),background(Vector3f::Zero()),has_background(true) {
+            Material background_material;
+            background_material.setTexture(img_path);
+            world = new Sphere(Vector3f::Zero(),1,background_material,IDENTITY_TRANS);
+        }
+        Color getTexture(const Ray& r) const {
+            if(!has_background) return background;
+            auto texture = world->getTexture(r.dir);
+            if(!(texture)) {
+                std::cerr<<"WARNING: Background did not return any texture for ray: "<<r<<" with sphere as: "<<world<<std::endl;
+                return background;
+            }
+            return texture.value();
+        }
+};
+
+
+struct State {
+    std::vector<Model*> models;
+    std::vector<Light*> lights;
+    std::unordered_map<std::string, Material*> materials;
+    Camera* cam;
+    Background* bg;
 };

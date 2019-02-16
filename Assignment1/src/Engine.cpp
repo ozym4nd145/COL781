@@ -36,7 +36,7 @@ pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
 
     if (!closest_model) {
         // cout<<"Background hit! "<<Color(0.2, 0.7, 0.8)<<endl;
-        return std::make_pair(Color(0.2, 0.7, 0.8),
+        return std::make_pair(_background.getTexture(r),
                               BLANK);  // TODO: Change this to background
         // return Color(0, 0, 0);  // TODO: Change this to background
     }
@@ -127,12 +127,17 @@ pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
         }
     }
 
-    // negating r.dir so that direction is away from point of intersection
-    Color final_intensity =
-        closest_model->getIntensity(normal.dir, -r.dir, light_rays, &_ambient,
-                                    reflected ? (&reflected.value()) : NULL,
-                                    refracted ? (&refracted.value()) : NULL);
+    // getting the final texture at the intersection point
+    // using closest_model since we want to get global texture
+    auto point_texture = closest_model->getTexture(intersection_point_true);
 
+    // negating r.dir so that direction is away from point of intersection
+    // using closest_model_part since we want to get the final_intensity of the model_part
+    Color final_intensity =
+        closest_model_part->getIntensity(normal.dir, -r.dir, light_rays, &_ambient,
+                                    reflected ? (&reflected.value()) : NULL,
+                                    refracted ? (&refracted.value()) : NULL, point_texture);
+    
     // cout<<"final intensity: "<<final_intensity<<endl;
     return std::make_pair(final_intensity,intersection_pts_vector);
 }

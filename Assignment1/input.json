@@ -51,32 +51,57 @@
             "sc": 1425.0
         }
     ],
+    "background": {
+        "img": "/home/oz/Coding/Assignment/COL781/Assignment1/textures/aman.jpg",
+        "color": [0.2, 0.7, 0.8]
+    },
     "models":[
         {
-            "type": "collection",
-            "material": "red_rubber",
+            "type": "sphere",
+            "material": "ivory",
+            "center": [0,0,0],
+            "radius": 2.0,
             "transformation":{
-                "Mr": [0.5,0.86602540,0,-0.86602540,0.5,0,0,0,1.0],
-                "Mc": [2,0,0,0,2.2,0,0,0,1],
-                "M": [1,0,0,0,1,0,0,0,1.2],
-                "R": [0,0,-6]
-            },
-            "elements":[
-                {
-                    "type": "triangle",
-                    "material": "blue_rubber",
-                    "p1": [2,0,0],
-                    "p2": [2,2,0],
-                    "p3": [0,2,-1]
-                },
-                {
-                    "type": "triangle",
-                    "material": "red_rubber",
-                    "p1": [2,0,0],
-                    "p2": [0,0,-1],
-                    "p3": [0,2,-1]
-                }
-            ]
+                "M": [1.2,0,0,0,0.5,0.86602540,0,-0.86602540,0.5],
+                "R": [-3,0,-16]
+	    }
+        },
+        {
+            "type": "sphere",
+            "material": "glass",
+            "center": [-1,-1.5,-12],
+            "radius": 2.0
+        },
+        {
+            "type": "sphere",
+            "material": "red_rubber",
+            "center": [1.5,-0.5,-18],
+            "radius": 3.0,
+            "img": "/home/oz/Coding/Assignment/COL781/Assignment1/textures/envmap.jpg"
+
+        },
+        {
+            "type": "sphere",
+            "material": "mirror",
+            "center": [7,5,-18],
+            "radius": 4.0
+        },
+        {
+            "type": "plane",
+            "material": "blue_rubber",
+            "ray_src": [0,-4,0],
+            "ray_normal": [0,1,0]
+        },
+        {
+            "type": "triangle",
+            "material": "mirror",
+            "p1": [2,1,0],
+            "p2": [-1,1,0],
+            "p3": [0,4,0],
+            "transformation":{
+                "M": [1,0,0,0,0.5,0.86602540,0,-0.86602540,0.5],
+                "R": [0,0,-10]
+            }
         }
     ],
     "lights":[
@@ -96,6 +121,7 @@
     "camera": {
         "ar": 1.0,
         "fov": 90.0,
-        "trans":[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]
+        "trans":[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1],
+        "ptrans":[1,0,0,0, 0,1,0,0, 0,0,0,-1, 0,0,1,2]
     }
 }

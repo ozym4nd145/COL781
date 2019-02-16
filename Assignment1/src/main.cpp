@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     string in_filename = string(argv[1]);
     State state = get_state(in_filename);
 
-    RenderEngine render_man(*(state.cam), i1, state.models, state.lights,
+    RenderEngine render_man(*(state.cam), i1, *(state.bg), state.models, state.lights,
                             Color(0.2, 0.2, 0.2));
     render_man.render();
     render_man.writeImage("./sphere.ppm");
