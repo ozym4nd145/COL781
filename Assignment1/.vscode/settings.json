@@ -49,7 +49,23 @@
         "variant": "cpp",
         "valarray": "cpp",
         "cstring": "cpp",
-        "forward_list": "cpp"
+        "forward_list": "cpp",
+        "csetjmp": "cpp",
+        "csignal": "cpp",
+        "*.ipp": "cpp",
+        "hash_map": "cpp",
+        "strstream": "cpp",
+        "bitset": "cpp",
+        "cfenv": "cpp",
+        "cinttypes": "cpp",
+        "codecvt": "cpp",
+        "complex": "cpp",
+        "cuchar": "cpp",
+        "unordered_set": "cpp",
+        "iomanip": "cpp",
+        "scoped_allocator": "cpp",
+        "shared_mutex": "cpp",
+        "typeindex": "cpp"
     },
     "cSpell.enabled": false
 }
