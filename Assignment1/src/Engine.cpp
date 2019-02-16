@@ -12,10 +12,13 @@
 using namespace std;
 
 void RenderEngine::addModel(const Model* model) { _models.push_back(model); }
+std::vector<pair<Vector3f, Vector3f>> BLANK;
 
-Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
+pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
+    Ray r, float refractive_index, int depth) {
     // cout<<"trace begin: "<<r<<" refIdx: "<<refractive_index<<"
     // depth:"<<depth<<endl;
+
     const Model* closest_model = NULL;
     const Model* closest_model_part = NULL;
     float closest_distance = std::numeric_limits<float>::infinity();
@@ -33,7 +36,8 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
 
     if (!closest_model) {
         // cout<<"Background hit! "<<Color(0.2, 0.7, 0.8)<<endl;
-        return Color(0.2, 0.7, 0.8);  // TODO: Change this to background
+        return std::make_pair(Color(0.2, 0.7, 0.8),
+                              BLANK);  // TODO: Change this to background
         // return Color(0, 0, 0);  // TODO: Change this to background
     }
     Point intersection_point_true = r.src + (closest_distance)*r.dir;
@@ -43,8 +47,10 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
         // Don't know why normal not returned
         // std::cerr<<"WARNING: Inconsistency Error! Intersected point doesn't
         // have a normal! intersected_part:"<<(*closest_model_part)<<std::endl;
-        return Color(0, 0, 0);
+        return std::make_pair(Color(0, 0, 0), BLANK);
     }
+
+    std::vector<pair<Vector3f, Vector3f>> intersection_pts_vector;
 
     Ray normal = normal_opt.value();
 
@@ -54,6 +60,9 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
         intersection_point_true +
         ((normal.dir.dot(r.dir) > 0) ? (-EPSILON) : (EPSILON)) * normal.dir;
     // auto intersection_point = intersection_point_true - EPSILON*r.dir;
+
+    intersection_pts_vector.push_back({r.src, intersection_point_true});
+
     std::optional<Color> reflected;
     std::optional<Color> refracted;
     bool has_refracted = false;
@@ -84,6 +93,9 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
             light_rays.push_back(
                 std::make_pair(light->_getIntensity(), shadow_ray.dir));
         }
+        intersection_pts_vector.push_back(
+            {intersection_point_true,
+             intersection_point_true + (shadow_ray.dir * shadow_ray.length)});
     }
 
     if (depth < max_trace_depth) {  // if recursion depth is not reached and
@@ -91,7 +103,12 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
         // reflected ray
         auto reflected_ray = closest_model_part->getReflected(r, normal);
         // cout<<"Tracing reflected!"<<endl;
-        reflected = trace(reflected_ray, refractive_index, depth + 1);
+        auto reflected_return_el =
+            trace(reflected_ray, refractive_index, depth + 1);
+        reflected = reflected_return_el.first;
+        intersection_pts_vector.insert(intersection_pts_vector.end(),
+                                       reflected_return_el.second.begin(),
+                                       reflected_return_el.second.end());
 
         // refracted ray
         auto trans_refractive_index =
@@ -100,8 +117,13 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
             auto refracted_ray = closest_model_part->getRefracted(
                 r, normal, refractive_index, trans_refractive_index.value());
             // cout<<"Tracing refracted!"<<endl;
-            refracted =
+            auto refracted_return_el =
                 trace(refracted_ray, trans_refractive_index.value(), depth + 1);
+            refracted = refracted_return_el.first;
+
+            intersection_pts_vector.insert(intersection_pts_vector.end(),
+                                           refracted_return_el.second.begin(),
+                                           refracted_return_el.second.end());
         }
     }
 
@@ -112,7 +134,7 @@ Color RenderEngine::trace(Ray r, float refractive_index, int depth) {
                                     refracted ? (&refracted.value()) : NULL);
 
     // cout<<"final intensity: "<<final_intensity<<endl;
-    return final_intensity;
+    return std::make_pair(final_intensity,intersection_pts_vector);
 }
 
 void RenderEngine::render() {
@@ -133,7 +155,13 @@ void RenderEngine::render() {
                 Ray r = _cam.getRay(x, y).value();
                 // Ray r = _cam.getRay(0.5, 0.5).value();
                 // cout<<" ray:"<<r<<endl;
-                c += trace(r, 1, 0);
+                auto ret_el = trace(r, 1, 0);
+                c += ret_el.first;
+                if(ret_el.second.size()>0){
+                    cout<<i<<"  and  "<<j<<endl;
+                    for(auto el: ret_el.second)
+                        cout<<el.first<<" --> "<<el.second<<endl;
+                }
                 // cout<<"final color: "<<c<<endl;
             }
             c = c / this->num_sample;

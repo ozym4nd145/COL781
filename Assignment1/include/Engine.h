@@ -35,7 +35,7 @@ class RenderEngine {
           _ambient{ambient} {}
 
     void addModel(const Model* model);
-    Color trace(Ray r, float refractive_index, int depth);
+    pair<Color,std::vector<pair<Vector3f,Vector3f>>> trace(Ray r, float refractive_index, int depth);
     void render();
     void writeImage(const std::string& path);
 };
