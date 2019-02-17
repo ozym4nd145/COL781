@@ -8,6 +8,15 @@ find_package(GLUT REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(X11 REQUIRED)
 
+# find the required packages
+find_package(GLM REQUIRED)
+message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
+find_package(GLFW3 REQUIRED)
+message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
+find_package(ASSIMP REQUIRED)
+message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
+
+
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
@@ -22,7 +31,7 @@ include_directories(include/ include_lib/)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
-FILE(GLOB SRCFILES src/*.cpp)
+FILE(GLOB SRCFILES src/*.cpp src/*.c)
 add_executable(ray_tracer ${SRCFILES})
 
 target_link_libraries(ray_tracer ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})

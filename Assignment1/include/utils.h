@@ -6,6 +6,7 @@
 #include "defs.h"
 #include "json.hpp"
 #include "CImg.h"
+#include "OGLModels.h"
 
 Vector4f augment(const Vector3f &vec, float val);
 
@@ -20,8 +21,8 @@ using json = nlohmann::json;
 using namespace std;
 
 Vector3f get_vector3f(const json &j);
-Model *parse_model(const json &j, unordered_map<string, Material *> &materials);
-void get_models(const json &j, vector<Model *> &models,
+std::pair<Model*,ogl::BaseModel*> parse_model(const json &j, unordered_map<string, Material *> &materials);
+void get_models(const json &j, vector<Model *> &models,vector<ogl::BaseModel *> &oglModels,
                 unordered_map<string, Material *> &materials);
 pair<string, Material *> parse_material(const json &j);
 void get_materials(const json &j, unordered_map<string, Material *> &materials);

@@ -4,6 +4,7 @@
 #include "DS.h"
 #include "Models.h"
 #include "defs.h"
+#include "OGLModels.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -88,13 +89,14 @@ Transformation get_transformation(const json &j){
     return Transformation(M,R);
 }
 
-Model *parse_model(const json &j,
+pair<Model*,ogl::BaseModel*> parse_model(const json &j,
                    unordered_map<string, Material *> &materials) {
     string type = j["type"];
     string mat = j["material"];
     Transformation t = get_transformation(j); 
     Model *m = NULL;
-    if (materials.find(mat) == materials.end()) return m;
+    ogl::BaseModel *obm = NULL;
+    if (materials.find(mat) == materials.end()) return make_pair(m,obm);
     bool texture_present = j.find("img")!=j.end();
 
     Material material = *materials[mat];
@@ -107,6 +109,7 @@ Model *parse_model(const json &j,
         Point center = get_vector3f(j["center"]);
         float radius = j["radius"];
         m = new Sphere(center, radius, material,t);
+        obm = new ogl::Sphere(center, radius, material,t);
     } else if (type == "plane") {
         Point ray_src = get_vector3f(j["ray_src"]);
         Vector3f ray_normal = get_vector3f(j["ray_normal"]);
@@ -123,8 +126,8 @@ Model *parse_model(const json &j,
         json cj = j["elements"];
         Collection *coll = new Collection(material,t);
         for (auto &el : cj) {
-            Model *temp = parse_model(el, materials);
-            coll->addModel(temp);
+            auto temp = parse_model(el, materials);
+            coll->addModel(temp.first);
         };
         m = &(*coll);
     } else if (type == "box") {
@@ -136,6 +139,8 @@ Model *parse_model(const json &j,
         float height = j["height"];
         m = new Box(center, x_axis, y_axis, length, breadth, height,
                     material,t);
+        obm = new ogl::Box(center, x_axis, y_axis, length, breadth, height,
+                    material,t);
     } else if (type == "polygon") {
         json pj = j["points"];
         std::vector<Point> points;
@@ -144,16 +149,19 @@ Model *parse_model(const json &j,
         }
         m = new Polygon(points, material,t);
     }
-    return m;
+    return std::make_pair(m,obm);
 }
 
-void get_models(const json &j, vector<Model *> &models,
+void get_models(const json &j, vector<Model *> &models,vector<ogl::BaseModel *> &oglModels,
                 unordered_map<string, Material *> &materials) {
     if (j.find("models") == j.end()) return;
     json jm = j["models"];
     for (auto &el : jm) {
-        Model *m = parse_model(el, materials);
+        auto ret = parse_model(el, materials);
+        Model *m = ret.first;
+        ogl::BaseModel* obm = ret.second;
         if (m != NULL) models.push_back(m);
+        if (obm != NULL) oglModels.push_back(obm);
     }
 }
 
@@ -221,14 +229,15 @@ State get_state(string filename) {
     ifile >> j;
     unordered_map<string, Material *> materials;
     vector<Model *> models;
+    vector<ogl::BaseModel *> oglModels;
     vector<Light *> lights;
     Camera *cam;
     Background* bg;
     get_materials(j, materials);
-    get_models(j, models, materials);
+    get_models(j, models, oglModels, materials);
     get_lights(j, lights);
     cam = get_camera(j);
     bg = get_background(j);
-    State s = {models, lights, materials, cam, bg};
+    State s = {models, oglModels, lights, materials, cam, bg};
     return s;
 }

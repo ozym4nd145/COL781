@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "DS.h"
 #include "defs.h"
+#include "OGLModels.h"
 
 class Model {
    public:
@@ -290,6 +291,7 @@ class Background {
 
 struct State {
     std::vector<Model*> models;
+    std::vector<ogl::BaseModel *> oglModels;
     std::vector<Light*> lights;
     std::unordered_map<std::string, Material*> materials;
     Camera* cam;
