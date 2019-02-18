@@ -44,13 +44,15 @@ namespace ogl {
     // Camera
     CameraModel::CameraModel(const Matrix4f& trans):
         model(glm::mat4(1.0f)),
-        cameraModel("/home/oz/Coding/Assignment/COL781/Assignment1/resources/objects/sphere/sphere.obj")
+        cameraModel("/home/oz/Coding/Assignment/COL781/Assignment1/resources/objects/camera/camera.obj")
     {
         Matrix4f t = trans.transpose();
-        model = glm::mat4( t(0,0),t(0,1),t(0,2),t(0,3),
+        model = glm::transpose(glm::mat4( t(0,0),t(0,1),t(0,2),t(0,3),
                             t(1,0),t(1,1),t(1,2),t(1,3),
                             t(2,0),t(2,1),t(2,2),t(2,3),
-                            t(3,0),t(3,1),t(3,2),t(3,3));
+                            t(3,0),t(3,1),t(3,2),t(3,3)));
+        model = glm::rotate(model,glm::radians(180.0f),glm::vec3(0.0f,0.0f,1.0f));
+        model = glm::rotate(model,glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
     }
     
     void CameraModel::Draw(Shader shader) const {
