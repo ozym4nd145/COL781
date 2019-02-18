@@ -85,7 +85,7 @@ pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
             }
         }
         if (is_occluded) {
-            std::cout<<"IS OCCLUDED!!!!! from "<<*light<<std::endl;
+            // std::cout<<"IS OCCLUDED!!!!! from "<<*light<<std::endl;
         }
         if (!is_occluded) {
             light_rays.push_back(
@@ -174,13 +174,13 @@ void RenderEngine::render() {
                 Ray r = _cam.getRay(x, y).value();
                 // Ray r = _cam.getRay(0.5, 0.5).value();
                 // cout<<" ray:"<<r<<endl;
-                auto ret_el = trace(r, 1, 0);
-                c += ret_el.first;
-                if(ret_el.second.size()>0){
-                    cout<<i<<"  and  "<<j<<endl;
-                    for(auto el: ret_el.second)
-                        cout<<el.first<<" --> "<<el.second<<endl;
-                }
+                // auto ret_el = trace(r, 1, 0);
+                // c += ret_el.first;
+                // if(ret_el.second.size()>0){
+                //     cout<<i<<"  and  "<<j<<endl;
+                //     for(auto el: ret_el.second)
+                //         cout<<el.first<<" --> "<<el.second<<endl;
+                // }
                 // cout<<"final color: "<<c<<endl;
             }
             c = c / this->num_sample;

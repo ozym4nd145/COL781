@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <Eigen/Dense>
+#include <Eigen/Core>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

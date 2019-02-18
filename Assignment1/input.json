@@ -52,7 +52,7 @@
         }
     ],
     "background": {
-        "img": "/home/oz/Coding/Assignment/COL781/Assignment1/textures/aman.jpg",
+        "img": "../textures/aman.jpg",
         "color": [0.2, 0.7, 0.8]
     },
     "models":[
@@ -77,7 +77,7 @@
             "material": "blue_rubber",
             "center": [1.5,-0.5,-18],
             "radius": 3.0,
-            "img": "/home/oz/Coding/Assignment/COL781/Assignment1/textures/envmap.jpg"
+            "img": "../textures/envmap.jpg"
 
         },
         {

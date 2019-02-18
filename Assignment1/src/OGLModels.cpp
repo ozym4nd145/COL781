@@ -8,7 +8,7 @@ namespace ogl {
 
     // Lights
     Lights::Lights(const std::vector<std::pair<Point,Color>>& lights):
-        lightModel("/home/oz/Coding/Assignment/COL781/Assignment1/resources/objects/sphere/sphere.obj")
+        lightModel("../resources/objects/sphere/sphere.obj")
     {
         for(auto light: lights) {
             glm::mat4 model = glm::mat4(1.0);
@@ -44,7 +44,7 @@ namespace ogl {
     // Camera
     CameraModel::CameraModel(const Matrix4f& trans):
         model(glm::mat4(1.0f)),
-        cameraModel("/home/oz/Coding/Assignment/COL781/Assignment1/resources/objects/camera/camera.obj")
+        cameraModel("../resources/objects/camera/camera.obj")
     {
         Matrix4f t = trans.transpose();
         model = glm::transpose(glm::mat4( t(0,0),t(0,1),t(0,2),t(0,3),
@@ -89,7 +89,7 @@ namespace ogl {
     // Box
     Box::Box(const Point& center, const Vector3f& x, const Vector3f& y, float l,
         float b, float h, const Material& mat, const Transformation& t):
-        BaseModel(mat),model(glm::mat4(1.0f)), box("/home/oz/Coding/Assignment/COL781/Assignment1/resources/objects/cube/cube.obj") {
+        BaseModel(mat),model(glm::mat4(1.0f)), box("../resources/objects/cube/cube.obj") {
 
         Vector3f xn = x.normalized();
         Vector3f zn = (xn.cross(y)).normalized();
@@ -109,7 +109,7 @@ namespace ogl {
 
     // Sphere
     Sphere::Sphere(Point center, float radius, Material mat, Transformation t):
-        BaseModel(mat), model(glm::mat4(1.0)), sphere("/home/oz/Coding/Assignment/COL781/Assignment1/resources/objects/sphere/sphere.obj") {
+        BaseModel(mat), model(glm::mat4(1.0)), sphere("../resources/objects/sphere/sphere.obj") {
         model = Utils::getTransformation(t)*model;
         model = glm::translate(model,glm::vec3(center[0],center[1],center[2]));
         model = glm::scale(model,glm::vec3(radius));
