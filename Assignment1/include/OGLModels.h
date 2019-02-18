@@ -120,5 +120,23 @@ namespace ogl {
 
         // draws the model, and thus all its meshes
         void render(Shader shader) const;
+        
+    };
+
+    class Lines {
+        private:
+            glm::mat4 model;
+            glm::vec3 intensity;
+            unsigned int VAO;
+            unsigned int VBO;
+            std::vector<float> pts;
+            
+            void setupMesh();
+            void resetMesh();
+            void populate(std::vector<std::pair<Vector3f,Vector3f>>& lines);
+        public:
+        Lines(std::vector<std::pair<Vector3f,Vector3f>>& points);
+        void resetLines(std::vector<std::pair<Vector3f,Vector3f>>& lines);
+        void Draw(Shader shader) const;
     };
 }

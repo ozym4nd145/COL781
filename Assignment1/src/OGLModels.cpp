@@ -120,4 +120,58 @@ namespace ogl {
         shader.setMat4("model",model);
         sphere.Draw(shader);
     }
+
+    //Lines
+    Lines::Lines(std::vector<std::pair<Vector3f,Vector3f>>& lines):
+        model(1.0f), intensity(1.0f,0.3f,0.2f)
+    {
+        populate(lines);
+        setupMesh();
+    }
+    
+    void Lines::setupMesh() {
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glBindVertexArray(VAO);
+        // load data into vertex buffers
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, pts.size()*sizeof(float), &pts[0], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    }
+
+    void Lines::resetMesh() {
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, pts.size()*sizeof(float), &pts[0], GL_STATIC_DRAW);
+    }
+
+    void Lines::populate(std::vector<std::pair<Vector3f,Vector3f>>& lines)
+    {
+        pts.clear();
+        for(auto line: lines) {
+            pts.push_back(line.first[0]);
+            pts.push_back(line.first[1]);
+            pts.push_back(line.first[2]);
+            pts.push_back(line.second[0]);
+            pts.push_back(line.second[1]);
+            pts.push_back(line.second[2]);
+        }
+    }
+
+    void Lines::resetLines(std::vector<std::pair<Vector3f,Vector3f>>& lines)
+    {
+        populate(lines);
+        resetMesh();
+    }
+
+    // draws the model, and thus all its meshes
+    void Lines::Draw(Shader shader) const {
+        shader.setMat4("model",model);
+        shader.setVec3("intensity",intensity);
+        
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_LINES, 0, pts.size());
+
+        glBindVertexArray(0);
+    }
 }

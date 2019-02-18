@@ -29,7 +29,7 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-
+const float LINE_WIDTH = 5.0f;
 // camera
 ogl::Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
@@ -42,7 +42,8 @@ float lastFrame = 0.0f;
 
 // // lighting
 // glm::vec3 lightPos(30.0f,20.0f,30.0f);
-
+ogl::Lines* lineModel;
+std::vector<std::vector<std::pair<Vector3f,Vector3f>>> lines(2);
 
 int main(int argc, char** argv)
 {
@@ -94,6 +95,16 @@ int main(int argc, char** argv)
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    glLineWidth(LINE_WIDTH);
+
+    lines[0].push_back(make_pair(Vector3f(0,0,0),Vector3f(0,0,-1)));
+    lines[0].push_back(make_pair(Vector3f(0,0,-1),Vector3f(5,0,-1)));
+    lines[0].push_back(make_pair(Vector3f(5,0,-1),Vector3f(5,2,-1)));
+
+    lines[1].push_back(make_pair(Vector3f(0,0,0),Vector3f(0,0,5)));
+    lines[1].push_back(make_pair(Vector3f(0,0,5),Vector3f(5,0,5)));
+    lines[1].push_back(make_pair(Vector3f(5,0,5),Vector3f(5,2,5)));
+
 
     string in_filename = string(argv[1]);
     State state = get_state(in_filename);
@@ -104,11 +115,12 @@ int main(int argc, char** argv)
     }
     ogl::Lights lights(lightVec);
     ogl::CameraModel cameraModel(state.cam->getTransformation());
+    lineModel = new ogl::Lines(lines[0]);
 
     // build and compile shaders
     // -------------------------
     ogl::Shader modelShader("../resources/shaders/model.vs", "../resources/shaders/model.fs");
-    ogl::Shader lightShader("../resources/shaders/light.vs", "../resources/shaders/light.fs");
+    ogl::Shader simpleShader("../resources/shaders/simple.vs", "../resources/shaders/simple.fs");
     
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -132,12 +144,11 @@ int main(int argc, char** argv)
         glClearColor(0.2f, 0.7f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // don't forget to enable shader before setting uniforms
-        modelShader.use();
-        lights.configureLights(modelShader);
-        // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
+
+        modelShader.use();
+        lights.configureLights(modelShader);
         modelShader.setMat4("projection", projection);
         modelShader.setMat4("view", view);
 
@@ -146,10 +157,11 @@ int main(int argc, char** argv)
             obm->Draw(modelShader);
         }
 
-        lightShader.use();
-        lightShader.setMat4("projection", projection);
-        lightShader.setMat4("view", view);
-        lights.DrawLights(lightShader);
+        simpleShader.use();
+        simpleShader.setMat4("projection", projection);
+        simpleShader.setMat4("view", view);
+        lights.DrawLights(simpleShader);
+        lineModel->Draw(simpleShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -178,6 +190,11 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(ogl::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(ogl::RIGHT, deltaTime);
+    
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        lineModel->resetLines(lines[1]);
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        lineModel->resetLines(lines[0]);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
