@@ -92,7 +92,6 @@ class Model {
 };
 
 class Light {
-   private:
     Point _center;
     Color _intensity;
 
@@ -100,7 +99,8 @@ class Light {
     Light(Point center, Color intensity)
         : _center{center}, _intensity{intensity} {}
     Ray getRayToLight(Point p) const { return Ray(p, _center - p); }
-    Color _getIntensity() const { return _intensity; }
+    Color getIntensity() const { return _intensity; }
+    Point getCenter() const {return _center;}
     friend std::ostream& operator<<(std::ostream& os, const Light& lg) {
         return os << "Light{center=" << lg._center
                   << ",intensity=" << lg._intensity << "}";

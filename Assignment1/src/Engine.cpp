@@ -91,7 +91,7 @@ pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
         }
         if (!is_occluded) {
             light_rays.push_back(
-                std::make_pair(light->_getIntensity(), shadow_ray.dir));
+                std::make_pair(light->getIntensity(), shadow_ray.dir));
         }
         intersection_pts_vector.push_back(
             {intersection_point_true,

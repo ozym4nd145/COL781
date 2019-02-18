@@ -2,7 +2,7 @@
     "materials":[
         {
             "name": "ivory",
-            "Ka": [0,0,0],
+            "Ka": [0.24,0.24,0.18],
             "Kd": [0.24,0.24,0.18],
             "Ks": [0.3,0.3,0.3],
             "Krg": [0.1,0.1,0.1],
@@ -22,7 +22,7 @@
         },
         {
             "name": "red_rubber",
-            "Ka": [0,0,0],
+            "Ka": [0.27,0.09,0.09],
             "Kd": [0.27,0.09,0.09],
             "Ks": [0.1,0.1,0.1],
             "Krg": [0,0,0],
@@ -32,7 +32,7 @@
         },
         {
             "name": "blue_rubber",
-            "Ka": [0,0,0],
+            "Ka": [0.09,0.09,0.27],
             "Kd": [0.09,0.09,0.27],
             "Ks": [0.1,0.1,0.1],
             "Krg": [0,0,0],
@@ -60,31 +60,31 @@
             "type": "sphere",
             "material": "ivory",
             "center": [0,0,0],
-            "radius": 2.0,
+            "radius": 0.5,
             "transformation":{
-                "M": [1.2,0,0,0,0.5,0.86602540,0,-0.86602540,0.5],
+                "M": [1,0,0,0,1,0,0,0,1],
                 "R": [-3,0,-16]
 	    }
         },
         {
             "type": "sphere",
-            "material": "glass",
+            "material": "blue_rubber",
             "center": [-1,-1.5,-12],
-            "radius": 2.0
+            "radius": 0.5
         },
         {
             "type": "sphere",
             "material": "red_rubber",
             "center": [1.5,-0.5,-18],
-            "radius": 3.0,
+            "radius": 0.75,
             "img": "/home/oz/Coding/Assignment/COL781/Assignment1/textures/envmap.jpg"
 
         },
         {
             "type": "sphere",
-            "material": "mirror",
+            "material": "blue_rubber",
             "center": [7,5,-18],
-            "radius": 4.0
+            "radius": 1.0
         },
         {
             "type": "plane",
@@ -101,6 +101,20 @@
             "transformation":{
                 "M": [1,0,0,0,0.5,0.86602540,0,-0.86602540,0.5],
                 "R": [0,0,-10]
+            }
+        },
+        {
+            "type": "box",
+            "material" : "blue_rubber",
+            "center": [0,0,0],
+            "x_axis": [1,0,0],
+            "y_axis": [0,1,0],
+            "length": 1.0,
+            "breadth": 1.0,
+            "height": 1.0,
+            "transformation": {
+                "M": [1,0,0,0,1,0,0,0,1],
+                "R": [0,0,10]
             }
         }
     ],

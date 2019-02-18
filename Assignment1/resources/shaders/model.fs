@@ -24,18 +24,18 @@ struct PointLight {
 
 uniform vec3 viewPos;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
-uniform Material material;
+uniform Material material = Material(vec3(0.1,0.1,0.1),vec3(0.3),vec3(0.5),0.0);
 
 uniform sampler2D texture_diffuse[NR_TEXTURE];
 uniform sampler2D texture_specular[NR_TEXTURE];
 uniform sampler2D texture_normal[NR_TEXTURE];
 uniform sampler2D texture_height[NR_TEXTURE];
 
-uniform int num_texture_diffuse;
-uniform int num_texture_specular;
-uniform int num_texture_normal;
-uniform int num_texture_height;
-uniform int num_point_lights;
+uniform int num_texture_diffuse=0;
+uniform int num_texture_specular=0;
+uniform int num_texture_normal=0;
+uniform int num_texture_height=0;
+uniform int num_point_lights=0;
 
 // function prototypes
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
@@ -47,6 +47,8 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 result = vec3(0.0);
     // phase 2: point lights
+    
+
     for(int i = 0; i < num_point_lights; i++)
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
     
@@ -62,6 +64,10 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+
+    if(diff==0.0) {
+        spec = 0;
+    }
 
     // combine results
     vec3 ambient = light.ambient;

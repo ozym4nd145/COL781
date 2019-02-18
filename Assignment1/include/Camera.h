@@ -24,4 +24,5 @@ class Camera {
     }
     std::optional<Ray> getRay(float i, float j) const;
     friend std::ostream& operator<<(std::ostream& os, const Camera& cam);
+    const Matrix4f& getTransformation() const { return _transformation; }
 };
