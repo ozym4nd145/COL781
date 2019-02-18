@@ -223,6 +223,11 @@ Background *get_background(const json &j) {
     }
 }
 
+pair<int,int> get_trace_point(const json &j) {
+    json jc = j["tracePoint"];
+    return make_pair(jc[0],jc[1]);
+}
+
 State get_state(string filename) {
     std::ifstream ifile(filename);
     json j;
@@ -238,6 +243,7 @@ State get_state(string filename) {
     get_lights(j, lights);
     cam = get_camera(j);
     bg = get_background(j);
-    State s = {models, oglModels, lights, materials, cam, bg};
+    auto tracePoint = get_trace_point(j);
+    State s = {models, oglModels, lights, materials, cam, bg,tracePoint};
     return s;
 }

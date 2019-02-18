@@ -7,13 +7,13 @@
             "Ks": [0.3,0.3,0.3],
             "Krg": [0.1,0.1,0.1],
             "Ktg": [0,0,0],
-            "ri": 1.0,
+            "ri": -1.0,
             "sc": 50.0
         },
         {
             "name": "glass",
-            "Ka": [0,0,0],
-            "Kd": [0,0,0],
+            "Ka": [0.1,0,0],
+            "Kd": [0.1,0,0],
             "Ks": [0.5,0.5,0.5],
             "Krg": [0.1,0.1,0.1],
             "Ktg": [0.8,0.8,0.8],
@@ -27,7 +27,7 @@
             "Ks": [0.1,0.1,0.1],
             "Krg": [0,0,0],
             "Ktg": [0,0,0],
-            "ri": 1.0,
+            "ri": -1.0,
             "sc": 10.0
         },
         {
@@ -37,17 +37,17 @@
             "Ks": [0.1,0.1,0.1],
             "Krg": [0,0,0],
             "Ktg": [0,0,0],
-            "ri": 1.0,
+            "ri": -1.0,
             "sc": 10.0
         },
         {
             "name": "mirror",
-            "Ka": [0,0,0],
-            "Kd": [0,0,0],
+            "Ka": [0,0.1,0],
+            "Kd": [0,0.1,0],
             "Ks": [10,10,10],
             "Krg": [0.8,0.8,0.8],
             "Ktg": [0,0,0],
-            "ri": 1.0,
+            "ri": -1.0,
             "sc": 1425.0
         }
     ],
@@ -60,7 +60,7 @@
             "type": "sphere",
             "material": "ivory",
             "center": [0,0,0],
-            "radius": 0.5,
+            "radius": 2.0,
             "transformation":{
                 "M": [1,0,0,0,1,0,0,0,1],
                 "R": [-3,0,-16]
@@ -68,40 +68,29 @@
         },
         {
             "type": "sphere",
-            "material": "blue_rubber",
+            "material": "glass",
             "center": [-1,-1.5,-12],
-            "radius": 0.5
+            "radius": 2.0
         },
         {
             "type": "sphere",
-            "material": "red_rubber",
+            "material": "blue_rubber",
             "center": [1.5,-0.5,-18],
-            "radius": 0.75,
+            "radius": 3.0,
             "img": "/home/oz/Coding/Assignment/COL781/Assignment1/textures/envmap.jpg"
 
         },
         {
             "type": "sphere",
-            "material": "blue_rubber",
+            "material": "mirror",
             "center": [7,5,-18],
-            "radius": 1.0
+            "radius": 4.0
         },
         {
             "type": "plane",
             "material": "blue_rubber",
             "ray_src": [0,-4,0],
             "ray_normal": [0,1,0]
-        },
-        {
-            "type": "triangle",
-            "material": "mirror",
-            "p1": [2,1,0],
-            "p2": [-1,1,0],
-            "p3": [0,4,0],
-            "transformation":{
-                "M": [1,0,0,0,0.5,0.86602540,0,-0.86602540,0.5],
-                "R": [0,0,-10]
-            }
         },
         {
             "type": "box",
@@ -114,7 +103,7 @@
             "height": 1.0,
             "transformation": {
                 "M": [1,0,0,0,1,0,0,0,1],
-                "R": [0,0,10]
+                "R": [0,0,-10]
             }
         }
     ],
@@ -137,5 +126,6 @@
         "fov": 90.0,
         "trans":[0.003,0,0,0, 0,0.003,0,0, 0,0,0.003,0, 0,0,0,1],
         "ptrans":[1,0,0,0, 0,1,0,0, 0,0,0,-1, 0,0,1,2]
-    }
+    },
+    "tracePoint": [400,300]
 }

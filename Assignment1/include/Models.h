@@ -296,4 +296,5 @@ struct State {
     std::unordered_map<std::string, Material*> materials;
     Camera* cam;
     Background* bg;
+    std::pair<int,int> tracePoint;
 };

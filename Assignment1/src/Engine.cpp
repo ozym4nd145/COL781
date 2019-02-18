@@ -16,8 +16,7 @@ std::vector<pair<Vector3f, Vector3f>> BLANK;
 
 pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
     Ray r, float refractive_index, int depth) {
-    // cout<<"trace begin: "<<r<<" refIdx: "<<refractive_index<<"
-    // depth:"<<depth<<endl;
+    // cout<<"trace begin: "<<r<<" refIdx: "<<refractive_index<<"depth:"<<depth<<endl;
 
     const Model* closest_model = NULL;
     const Model* closest_model_part = NULL;
@@ -69,9 +68,8 @@ pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
 
     std::vector<std::pair<Color, Vector3f>> light_rays;
 
-    // cout<<"Intersection point true: "<<intersection_point_true<<" |
-    // Intersection point: "<<intersection_point<<endl; cout<<"Normal:
-    // "<<normal<<endl;
+    // cout<<"Intersection point true: "<<intersection_point_true<<" |Intersection point: "<<intersection_point<<endl; cout<<"Normal:"<<normal<<endl;
+    // cout<<"Model intersection: "<<(*closest_model)<<endl;
 
     // shadow rays
     for (auto light : _lights) {
@@ -87,22 +85,22 @@ pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
             }
         }
         if (is_occluded) {
-            // std::cout<<"IS OCCLUDED!!!!! from "<<*light<<std::endl;
+            std::cout<<"IS OCCLUDED!!!!! from "<<*light<<std::endl;
         }
         if (!is_occluded) {
             light_rays.push_back(
                 std::make_pair(light->getIntensity(), shadow_ray.dir));
         }
-        intersection_pts_vector.push_back(
-            {intersection_point_true,
-             intersection_point_true + (shadow_ray.dir * shadow_ray.length)});
+        // intersection_pts_vector.push_back(
+        //     {intersection_point_true,
+        //      intersection_point_true + (shadow_ray.dir * shadow_ray.length)});
     }
 
     if (depth < max_trace_depth) {  // if recursion depth is not reached and
                                     // normal is present
         // reflected ray
         auto reflected_ray = closest_model_part->getReflected(r, normal);
-        // cout<<"Tracing reflected!"<<endl;
+        // cout<<"Tracing reflected!"<<"depth:"<<depth<<endl;
         auto reflected_return_el =
             trace(reflected_ray, refractive_index, depth + 1);
         reflected = reflected_return_el.first;
@@ -116,7 +114,7 @@ pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
         if (trans_refractive_index) {
             auto refracted_ray = closest_model_part->getRefracted(
                 r, normal, refractive_index, trans_refractive_index.value());
-            // cout<<"Tracing refracted!"<<endl;
+            // cout<<"Tracing refracted!"<<"depth:"<<depth<<endl;
             auto refracted_return_el =
                 trace(refracted_ray, trans_refractive_index.value(), depth + 1);
             refracted = refracted_return_el.first;
@@ -142,6 +140,18 @@ pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
     return std::make_pair(final_intensity,intersection_pts_vector);
 }
 
+pair<Color,std::vector<pair<Vector3f,Vector3f>>> RenderEngine::getTrace(int i, int j) {
+    const int width = _img.width;
+    const int height = _img.height;
+    assert(i<width && i>=0);
+    assert(j<height && j>=0);
+
+    float x = ((float)i + 0.5f) / width;
+    float y = ((float)j + 0.5f) / height;
+    Ray r = _cam.getRay(x, y).value();
+    return trace(r, 1, 0);
+}
+
 void RenderEngine::render() {
     std::random_device
         rd;  // Will be used to obtain a seed for the random number engine
@@ -157,6 +167,10 @@ void RenderEngine::render() {
             for (int k = 0; k < this->num_sample; k++) {
                 float x = ((float)i + dis(gen)) / width;
                 float y = ((float)j + dis(gen)) / height;
+                // int i=350;
+                // int j=300;
+                // float x = ((float)i + 0.5f) / width;
+                // float y = ((float)j + 0.5f) / height;
                 Ray r = _cam.getRay(x, y).value();
                 // Ray r = _cam.getRay(0.5, 0.5).value();
                 // cout<<" ray:"<<r<<endl;

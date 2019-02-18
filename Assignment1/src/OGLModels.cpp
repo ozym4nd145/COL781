@@ -51,6 +51,7 @@ namespace ogl {
                             t(1,0),t(1,1),t(1,2),t(1,3),
                             t(2,0),t(2,1),t(2,2),t(2,3),
                             t(3,0),t(3,1),t(3,2),t(3,3)));
+        model = glm::translate(model,glm::vec3(0.0f,-0.5f,0.0f));
         model = glm::rotate(model,glm::radians(180.0f),glm::vec3(0.0f,0.0f,1.0f));
         model = glm::rotate(model,glm::radians(90.0f),glm::vec3(1.0f,0.0f,0.0f));
     }
@@ -112,6 +113,7 @@ namespace ogl {
         model = Utils::getTransformation(t)*model;
         model = glm::translate(model,glm::vec3(center[0],center[1],center[2]));
         model = glm::scale(model,glm::vec3(radius));
+        model = glm::scale(model,glm::vec3((1/3.0))); // since blender obj is of radius 3
     }
 
     // draws the model, and thus all its meshes

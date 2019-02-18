@@ -21,8 +21,10 @@ class RenderEngine {
     std::vector<const Model*> _models;
     std::vector<const Light*> _lights;
     const Color _ambient;
-    const int max_trace_depth = 4;
+    // const int max_trace_depth = 4;
+    const int max_trace_depth = 3;
     // const int max_trace_depth = 1;
+    // const int num_sample = 5;
     const int num_sample = 5;
 
    public:
@@ -38,6 +40,7 @@ class RenderEngine {
 
     void addModel(const Model* model);
     pair<Color,std::vector<pair<Vector3f,Vector3f>>> trace(Ray r, float refractive_index, int depth);
+    pair<Color,std::vector<pair<Vector3f,Vector3f>>> getTrace(int i, int j);
     void render();
     void writeImage(const std::string& path);
 };

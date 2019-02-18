@@ -47,9 +47,8 @@ std::vector<std::vector<std::pair<Vector3f,Vector3f>>> lines(2);
 
 int main(int argc, char** argv)
 {
-    const int width = 512;
-    const int height = 512;
-    Image i1{width, height};
+    const int width = 800;
+    const int height = 600;
 
     if (argc != 2) {
         cout << "Usage: " << argv[0] << " <Input JSON file>" << endl;
@@ -109,13 +108,24 @@ int main(int argc, char** argv)
     string in_filename = string(argv[1]);
     State state = get_state(in_filename);
 
+    Image img{width, height};
+    RenderEngine render_man(*(state.cam), img, *(state.bg), state.models, state.lights,
+                            Color(0.2, 0.2, 0.2));
+    // render_man.render();
+    // render_man.writeImage("./sphere.ppm");
+
     std::vector<pair<Point,Color>> lightVec;
     for(auto light: state.lights) {
         lightVec.push_back(make_pair(light->getCenter(),light->getIntensity()));
     }
     ogl::Lights lights(lightVec);
     ogl::CameraModel cameraModel(state.cam->getTransformation());
-    lineModel = new ogl::Lines(lines[0]);
+    
+    int imgI = state.tracePoint.first;
+    int imgJ = state.tracePoint.second;
+    auto trace = render_man.getTrace(imgI,imgJ);
+    std::cout<<"trace point: "<<imgI<<","<<imgJ<<" color: "<<trace.first<<" numLines: "<<(trace.second).size()<<std::endl;
+    lineModel = new ogl::Lines(trace.second);
 
     // build and compile shaders
     // -------------------------
@@ -161,7 +171,8 @@ int main(int argc, char** argv)
         simpleShader.setMat4("projection", projection);
         simpleShader.setMat4("view", view);
         lights.DrawLights(simpleShader);
-        lineModel->Draw(simpleShader);
+        if(lineModel)
+            lineModel->Draw(simpleShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -191,10 +202,10 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(ogl::RIGHT, deltaTime);
     
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        lineModel->resetLines(lines[1]);
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        lineModel->resetLines(lines[0]);
+    // if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    //     lineModel->resetLines(lines[1]);
+    // if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    //     lineModel->resetLines(lines[0]);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
