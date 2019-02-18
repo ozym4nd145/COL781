@@ -91,9 +91,9 @@ pair<Color, std::vector<pair<Vector3f, Vector3f>>> RenderEngine::trace(
             light_rays.push_back(
                 std::make_pair(light->getIntensity(), shadow_ray.dir));
         }
-        // intersection_pts_vector.push_back(
-        //     {intersection_point_true,
-        //      intersection_point_true + (shadow_ray.dir * shadow_ray.length)});
+        intersection_pts_vector.push_back(
+            {intersection_point_true,
+             intersection_point_true + (shadow_ray.dir * shadow_ray.length)});
     }
 
     if (depth < max_trace_depth) {  // if recursion depth is not reached and
