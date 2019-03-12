@@ -3,9 +3,9 @@ cmake_policy(VERSION 2.8)
 
 project (Bowling)
 
-IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
-ENDIF(NOT CMAKE_BUILD_TYPE)
+# IF(NOT CMAKE_BUILD_TYPE)
+#   SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
+# ENDIF(NOT CMAKE_BUILD_TYPE)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
@@ -42,9 +42,9 @@ include_directories(${CMAKE_SOURCE_DIR}/includes)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
 FILE(GLOB SRCFILES src/*.cpp src/*.c)
-add_executable(ray_tracer ${SRCFILES} )
+add_executable(bowling ${SRCFILES} )
 
-target_link_libraries(ray_tracer ${LIBS})
-target_link_libraries(ray_tracer ${OPENGL_LIBRARIES})
-target_link_libraries(ray_tracer ${X11_LIBRARIES} m)
-target_link_libraries(ray_tracer ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(bowling ${LIBS})
+target_link_libraries(bowling ${OPENGL_LIBRARIES})
+target_link_libraries(bowling ${X11_LIBRARIES} m)
+target_link_libraries(bowling ${CMAKE_THREAD_LIBS_INIT})
