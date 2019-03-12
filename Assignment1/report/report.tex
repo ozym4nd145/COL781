@@ -29,43 +29,69 @@ top=30mm,
 \begin{document}
 \maketitle
 \section{Introduction}
-    In this assignment we implement a ray-tracing module. It works by following recursive ray tracing principles as defined in the literature (please increase your knowledge first before reading the report, if you don't know about it)
+    In this assignment we implement a ray-tracing module. We have implemented a recursive ray tracing algorithm\footnote{Please increase your knowledge first before reading the report, if you don't know about it} principles as defined in the literature.
+    
+\section{Models}
+    We have worked with the following models:
+    \begin{enumerate}
+        \item Sphere
+        \item Quadric
+        \item Plane
+        \item Polygon
+        \item Triangle
+        \item Collection
+        \item Box        
+    \end{enumerate}
 
+    All of these models, can be defined in their own local co-ordinate systems and need only the parameters required to define them completely.
+
+\section{Lights}
+    We have a functionality of specifying lights in the world co-ordinate system, and the color of the light emitted by them. Presently, all lights are point source.
+
+\section{Camera}
+    We presently have a support for specifying a single camera, and a transformation matrix, that specifies the lookat direction and position of the camera.
+
+\section{Texture and Materials}
+    We have a support of specifying texture for Sphere and Triangle. We find out the value of $u$ and $v$ for these models and map them to the texture image, to get the final color at the location in a texture map.
+
+    We also, have a support of specifying a class of materials
 
 \section{Ray Tracing}
 
-    % \begin{figure*}
-    %     \begin{subfigure}[ht]{0.475\textwidth}  
-    %         \centering 
-    %         \includegraphics[width=\textwidth]{{../results/aug15/128_popularity}.jpg}
-    %         \caption{Popularity Algorithm}    
-    %     \end{subfigure}
-    %     \hfill
-    %     \begin{subfigure}[ht]{0.475\textwidth}   
-    %         \centering 
-    %         \includegraphics[width=\textwidth]{{../results/aug15/128_median}.jpg}
-    %         \caption{Median Cut Algorithm}
-    %     \end{subfigure}
-    %     \vskip\baselineskip
-    %     \begin{subfigure}[ht]{0.475\textwidth}  
-    %         \centering 
-    %         \includegraphics[width=\textwidth]{{../results/aug15/128_popularity_dither}.jpg}
-    %         \caption{Popularity with Dither}    
-    %     \end{subfigure}
-    %     \hfill
-    %     \begin{subfigure}[ht]{0.475\textwidth}   
-    %         \centering 
-    %         \includegraphics[width=\textwidth]{{../results/aug15/128_median_dither}.jpg}
-    %         \caption{Median Cut with Dither}
-    %     \end{subfigure}
-    %     \caption{Results of Algorithms with 128 colors}
-    % \end{figure*}
+    Finally, we perform a recursive ray tracing that renders the scene. Some of the samples of the rendered scenes are:
+    
 
-    \begin{thebibliography}{1}
-        \bibitem{xdog-2012} 
-        Winnemöller, H., Kyprianidis, J. and Olsen, S. 
-        \textit{XDoG: An eXtended difference-of-Gaussians compendium including advanced image stylization.}.\\ 
-        Computers \& Graphics, 36(6), pp.740-753..     
-    \end{thebibliography}
+    \begin{figure*}
+        \begin{subfigure}[ht]{0.475\textwidth}  
+            \centering 
+            \includegraphics[width=\textwidth]{{imgs/spheres}.jpg}
+            \caption{Spheres}    
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[ht]{0.475\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth]{{imgs/box_quadric}.jpg}
+            \caption{Box and Quadric}
+        \end{subfigure}
+        \vskip\baselineskip
+        \begin{subfigure}[ht]{0.475\textwidth}  
+            \centering 
+            \includegraphics[width=\textwidth]{{imgs/polygon_collection}.jpg}
+            \caption{Polygon and Collection}    
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[ht]{0.475\textwidth}   
+            \centering 
+            \includegraphics[width=\textwidth]{{imgs/all}.jpg}
+            \caption{Complete Models}
+        \end{subfigure}
+        \caption{Results of Ray-Tracing with various models, and textures}
+    \end{figure*}
+
+    \section{OpenGL Simulation}
+    For OpenGL simulation we had to create new classes for our models. We created classes for Box, Sphere, Lights, Lines, Mesh and Camera.
+    For the simulation we first re-drew our scene using the input json file and parsing them in our OpenGL model classes and then we calculated all the intersection lines using our ray traces code and drew these lines in OpenGL window. This gave us the required simulation of ray tracer for a given point in image.
+    Some of the things like refraction and shadows were missing from our rendered scene since OpenGL uses rasterization instead of ray tracing and it is really tough to give shadows and refraction in rasterization.  
+    We also made the camera system movable, thus giving us freedom to roam around the scene and explore the whole environment.
 
 \end{document}
