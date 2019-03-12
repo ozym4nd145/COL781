@@ -1,0 +1,71 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{cleveref}
+
+\newcommand{\acomment}[1]{{\bf{\color{blue}{{[Aman: #1]}}}}}
+\newcommand{\scomment}[1]{{\bf{\color{blue}{{[Suyash: #1]}}}}}
+
+\hypersetup{
+colorlinks=true,
+allcolors=blue,
+}
+
+\usepackage{geometry}
+\geometry{
+a4paper,
+left=20mm,
+top=30mm,
+}
+
+\title{COL781: Computer Graphics\\Assignment 1}
+\author{Suyash Agrawal (2015CS10262)\\Aman Agrawal (2015CS10210)}
+
+\begin{document}
+\maketitle
+\section{Introduction}
+    In this assignment we implement a ray-tracing module. It works by following recursive ray tracing principles as defined in the literature (please increase your knowledge first before reading the report, if you don't know about it)
+
+
+\section{Ray Tracing}
+
+    % \begin{figure*}
+    %     \begin{subfigure}[ht]{0.475\textwidth}  
+    %         \centering 
+    %         \includegraphics[width=\textwidth]{{../results/aug15/128_popularity}.jpg}
+    %         \caption{Popularity Algorithm}    
+    %     \end{subfigure}
+    %     \hfill
+    %     \begin{subfigure}[ht]{0.475\textwidth}   
+    %         \centering 
+    %         \includegraphics[width=\textwidth]{{../results/aug15/128_median}.jpg}
+    %         \caption{Median Cut Algorithm}
+    %     \end{subfigure}
+    %     \vskip\baselineskip
+    %     \begin{subfigure}[ht]{0.475\textwidth}  
+    %         \centering 
+    %         \includegraphics[width=\textwidth]{{../results/aug15/128_popularity_dither}.jpg}
+    %         \caption{Popularity with Dither}    
+    %     \end{subfigure}
+    %     \hfill
+    %     \begin{subfigure}[ht]{0.475\textwidth}   
+    %         \centering 
+    %         \includegraphics[width=\textwidth]{{../results/aug15/128_median_dither}.jpg}
+    %         \caption{Median Cut with Dither}
+    %     \end{subfigure}
+    %     \caption{Results of Algorithms with 128 colors}
+    % \end{figure*}
+
+    \begin{thebibliography}{1}
+        \bibitem{xdog-2012} 
+        Winnemöller, H., Kyprianidis, J. and Olsen, S. 
+        \textit{XDoG: An eXtended difference-of-Gaussians compendium including advanced image stylization.}.\\ 
+        Computers \& Graphics, 36(6), pp.740-753..     
+    \end{thebibliography}
+
+\end{document}
