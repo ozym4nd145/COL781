@@ -29,7 +29,7 @@ top=30mm,
 \begin{document}
 \maketitle
 \section{Introduction}
-    In this assignment we implement a ray-tracing module. We have implemented a recursive ray tracing algorithm\footnote{Please increase your knowledge first before reading the report, if you don't know about it} principles as defined in the literature.
+    In this assignment we implement a ray-tracing module. We have implemented a recursive ray tracing algorithm principles as defined in the literature.
     
 \section{Models}
     We have worked with the following models:
@@ -52,13 +52,12 @@ top=30mm,
     We presently have a support for specifying a single camera, and a transformation matrix, that specifies the lookat direction and position of the camera.
 
 \section{Texture and Materials}
-    We have a support of specifying texture for Sphere and Triangle. We find out the value of $u$ and $v$ for these models and map them to the texture image, to get the final color at the location in a texture map.
-
-    We also, have a support of specifying a class of materials
+    We have a support of specifying texture for Sphere and Triangle. We find out the value of $u$ and $v$ for these models and map them to the texture image, to get the final color at the location in a texture map.\\\\
+    \noindent We also, have a support of specifying a class of materials each with their own parameters, and each model object can be assigned a texture or a material.
 
 \section{Ray Tracing}
 
-    Finally, we perform a recursive ray tracing that renders the scene. Some of the samples of the rendered scenes are:
+    Finally, we perform a recursive ray tracing that renders the scene. Some of the samples of the rendered scenes are in \cref{fig:ray_tracing}
     
 
     \begin{figure*}
@@ -85,7 +84,7 @@ top=30mm,
             \includegraphics[width=\textwidth]{{imgs/all}.jpg}
             \caption{Complete Models}
         \end{subfigure}
-        \caption{Results of Ray-Tracing with various models, and textures}
+        \caption{Results of Ray-Tracing with various models, and textures \label{fig:ray_tracing}}
     \end{figure*}
 
     \section{OpenGL Simulation}
@@ -93,5 +92,14 @@ top=30mm,
     For the simulation we first re-drew our scene using the input json file and parsing them in our OpenGL model classes and then we calculated all the intersection lines using our ray traces code and drew these lines in OpenGL window. This gave us the required simulation of ray tracer for a given point in image.
     Some of the things like refraction and shadows were missing from our rendered scene since OpenGL uses rasterization instead of ray tracing and it is really tough to give shadows and refraction in rasterization.  
     We also made the camera system movable, thus giving us freedom to roam around the scene and explore the whole environment.
+    See \cref{fig:opengl} for an example.
+    \begin{figure*}
+        \begin{subfigure}[ht]{0.99\textwidth}  
+            \centering 
+            \includegraphics[width=\textwidth]{{imgs/opengl}.png}
+        \end{subfigure}
+        \hfill
+        \caption{Results of OpenGL simulation \label{fig:opengl}}
+    \end{figure*}
 
 \end{document}
