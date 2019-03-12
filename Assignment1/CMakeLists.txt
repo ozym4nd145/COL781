@@ -34,7 +34,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
 FILE(GLOB SRCFILES src/*.cpp src/*.c)
 add_executable(ray_tracer ${SRCFILES} )
 
-target_link_libraries(ray_tracer ${GLFW3_LIBRARY} ${ASSIMP_LIBRARY} ${LIBS})
+target_link_libraries(ray_tracer ${LIBS})
 target_link_libraries(ray_tracer ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 target_link_libraries(ray_tracer ${X11_LIBRARIES} m)
 target_link_libraries(ray_tracer ${CMAKE_THREAD_LIBS_INIT})

@@ -47,8 +47,8 @@ std::vector<std::vector<std::pair<Vector3f,Vector3f>>> lines(2);
 
 int main(int argc, char** argv)
 {
-    const int width = 800;
-    const int height = 600;
+    const int width = 512;
+    const int height = 512;
 
     if (argc != 2) {
         cout << "Usage: " << argv[0] << " <Input JSON file>" << endl;
@@ -111,8 +111,8 @@ int main(int argc, char** argv)
     Image img{width, height};
     RenderEngine render_man(*(state.cam), img, *(state.bg), state.models, state.lights,
                             Color(0.2, 0.2, 0.2));
-    // render_man.render();
-    // render_man.writeImage("./sphere.ppm");
+    render_man.render();
+    render_man.writeImage("./sphere.ppm");
 
     std::vector<pair<Point,Color>> lightVec;
     for(auto light: state.lights) {
