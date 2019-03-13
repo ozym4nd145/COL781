@@ -60,7 +60,7 @@ class Ball{
 
             float angle_rot_abt_x = abs(newpos.z)/radius;
             float angle_rot_abt_z = abs(newpos.x)/radius;
-            std::cout<<angle_rot_abt_x<<"  " << angle_rot_abt_x<<std::endl;
+            std::cout<<t<<" --> "<<angle_rot_abt_x<<"  " << angle_rot_abt_x<<std::endl;
             glm::mat4 this_trans = glm::translate(glm::mat4(1.0f), newpos);
 
             this_trans = glm::rotate(this_trans,angle_rot_abt_x,glm::vec3(1.0f,0.0f,0.0f));

@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "ball.h"
+#include "pin.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -82,6 +83,7 @@ int main(int argc, char** argv)
     std::vector<glm::vec3> ball_bcurve_points = { glm::vec3(0.0f,0.0f,0.0f), glm::vec3(-2.0f,0.0f,-2.0f), glm::vec3(-4.0f,0.0f,-3.8f), glm::vec3(0.0f,0.0f,-5.0f)};
 
     Ball ball(std::string("../models/earth.obj"),&ourShader,ball_bcurve_points);
+    Pin pin1(std::string("../models/10492_Bowling Pin_v1_max2011_iteration-2.obj"),&ourShader);
 
     std::cout<<"Model Made"<<std::endl;
 
@@ -112,6 +114,7 @@ int main(int argc, char** argv)
         ourShader.setMat4("view", view);
 
         ball.draw_at_time(currentFrame);
+        pin1.draw_at_time(currentFrame);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
