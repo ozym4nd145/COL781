@@ -13,6 +13,7 @@
 
 #include "ball.h"
 #include "pin.h"
+#include "track.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -24,7 +25,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 3.0f, 9.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -85,6 +86,9 @@ int main(int argc, char** argv)
     Ball ball(std::string("../models/earth.obj"),&ourShader,ball_bcurve_points);
     Pin pin1(std::string("../models/10492_Bowling Pin_v1_max2011_iteration-2.obj"),&ourShader);
 
+    Track track(std::string("../models/track.obj"),&ourShader);
+
+
     std::cout<<"Model Made"<<std::endl;
 
     while (!glfwWindowShouldClose(window))
@@ -115,6 +119,7 @@ int main(int argc, char** argv)
 
         ball.draw_at_time(currentFrame);
         pin1.draw_at_time(currentFrame);
+        track.draw_at_time(currentFrame);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

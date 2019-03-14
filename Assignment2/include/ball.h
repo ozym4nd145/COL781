@@ -44,7 +44,7 @@ class Ball{
         Shader *shader;
         Beizer *bcurve;
         
-        const float time_to_hit = 10.0f;
+        const float time_to_hit = 3.0f;
         const float radius = 1.00f;
         Ball(const string obj_filename, Shader* sh, vector<glm::vec3> bcurve_points): shader(sh) {
             base_model = new Model(obj_filename);
@@ -65,7 +65,7 @@ class Ball{
 
             this_trans = glm::rotate(this_trans,angle_rot_abt_x,glm::vec3(1.0f,0.0f,0.0f));
             this_trans = glm::rotate(this_trans,angle_rot_abt_z,glm::vec3(0.0f,0.0f,1.0f));
-            this_trans = glm::scale(this_trans, glm::vec3(0.001f, 0.001f, 0.001f));
+            this_trans = glm::scale(this_trans, glm::vec3(0.002f, 0.002f, 0.002f));
             shader->setMat4("model", this_trans);
             
             base_model->Draw(*shader);
