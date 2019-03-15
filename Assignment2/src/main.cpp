@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 
     // glLineWidth(LINE_WIDTH);
 
-    std::vector<glm::vec3> ball_bcurve_points = { glm::vec3(0.0f,0.0f,10.0f), glm::vec3(-2.0f,0.0f,8.0f), glm::vec3(-4.0f,0.0f,3.8f), glm::vec3(0.0f,0.0f,0.0f)};
+    std::vector<glm::vec3> ball_bcurve_points = { glm::vec3(0.0f,0.0f,10.0f), glm::vec3(-2.0f,0.0f,5.0f), glm::vec3(-2.0f,0.0f,-8.0f), glm::vec3(0.0f,0.0f,-15.0f)};
 
 
     Beizer *bcurve = new Beizer(ball_bcurve_points);

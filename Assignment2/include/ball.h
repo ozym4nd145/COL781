@@ -35,8 +35,8 @@ class Ball{
 
             glm::vec3 newpos = get_center(t);
 
-            float angle_rot_abt_x = abs(newpos.z)/RADIUS;
-            float angle_rot_abt_z = abs(newpos.x)/RADIUS;
+            float angle_rot_abt_x = newpos.z/RADIUS;
+            float angle_rot_abt_z = newpos.x/RADIUS;
 
             glm::mat4 this_trans = glm::translate(orig_model_matrix, newpos);
 

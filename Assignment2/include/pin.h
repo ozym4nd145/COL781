@@ -12,9 +12,9 @@ class Pin{
     public:
         Model *base_model;
         Shader *shader;
-        const glm::vec3 original_pos = glm::vec3(0.0f,0.05f,0.0f);
+        const glm::vec3 original_pos = glm::vec3(0.0f,0.05f,-15.0f);
         const glm::mat4 orig_model_matrix = glm::translate(glm::mat4(1.0f),original_pos);
-        const float max_angle_fall = 75.0f; // in degrees
+        const float max_angle_fall = 80.0f; // in degrees
         const float bottom_right_corner_dist = 0.750f;
         const float BOTTOM_RADIUS = 1.4f;
         const float MASS = 4.0f;
