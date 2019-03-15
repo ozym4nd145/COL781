@@ -25,7 +25,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(0.0f, 3.0f, 9.0f));
+Camera camera(glm::vec3(0.0f, 5.0f, 25.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -81,15 +81,16 @@ int main(int argc, char** argv)
 
     // glLineWidth(LINE_WIDTH);
 
-    std::vector<glm::vec3> ball_bcurve_points = { glm::vec3(0.0f,0.0f,0.0f), glm::vec3(-2.0f,0.0f,-2.0f), glm::vec3(-4.0f,0.0f,-3.8f), glm::vec3(0.0f,0.0f,-5.0f)};
+    std::vector<glm::vec3> ball_bcurve_points = { glm::vec3(0.0f,0.0f,10.0f), glm::vec3(-2.0f,0.0f,8.0f), glm::vec3(-4.0f,0.0f,3.8f), glm::vec3(0.0f,0.0f,0.0f)};
 
-    Ball ball(std::string("../models/earth.obj"),&ourShader,ball_bcurve_points);
-    Pin pin1(std::string("../models/10492_Bowling Pin_v1_max2011_iteration-2.obj"),&ourShader);
+    const float time_to_hit  = 5.0f;
+    const float time_to_fall  = 1.0f;
 
-    Track track(std::string("../models/track.obj"),&ourShader);
+    Ball ball(std::string("../models/obj/ball.obj"),&ourShader,ball_bcurve_points,time_to_hit);
+    Pin pin(std::string("../models/obj/pin.obj"),&ourShader,time_to_hit,time_to_fall);
+    Track track(std::string("../models/obj/track.obj"),&ourShader);
 
-
-    std::cout<<"Model Made"<<std::endl;
+    std::cout<<"Models Made"<<std::endl;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -118,7 +119,7 @@ int main(int argc, char** argv)
         ourShader.setMat4("view", view);
 
         ball.draw_at_time(currentFrame);
-        pin1.draw_at_time(currentFrame);
+        pin.draw_at_time(currentFrame);
         track.draw_at_time(currentFrame);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

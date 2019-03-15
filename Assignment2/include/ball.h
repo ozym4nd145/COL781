@@ -43,10 +43,13 @@ class Ball{
         Model *base_model;
         Shader *shader;
         Beizer *bcurve;
-        
-        const float time_to_hit = 3.0f;
         const float radius = 1.00f;
-        Ball(const string obj_filename, Shader* sh, vector<glm::vec3> bcurve_points): shader(sh) {
+        const float CENTER_HT = 0.538623325916173f+0.05f;
+        const glm::mat4 orig_model_matrix = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,CENTER_HT,0.0f));
+        
+        const float time_to_hit;
+
+        Ball(const string obj_filename, Shader* sh, vector<glm::vec3> bcurve_points,float th): shader(sh), time_to_hit(th) {
             base_model = new Model(obj_filename);
             bcurve = new Beizer(bcurve_points);
         }
@@ -54,18 +57,16 @@ class Ball{
         void draw_at_time(float t){
 
             float scaled_t = min(0.95f,t/time_to_hit);
+
             glm::vec3 newpos = bcurve->get_pt(scaled_t);
-
-            // std::cout<<scaled_t<<"  "<<newpos.x<<","<<newpos.y<<","<<newpos.z<<std::endl;
-
             float angle_rot_abt_x = abs(newpos.z)/radius;
             float angle_rot_abt_z = abs(newpos.x)/radius;
-            std::cout<<t<<" --> "<<angle_rot_abt_x<<"  " << angle_rot_abt_x<<std::endl;
-            glm::mat4 this_trans = glm::translate(glm::mat4(1.0f), newpos);
+
+            glm::mat4 this_trans = glm::translate(orig_model_matrix, newpos);
 
             this_trans = glm::rotate(this_trans,angle_rot_abt_x,glm::vec3(1.0f,0.0f,0.0f));
             this_trans = glm::rotate(this_trans,angle_rot_abt_z,glm::vec3(0.0f,0.0f,1.0f));
-            this_trans = glm::scale(this_trans, glm::vec3(0.002f, 0.002f, 0.002f));
+            
             shader->setMat4("model", this_trans);
             
             base_model->Draw(*shader);
