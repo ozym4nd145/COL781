@@ -93,7 +93,7 @@ int main(int argc, char** argv)
     Beizer *bcurve = new Beizer(ball_bcurve_points);
     const float speed  = 3.0f;
     const float time_to_fall  = 1.0f;
-    const bool camera_follows = true;
+    const bool camera_follows = false;
     glm::vec3 camera_offset = glm::vec3(0.0f,5.0f,12.0f);
     
     Ball ball(std::string("../models/obj/ball.obj"),&ourShader,bcurve,speed);

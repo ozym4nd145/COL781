@@ -31,25 +31,15 @@ class Joint {
         std::vector<Joint*> children;
         glm::mat4 animatedTransform;
         glm::mat4 offsetTransform;
-        glm::mat4 localBindTransform;
-        glm::mat4 invBindTransform;
 
         Joint(int id,const std::string& name):
-            localBindTransform{1.0f},invBindTransform{1.0f},id{id}, name{name}, animatedTransform{1.0f},offsetTransform{1.0f} {
+            id{id}, name{name}, animatedTransform{1.0f},offsetTransform{1.0f} {
             cout<<"Created joint: "<<name<<" id: "<<id<<endl;
         }
 
         void addChild(Joint* child) {
             children.push_back(child);
         }
-
-        // void calculateInverseBindTranform(glm::mat4 parentBindTransform) {
-        //     glm::mat4 bindTransform = parentBindTransform*localBindTransform;
-        //     invBindTransform = glm::inverse(bindTransform);
-        //     for(int i=0;i<children.size();i++) {
-        //         children[i]->calculateInverseBindTranform(bindTransform);
-        //     }
-        // }
 
         void applyTransformation(map<string,glm::mat4>& update,glm::mat4 parentTranformation) {
             if(update.find(name) == update.end()) {
@@ -59,7 +49,7 @@ class Joint {
             glm::mat4 localTransform = update[name];
             glm::mat4 currentTransform = parentTranformation*localTransform;
             animatedTransform = currentTransform*offsetTransform;
-            for(int i=0;i<children.size();i++) {
+            for(int i=0;i<(int)children.size();i++) {
                 children[i]->applyTransformation(update,currentTransform);
             }
         }
@@ -85,13 +75,13 @@ class Animator {
         map<string,pair<vector<float>,vector<JointTransform>>> keyframes;
     public:
         Animator(aiAnimation* animation):duration{0} {
-            float duration = animation->mTicksPerSecond*animation->mDuration;
-            for(int i=0;i<animation->mNumChannels;i++) {
+            duration = animation->mTicksPerSecond*animation->mDuration;
+            for(int i=0;i<(int)animation->mNumChannels;i++) {
                 aiNodeAnim* node = animation->mChannels[i];
                 string jointName((node->mNodeName).C_Str());
                 assert(node->mNumRotationKeys==node->mNumScalingKeys);
                 assert(node->mNumRotationKeys==node->mNumPositionKeys);
-                for(int j=0;j<(node->mNumRotationKeys);j++) {
+                for(int j=0;j<(int)(node->mNumRotationKeys);j++) {
                     float timestamp = (node->mRotationKeys[j]).mTime;
                     JointTransform transform;
                     transform.rotation = glm::quat(node->mRotationKeys[j].mValue.w,
@@ -156,10 +146,13 @@ class AnimatedModel {
         vector<AnimatedMesh> meshes;
         string directory;
         glm::mat4 modelTransformation;
+        const float speed;
 
 
     public:
-        AnimatedModel(const std::string& path):rootJoint{NULL},animator{NULL},modelTransformation{1.0f} {
+        
+        AnimatedModel(const std::string& path):
+            rootJoint{NULL},animator{NULL},modelTransformation{1.0f}, speed{5.0f} {
             // read file via ASSIMP
             Assimp::Importer importer;
             const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -173,26 +166,25 @@ class AnimatedModel {
             this->directory = path.substr(0, path.find_last_of('/'));
             parseModel(scene);
             
-            modelTransformation = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,-40));
-            modelTransformation = glm::rotate(modelTransformation,glm::radians(90.0f),glm::vec3(0,1,0));
+            modelTransformation = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,20));
+            modelTransformation = glm::rotate(modelTransformation,glm::radians(180.0f),glm::vec3(0,1,0));
             modelTransformation = glm::rotate(modelTransformation,glm::radians(-90.0f),glm::vec3(1,0,0));
+            modelTransformation = glm::scale(modelTransformation,glm::vec3(0.5f));
 
         }
 
         void update(float timestamp) {
             map<string,glm::mat4> updateTranformation = animator->getUpdate(timestamp);
-            rootJoint->applyTransformation(updateTranformation,modelTransformation);
+            glm::mat4 transformation = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,-speed*timestamp))*modelTransformation;
+            rootJoint->applyTransformation(updateTranformation,transformation);
         }
 
         // draws the model, and thus all its meshes
         void Draw(Shader shader)
         {
-            // shader.setMat4("model",modelTransformation);
-            for(int i=0;i<allJoints.size();i++) {
+            for(int i=0;i<(int)allJoints.size();i++) {
                 shader.setMat4("jointTransforms["+std::to_string(i)+"]",allJoints[i]->animatedTransform);
             }
-            glm::mat4 jointTransformMatrices[jointName2Id.size()];
-
             for(unsigned int i = 0; i < meshes.size(); i++)
                 meshes[i].Draw(shader);
         }
@@ -200,7 +192,6 @@ class AnimatedModel {
             processMeshes(scene);
             parseJoints(scene->mRootNode,scene,NULL);
             parseAnimations(scene);
-            // rootJoint->calculateInverseBindTranform(glm::mat4(1.0f));
         }
 
         void parseAnimations(const aiScene* scene) {
@@ -214,7 +205,7 @@ class AnimatedModel {
         }
 
         void processMeshes(const aiScene* scene) {
-            for(int i=0;i<scene->mNumMeshes;i++) {
+            for(int i=0;i<(int)scene->mNumMeshes;i++) {
                 aiMesh* m = scene->mMeshes[i];
                 meshes.push_back(processMesh(m,scene));
                 
@@ -227,7 +218,6 @@ class AnimatedModel {
             if(jointName2Id.find(name)!=jointName2Id.end()) {
                 int idx = jointName2Id[name];
                 nodeJoint = allJoints[idx];
-                nodeJoint->localBindTransform = aiMatrix4x4ToGlm(&(node->mTransformation));
                 if(parentJoint != NULL) {
                     parentJoint->children.push_back(nodeJoint);
                 }
@@ -267,7 +257,7 @@ class AnimatedModel {
                     allJoints[newIdx]->offsetTransform = aiMatrix4x4ToGlm(&(joint->mOffsetMatrix));
                 }
                 int jointIdx = jointName2Id[(joint->mName).C_Str()];
-                for(int j=0;j<joint->mNumWeights;j++) {
+                for(int j=0;j<(int)joint->mNumWeights;j++) {
                     auto jointWeight = (joint->mWeights)[j];
                     vertexJointMap[jointWeight.mVertexId].push_back(make_pair(jointWeight.mWeight,jointIdx));
                 }
@@ -315,7 +305,7 @@ class AnimatedModel {
                 // joint indices && joint weights
                 float totalWeight = 0.00001f;
                 for(int j=0;j<3;j++) {
-                    if(j<joints.size()) {
+                    if(j<(int)joints.size()) {
                         vertex.JointIndices[j] = joints[j].second;
                         vertex.JointWeights[j] = joints[j].first;
                         totalWeight += vertex.JointWeights[j];
