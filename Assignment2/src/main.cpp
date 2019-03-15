@@ -12,6 +12,14 @@
 #include <iostream>
 #include "AnimatedModel.h"
 
+#include "beizer.h"
+#include "ball.h"
+#include "pin.h"
+#include "track.h"
+#include "gutter.h"
+#include "engine.h"
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -20,9 +28,9 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-const float LINE_WIDTH = 5.0f;
+
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 5.0f, 25.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -69,19 +77,36 @@ int main(int argc, char** argv)
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
-    glLineWidth(LINE_WIDTH);
+
+    Shader ourShader("../resources/shaders/model.vs", "../resources/shaders/model.fs");
+    Shader animatedModelShader("../resources/shaders/animated.vs", "../resources/shaders/animated.fs");
+
+    // glLineWidth(LINE_WIDTH);
+
+    std::vector<glm::vec3> ball_bcurve_points = { glm::vec3(0.0f,0.0f,10.0f), glm::vec3(-2.0f,0.0f,5.0f), glm::vec3(-2.0f,0.0f,-8.0f), glm::vec3(0.0f,0.0f,-15.0f)};
+
+
+    Beizer *bcurve = new Beizer(ball_bcurve_points);
+    const float speed  = 3.0f;
+    const float time_to_fall  = 1.0f;
+    const bool camera_follows = true;
+    glm::vec3 camera_offset = glm::vec3(0.0f,5.0f,12.0f);
+    
+    Ball ball(std::string("../models/obj/ball.obj"),&ourShader,bcurve,speed);
+    Pin pin(std::string("../models/obj/pin.obj"),&ourShader,time_to_fall);
+    Track track(std::string("../models/obj/track.obj"),&ourShader);
+    Gutter gutter(std::string("../models/obj/gutter.obj"),&ourShader);
+
+    
+    Engine engine(&ball,&pin,&track,&gutter);
+
 
 
     anim::AnimatedModel human("../resources/bowler/model.dae");
-    // learnogl::Model cyborg("../resources/nanosuit/nanosuit.obj");
-    // build and compile shaders
-    // -------------------------
-    Shader animatedModelShader("../resources/shaders/animated.vs", "../resources/shaders/animated.fs");
-    // Shader normalModelShader("../resources/shaders/model.vs", "../resources/shaders/animated.fs");
 
     // render loop
     // -----------
@@ -91,6 +116,7 @@ int main(int argc, char** argv)
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
+        float timePassed = currentFrame-initFrame;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
@@ -100,34 +126,36 @@ int main(int argc, char** argv)
 
         // render
         // ------
-        glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
+        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // don't forget to enable shader before setting uniforms
+        ourShader.use();
+
+        // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        if(camera_follows){
+            glm::vec3 ball_pos = ball.get_center(timePassed);
+            camera.setPosition(ball_pos + camera_offset);
+        }
         glm::mat4 view = camera.GetViewMatrix();
-        
+        ourShader.setMat4("projection", projection);
+        ourShader.setMat4("view", view);
+
+        engine.draw_at_time(timePassed);
+
         animatedModelShader.use();
         animatedModelShader.setMat4("projection", projection);
         animatedModelShader.setMat4("view", view);
-        // animatedModelShader.setMat4("model", model);
-        human.update((currentFrame-initFrame)/10.0);
+        human.update(timePassed/10.0);
         human.Draw(animatedModelShader);
 
-        // normalModelShader.use();
-        // normalModelShader.setMat4("projection", projection);
-        // normalModelShader.setMat4("view", view);
-        // normalModelShader.setMat4("model", glm::mat4(1.0f));
-
-        // cyborg.Draw(normalModelShader);
-        
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-
-
+    
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
@@ -148,11 +176,6 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
-    
-    // if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    //     lineModel->resetLines(lines[1]);
-    // if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    //     lineModel->resetLines(lines[0]);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

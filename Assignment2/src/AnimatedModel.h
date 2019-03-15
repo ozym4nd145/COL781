@@ -171,9 +171,7 @@ class AnimatedModel {
             }
             // retrieve the directory path of the filepath
             this->directory = path.substr(0, path.find_last_of('/'));
-            cout<<"directory: "<<this->directory<<endl;
             parseModel(scene);
-            cout<<"haha"<<endl;
             
             modelTransformation = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,-40));
             modelTransformation = glm::rotate(modelTransformation,glm::radians(90.0f),glm::vec3(0,1,0));

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MESH_H
+#define MESH_H
 
 #include <glad/glad.h> // holds all OpenGL type declarations
 
@@ -14,8 +15,6 @@
 #include <vector>
 using namespace std;
 
-namespace anim {
-
 struct Vertex {
     // position
     glm::vec3 Position;
@@ -23,12 +22,10 @@ struct Vertex {
     glm::vec3 Normal;
     // texCoords
     glm::vec2 TexCoords;
-    // number of joints
-    glm::ivec1 NumJoints;
-    // jointIndices
-    glm::ivec3 JointIndices;
-    // jointWeights
-    glm::vec3 JointWeights;
+    // tangent
+    glm::vec3 Tangent;
+    // bitangent
+    glm::vec3 Bitangent;
 };
 
 struct Texture {
@@ -37,8 +34,7 @@ struct Texture {
     string path;
 };
 
-
-class AnimatedMesh {
+class Mesh {
 public:
     /*  Mesh Data  */
     vector<Vertex> vertices;
@@ -48,7 +44,7 @@ public:
 
     /*  Functions  */
     // constructor
-    AnimatedMesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
     {
         this->vertices = vertices;
         this->indices = indices;
@@ -59,7 +55,7 @@ public:
     }
 
     // render the mesh
-    void Draw(Shader shader) 
+    void Draw(Shader shader) const
     {
         // bind appropriate textures
         unsigned int diffuseNr  = 0;
@@ -73,25 +69,25 @@ public:
             string number;
             string name = textures[i].type;
             if(name == "texture_diffuse")
-				number = std::to_string(diffuseNr++);
-			else if(name == "texture_specular")
-				number = std::to_string(specularNr++); // transfer unsigned int to stream
+                number = std::to_string(diffuseNr++);
+            else if(name == "texture_specular")
+                number = std::to_string(specularNr++); // transfer unsigned int to stream
             else if(name == "texture_normal")
-				number = std::to_string(normalNr++); // transfer unsigned int to stream
-             else if(name == "texture_height")
-			    number = std::to_string(heightNr++); // transfer unsigned int to stream
+                number = std::to_string(normalNr++); // transfer unsigned int to stream
+            else if(name == "texture_height")
+                number = std::to_string(heightNr++); // transfer unsigned int to stream
 
-													 // now set the sampler to the correct texture unit
+                                                    // now set the sampler to the correct texture unit
             glUniform1i(glGetUniformLocation(shader.ID, (name +"["+ number+"]").c_str()), i);
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
-        
+
         glUniform1i(glGetUniformLocation(shader.ID, ("num_texture_diffuse")), diffuseNr);
         glUniform1i(glGetUniformLocation(shader.ID, ("num_texture_specular")), specularNr);
         glUniform1i(glGetUniformLocation(shader.ID, ("num_texture_normal")), normalNr);
         glUniform1i(glGetUniformLocation(shader.ID, ("num_texture_height")), heightNr);
-                
+        
         // draw mesh
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -135,18 +131,14 @@ private:
         // vertex texture coords
         glEnableVertexAttribArray(2);	
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-        // number of joints
+        // vertex tangent
         glEnableVertexAttribArray(3);
-        glVertexAttribIPointer(3, 1, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, NumJoints));
-        // joint indices
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+        // vertex bitangent
         glEnableVertexAttribArray(4);
-        glVertexAttribIPointer(4, 3, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, JointIndices));
-        // joint weights
-        glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, JointWeights));
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
 
         glBindVertexArray(0);
     }
 };
-
-}
+#endif
