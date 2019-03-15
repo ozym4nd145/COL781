@@ -49,6 +49,16 @@ public:
         this->vertices = vertices;
         this->indices = indices;
         this->textures = textures;
+        // std::cout<<"------MESH------"<<std::endl;
+        // for(auto el: textures){
+        //     std::cout<<el.id<<" --> "<<el.type<<" --> "<<el.path<<std::endl;
+        // }
+
+        // for(auto el: vertices){
+        //     std::cout<<el.Position.x<<","<<el.Position.y<<","<<el.Position.z<<" --> (";
+        //     std::cout<<el.TexCoords.x<<","<<el.TexCoords.y<<")"<<std::endl;
+        // }
+
 
         // now that we have all the required data, set the vertex buffers and its attribute pointers.
         setupMesh();

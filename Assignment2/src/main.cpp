@@ -15,7 +15,9 @@
 #include "ball.h"
 #include "pin.h"
 #include "track.h"
+#include "gutter.h"
 #include "engine.h"
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -95,8 +97,11 @@ int main(int argc, char** argv)
     Ball ball(std::string("../models/obj/ball.obj"),&ourShader,bcurve,speed);
     Pin pin(std::string("../models/obj/pin.obj"),&ourShader,time_to_fall);
     Track track(std::string("../models/obj/track.obj"),&ourShader);
+    Gutter gutter(std::string("../models/obj/gutter.obj"),&ourShader);
 
-    Engine engine(&ball,&pin,&track);
+    
+    Engine engine(&ball,&pin,&track,&gutter);
+
 
 
     std::cout<<"Models and Engine Made"<<std::endl;

@@ -8,7 +8,10 @@ class Track{
     public:
         Model *base_model;
         Shader *shader;
-
+        const float WIDTH = 2*4.051050f;
+        const float HEIGHT = 2*0.10000f;
+        const float LENGTH = 2*20.000000f;
+        
         Track(const string obj_filename, Shader* sh ): shader(sh) {
             base_model = new Model(obj_filename);
         }

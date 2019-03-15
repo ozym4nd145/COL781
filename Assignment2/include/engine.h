@@ -2,6 +2,8 @@
 #include "pin.h"
 #include "ball.h"
 #include "track.h"
+#include "gutter.h"
+
 class Engine{
     private:
         bool did_intersect;
@@ -9,7 +11,8 @@ class Engine{
         Ball *ball;
         Pin *pin;
         Track *track;
-        Engine(Ball* b, Pin* p, Track* t): ball(b), pin(p), track(t) {
+        Gutter *gutter;
+        Engine(Ball* b, Pin* p, Track* t, Gutter* g): ball(b), pin(p), track(t), gutter(g) {
             did_intersect = false;
         }
 
@@ -55,6 +58,7 @@ class Engine{
             track->draw_at_time(t);
             ball->draw_at_time(t);
             pin->draw_at_time(t);
+            gutter->draw_at_time(t);
         }
 };
 
