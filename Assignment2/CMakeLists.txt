@@ -3,15 +3,13 @@ cmake_policy(VERSION 2.8)
 
 project (Bowling)
 
-# IF(NOT CMAKE_BUILD_TYPE)
-#   SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
-# ENDIF(NOT CMAKE_BUILD_TYPE)
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 link_directories(${CMAKE_SOURCE_DIR}/lib)
-
-list(APPEND CMAKE_CXX_FLAGS "-std=c++11 -O3")
 
 # find the required packages
 find_package(GLM REQUIRED)
@@ -40,7 +38,8 @@ set(LIBS ${LIBS} GLAD)
 
 include_directories(${CMAKE_SOURCE_DIR}/includes)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -g -std=c++17")
 FILE(GLOB SRCFILES src/*.cpp src/*.c)
 add_executable(bowling ${SRCFILES} )
 

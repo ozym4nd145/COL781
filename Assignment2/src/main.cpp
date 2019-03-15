@@ -6,21 +6,23 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <learnopengl/shader.h>
-#include <learnopengl/camera.h>
 #include <learnopengl/model.h>
+#include <learnopengl/camera.h>
 
 #include <iostream>
+#include "AnimatedModel.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void processInput(GLFWwindow *window);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 const float LINE_WIDTH = 5.0f;
-
 // camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -74,10 +76,83 @@ int main(int argc, char** argv)
     glLineWidth(LINE_WIDTH);
 
 
+    anim::AnimatedModel human("../resources/bowler/model.dae");
+    // learnogl::Model cyborg("../resources/nanosuit/nanosuit.obj");
+    // build and compile shaders
+    // -------------------------
+    Shader animatedModelShader("../resources/shaders/animated.vs", "../resources/shaders/animated.fs");
+    // Shader normalModelShader("../resources/shaders/model.vs", "../resources/shaders/animated.fs");
+
+    // render loop
+    // -----------
+    float initFrame = glfwGetTime();
+    while (!glfwWindowShouldClose(window))
+    {
+        // per-frame time logic
+        // --------------------
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        // input
+        // -----
+        processInput(window);
+
+        // render
+        // ------
+        glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        
+        animatedModelShader.use();
+        animatedModelShader.setMat4("projection", projection);
+        animatedModelShader.setMat4("view", view);
+        // animatedModelShader.setMat4("model", model);
+        human.update((currentFrame-initFrame)/10.0);
+        human.Draw(animatedModelShader);
+
+        // normalModelShader.use();
+        // normalModelShader.setMat4("projection", projection);
+        // normalModelShader.setMat4("view", view);
+        // normalModelShader.setMat4("model", glm::mat4(1.0f));
+
+        // cyborg.Draw(normalModelShader);
+        
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+
+
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
+}
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow *window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+    
+    // if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    //     lineModel->resetLines(lines[1]);
+    // if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    //     lineModel->resetLines(lines[0]);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -106,12 +181,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    // camera.ProcessMouseMovement(xoffset, yoffset);
+    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    // camera.ProcessMouseScroll(yoffset);
+    camera.ProcessMouseScroll(yoffset);
 }
