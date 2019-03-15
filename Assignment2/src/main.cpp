@@ -11,9 +11,11 @@
 
 #include <iostream>
 
+#include "beizer.h"
 #include "ball.h"
 #include "pin.h"
 #include "track.h"
+#include "engine.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -83,14 +85,21 @@ int main(int argc, char** argv)
 
     std::vector<glm::vec3> ball_bcurve_points = { glm::vec3(0.0f,0.0f,10.0f), glm::vec3(-2.0f,0.0f,8.0f), glm::vec3(-4.0f,0.0f,3.8f), glm::vec3(0.0f,0.0f,0.0f)};
 
-    const float time_to_hit  = 5.0f;
-    const float time_to_fall  = 1.0f;
 
-    Ball ball(std::string("../models/obj/ball.obj"),&ourShader,ball_bcurve_points,time_to_hit);
-    Pin pin(std::string("../models/obj/pin.obj"),&ourShader,time_to_hit,time_to_fall);
+    Beizer *bcurve = new Beizer(ball_bcurve_points);
+    const float speed  = 3.0f;
+    const float time_to_fall  = 1.0f;
+    const bool camera_follows = true;
+    glm::vec3 camera_offset = glm::vec3(0.0f,5.0f,12.0f);
+    
+    Ball ball(std::string("../models/obj/ball.obj"),&ourShader,bcurve,speed);
+    Pin pin(std::string("../models/obj/pin.obj"),&ourShader,time_to_fall);
     Track track(std::string("../models/obj/track.obj"),&ourShader);
 
-    std::cout<<"Models Made"<<std::endl;
+    Engine engine(&ball,&pin,&track);
+
+
+    std::cout<<"Models and Engine Made"<<std::endl;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -114,13 +123,15 @@ int main(int argc, char** argv)
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        if(camera_follows){
+            glm::vec3 ball_pos = ball.get_center(currentFrame);
+            camera.setPosition(ball_pos + camera_offset);
+        }
         glm::mat4 view = camera.GetViewMatrix();
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
 
-        ball.draw_at_time(currentFrame);
-        pin.draw_at_time(currentFrame);
-        track.draw_at_time(currentFrame);
+        engine.draw_at_time(currentFrame);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

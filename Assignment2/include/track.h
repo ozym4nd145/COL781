@@ -13,6 +13,10 @@ class Track{
             base_model = new Model(obj_filename);
         }
 
+        glm::vec3 get_plane_normal(){
+            return glm::vec3(0.0f,1.0f,0.0f);
+        }
+
         void draw_at_time(float t){
 
             glm::mat4 this_trans = glm::mat4(1.0f);
