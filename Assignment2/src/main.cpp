@@ -106,7 +106,8 @@ int main(int argc, char** argv)
 
 
 
-    anim::AnimatedModel human("../resources/bowler/model.dae");
+    //anim::AnimatedModel human("../resources/bowler/model.dae");
+    anim::AnimatedModel human("../resources/bowler/bowler.dae");
 
     // render loop
     // -----------
@@ -147,7 +148,7 @@ int main(int argc, char** argv)
         animatedModelShader.use();
         animatedModelShader.setMat4("projection", projection);
         animatedModelShader.setMat4("view", view);
-        human.update(timePassed/10.0);
+        human.update(timePassed);
         human.Draw(animatedModelShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

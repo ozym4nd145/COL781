@@ -34,7 +34,7 @@ class Joint {
 
         Joint(int id,const std::string& name):
             id{id}, name{name}, animatedTransform{1.0f},offsetTransform{1.0f} {
-            cout<<"Created joint: "<<name<<" id: "<<id<<endl;
+            // cout<<"Created joint: "<<name<<" id: "<<id<<endl;
         }
 
         void addChild(Joint* child) {
@@ -71,11 +71,14 @@ struct JointTransform {
 
 class Animator {
     private:
-        float duration;
         map<string,pair<vector<float>,vector<JointTransform>>> keyframes;
     public:
+        float duration;
         Animator(aiAnimation* animation):duration{0} {
             duration = animation->mTicksPerSecond*animation->mDuration;
+            // cout<<"duration: "<<duration<<endl;
+            // cout<<"mDuration: "<<animation->mDuration<<endl;
+            // cout<<"mTicksPerSecond: "<<animation->mTicksPerSecond<<endl;
             for(int i=0;i<(int)animation->mNumChannels;i++) {
                 aiNodeAnim* node = animation->mChannels[i];
                 string jointName((node->mNodeName).C_Str());
@@ -146,13 +149,14 @@ class AnimatedModel {
         vector<AnimatedMesh> meshes;
         string directory;
         glm::mat4 modelTransformation;
-        const float speed;
+        const float distanceFromPlank;
+        const float animationTime;
 
 
     public:
         
         AnimatedModel(const std::string& path):
-            rootJoint{NULL},animator{NULL},modelTransformation{1.0f}, speed{5.0f} {
+            rootJoint{NULL},animator{NULL},modelTransformation{1.0f}, distanceFromPlank{10.0f},animationTime{10.0f} {
             // read file via ASSIMP
             Assimp::Importer importer;
             const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -166,7 +170,7 @@ class AnimatedModel {
             this->directory = path.substr(0, path.find_last_of('/'));
             parseModel(scene);
             
-            modelTransformation = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,20));
+            modelTransformation = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,distanceFromPlank+20.0f));
             modelTransformation = glm::rotate(modelTransformation,glm::radians(180.0f),glm::vec3(0,1,0));
             modelTransformation = glm::rotate(modelTransformation,glm::radians(-90.0f),glm::vec3(1,0,0));
             modelTransformation = glm::scale(modelTransformation,glm::vec3(0.5f));
@@ -174,8 +178,11 @@ class AnimatedModel {
         }
 
         void update(float timestamp) {
+            timestamp = (timestamp/animationTime)*(animator->duration);
             map<string,glm::mat4> updateTranformation = animator->getUpdate(timestamp);
-            glm::mat4 transformation = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,-speed*timestamp))*modelTransformation;
+            float timest = min(animator->duration,timestamp);
+            float translation = -(timest/(animator->duration))*distanceFromPlank;
+            glm::mat4 transformation = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,translation))*modelTransformation;
             rootJoint->applyTransformation(updateTranformation,transformation);
         }
 
