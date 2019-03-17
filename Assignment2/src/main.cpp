@@ -30,7 +30,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(0.0f, 5.0f, 25.0f));
+Camera camera(glm::vec3(21.0f, 10.0f, 35.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -42,6 +42,10 @@ float lastFrame = 0.0f;
 
 int main(int argc, char** argv)
 {
+
+    // Necessary to position the camera at a position from where, we can view the complete scene.
+    camera.setYawPitch(-135.0f,-5.0f);
+
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -94,10 +98,10 @@ int main(int argc, char** argv)
     Beizer *bcurve_hand = new Beizer(ball_bcurve_hand_points);
     Beizer *bcurve_track = new Beizer(ball_bcurve_track_points);
     const float speed_hand_ball  = 1.0f;
-    const float speed_track_ball  = 10.0f;
+    const float speed_track_ball  = 8.0f;
     const float time_to_fall  = 1.0f;
     const float track_ball_start = 6.5f;
-    const bool camera_follows = false;
+    const bool camera_follows = true;
     glm::vec3 camera_offset = glm::vec3(0.0f,5.0f,12.0f);
     
     Ball ballHand(std::string("../models/obj/ball.obj"),&ourShader,bcurve_hand,speed_hand_ball);
@@ -109,9 +113,6 @@ int main(int argc, char** argv)
     
     Engine engine(&ballTrack,&ballHand,&pin,&track,&gutter,track_ball_start);
 
-
-
-    //anim::AnimatedModel human("../resources/bowler/model.dae");
     anim::AnimatedModel human("../resources/bowler/bowler.dae");
 
     // render loop
@@ -141,8 +142,9 @@ int main(int argc, char** argv)
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        if(camera_follows){
-            glm::vec3 ball_pos = ballTrack.get_center(timePassed);
+        if(camera_follows && timePassed>=track_ball_start){
+            camera.resetYawPitch();
+            glm::vec3 ball_pos = ballTrack.get_center(timePassed-track_ball_start);
             camera.setPosition(ball_pos + camera_offset);
         }
         glm::mat4 view = camera.GetViewMatrix();

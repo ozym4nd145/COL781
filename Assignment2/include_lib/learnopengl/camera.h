@@ -117,6 +117,24 @@ public:
         Position = new_position;
     }
 
+    void setYawPitch(float yaw, float pitch){
+        Yaw = yaw;
+        Pitch = pitch;
+        if (Pitch > 89.0f)
+            Pitch = 89.0f;
+        if (Pitch < -89.0f)
+            Pitch = -89.0f;
+
+        updateCameraVectors();
+    }
+
+    void resetYawPitch(){
+        Yaw = YAW;
+        Pitch = PITCH;
+        updateCameraVectors();
+    }
+
+
 private:
     // Calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors()
