@@ -87,22 +87,27 @@ int main(int argc, char** argv)
 
     // glLineWidth(LINE_WIDTH);
 
-    std::vector<glm::vec3> ball_bcurve_points = { glm::vec3(0.0f,0.0f,10.0f), glm::vec3(-2.0f,0.0f,5.0f), glm::vec3(-2.0f,0.0f,-8.0f), glm::vec3(0.0f,0.0f,-15.0f)};
+    std::vector<glm::vec3> ball_bcurve_track_points = {glm::vec3(1.0f,1.0f,23.0f), glm::vec3(0.0f,0.0f,20.0f), glm::vec3(-2.0f,0.0f,5.0f), glm::vec3(-2.0f,0.0f,-8.0f), glm::vec3(0.0f,0.0f,-15.0f)};
+    std::vector<glm::vec3> ball_bcurve_hand_points = {glm::vec3(1.0f,1.0f,30.0f), glm::vec3(1.0f,1.0f,23.0f)};
 
 
-    Beizer *bcurve = new Beizer(ball_bcurve_points);
-    const float speed  = 3.0f;
+    Beizer *bcurve_hand = new Beizer(ball_bcurve_hand_points);
+    Beizer *bcurve_track = new Beizer(ball_bcurve_track_points);
+    const float speed_hand_ball  = 1.0f;
+    const float speed_track_ball  = 10.0f;
     const float time_to_fall  = 1.0f;
+    const float track_ball_start = 6.5f;
     const bool camera_follows = false;
     glm::vec3 camera_offset = glm::vec3(0.0f,5.0f,12.0f);
     
-    Ball ball(std::string("../models/obj/ball.obj"),&ourShader,bcurve,speed);
+    Ball ballHand(std::string("../models/obj/ball.obj"),&ourShader,bcurve_hand,speed_hand_ball);
+    Ball ballTrack(std::string("../models/obj/ball.obj"),&ourShader,bcurve_track,speed_track_ball);
     Pin pin(std::string("../models/obj/pin.obj"),&ourShader,time_to_fall);
     Track track(std::string("../models/obj/track.obj"),&ourShader);
     Gutter gutter(std::string("../models/obj/gutter.obj"),&ourShader);
 
     
-    Engine engine(&ball,&pin,&track,&gutter);
+    Engine engine(&ballTrack,&ballHand,&pin,&track,&gutter,track_ball_start);
 
 
 
@@ -120,6 +125,7 @@ int main(int argc, char** argv)
         float timePassed = currentFrame-initFrame;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        // cout<<"Time passed: "<<timePassed<<endl;
 
         // input
         // -----
@@ -136,7 +142,7 @@ int main(int argc, char** argv)
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         if(camera_follows){
-            glm::vec3 ball_pos = ball.get_center(timePassed);
+            glm::vec3 ball_pos = ballTrack.get_center(timePassed);
             camera.setPosition(ball_pos + camera_offset);
         }
         glm::mat4 view = camera.GetViewMatrix();

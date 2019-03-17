@@ -42,13 +42,17 @@ class Pin{
                 // ball has hit
                 
                 t = min(t,time_to_hit+time_to_fall);
-                float exess_angle = min((max_angle_fall/time_to_fall)*(t-time_to_hit),max_angle_fall);
+                float excess_angle = min((max_angle_fall/time_to_fall)*(t-time_to_hit),max_angle_fall);
                 
                 this_trans = glm::translate(this_trans,(t-time_to_hit)*after_hit_velocity);
                 
-                this_trans = glm::translate(this_trans,glm::vec3(bottom_right_corner_dist,0.0f,0.0f));
-                this_trans = glm::rotate(this_trans,glm::radians(-1.0f*exess_angle),glm::vec3(0.0f,0.0f,1.0f));
-                this_trans = glm::translate(this_trans,glm::vec3(-bottom_right_corner_dist,0.0f,0.0f));
+                float mult = (after_hit_velocity.x<0)?(1.0f):(-1.0f);
+                float dist = mult*bottom_right_corner_dist;
+                float angle = mult*excess_angle;
+
+                this_trans = glm::translate(this_trans,glm::vec3(-dist,0.0f,0.0f));
+                this_trans = glm::rotate(this_trans,glm::radians(angle),glm::vec3(0.0f,0.0f,1.0f));
+                this_trans = glm::translate(this_trans,glm::vec3(dist,0.0f,0.0f));
 
             }
             shader->setMat4("model", this_trans);            

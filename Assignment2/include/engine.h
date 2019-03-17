@@ -9,10 +9,12 @@ class Engine{
         bool did_intersect;
     public:
         Ball *ball;
+        Ball *ballHand;
         Pin *pin;
         Track *track;
         Gutter *gutter;
-        Engine(Ball* b, Pin* p, Track* t, Gutter* g): ball(b), pin(p), track(t), gutter(g) {
+        float startBallTrack;
+        Engine(Ball* b, Ball* bh, Pin* p, Track* t, Gutter* g, float startBallTrack): ball(b), ballHand(bh), pin(p), track(t), gutter(g), startBallTrack(startBallTrack) {
             did_intersect = false;
         }
 
@@ -47,16 +49,21 @@ class Engine{
         }
 
         void draw_at_time(float t){
-            if(!did_intersect){
-                bool intersection = is_intersecting(t);
+            float track_ball_time = t-startBallTrack;
+            if(!did_intersect && track_ball_time > 0){
+                bool intersection = is_intersecting(track_ball_time);
                 if(intersection){
-                    pin->set_hit(get_pin_velocity(t),t);
+                    pin->set_hit(get_pin_velocity(track_ball_time),t);
                     did_intersect = true;
                 }
             }
 
             track->draw_at_time(t);
-            ball->draw_at_time(t);
+            if(t < startBallTrack) {
+                ballHand->draw_at_time(t);
+            } else {
+                ball->draw_at_time(t-startBallTrack);
+            }
             pin->draw_at_time(t);
             gutter->draw_at_time(t);
         }

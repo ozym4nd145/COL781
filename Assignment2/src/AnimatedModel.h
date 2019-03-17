@@ -76,9 +76,9 @@ class Animator {
         float duration;
         Animator(aiAnimation* animation):duration{0} {
             duration = animation->mTicksPerSecond*animation->mDuration;
-            // cout<<"duration: "<<duration<<endl;
-            // cout<<"mDuration: "<<animation->mDuration<<endl;
-            // cout<<"mTicksPerSecond: "<<animation->mTicksPerSecond<<endl;
+            cout<<"duration: "<<duration<<endl;
+            cout<<"mDuration: "<<animation->mDuration<<endl;
+            cout<<"mTicksPerSecond: "<<animation->mTicksPerSecond<<endl;
             for(int i=0;i<(int)animation->mNumChannels;i++) {
                 aiNodeAnim* node = animation->mChannels[i];
                 string jointName((node->mNodeName).C_Str());
@@ -180,7 +180,7 @@ class AnimatedModel {
         void update(float timestamp) {
             timestamp = (timestamp/animationTime)*(animator->duration);
             map<string,glm::mat4> updateTranformation = animator->getUpdate(timestamp);
-            float timest = min(animator->duration,timestamp);
+            float timest = min(((animator->duration)-0.8f),timestamp);
             float translation = -(timest/(animator->duration))*distanceFromPlank;
             glm::mat4 transformation = glm::translate(glm::mat4(1.0f),glm::vec3(0,0,translation))*modelTransformation;
             rootJoint->applyTransformation(updateTranformation,transformation);
