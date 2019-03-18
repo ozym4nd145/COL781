@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 
     // glLineWidth(LINE_WIDTH);
 
-    std::vector<glm::vec3> ball_bcurve_track_points = {glm::vec3(1.0f,1.0f,23.0f), glm::vec3(0.0f,0.0f,20.0f), glm::vec3(-2.0f,0.0f,5.0f), glm::vec3(-2.0f,0.0f,-8.0f), glm::vec3(0.0f,0.0f,-15.0f)};
+    std::vector<glm::vec3> ball_bcurve_track_points = {glm::vec3(1.0f,1.0f,23.0f), glm::vec3(0.0f,0.0f,20.0f), glm::vec3(-2.0f,0.0f,5.0f), glm::vec3(-2.0f,0.0f,-8.0f), glm::vec3(0.0f,0.0f,-18.0f)};
     std::vector<glm::vec3> ball_bcurve_hand_points = {glm::vec3(1.0f,1.0f,30.0f), glm::vec3(1.0f,1.0f,23.0f)};
 
 

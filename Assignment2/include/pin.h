@@ -12,9 +12,9 @@ class Pin{
     public:
         Model *base_model;
         Shader *shader;
-        const glm::vec3 original_pos = glm::vec3(0.0f,0.05f,-15.0f);
+        const glm::vec3 original_pos = glm::vec3(0.0f,0.05f,-18.0f);
         const glm::mat4 orig_model_matrix = glm::translate(glm::mat4(1.0f),original_pos);
-        const float max_angle_fall = 80.0f; // in degrees
+        const float max_angle_fall = 180.0f; // in degrees
         const float bottom_right_corner_dist = 0.750f;
         const float BOTTOM_RADIUS = 1.4f;
         const float MASS = 4.0f;
@@ -46,13 +46,14 @@ class Pin{
                 
                 this_trans = glm::translate(this_trans,(t-time_to_hit)*after_hit_velocity);
                 
-                float mult = (after_hit_velocity.x<0)?(1.0f):(-1.0f);
-                float dist = mult*bottom_right_corner_dist;
-                float angle = mult*excess_angle;
+                float dist = bottom_right_corner_dist;
+                float angle = excess_angle;
 
-                this_trans = glm::translate(this_trans,glm::vec3(-dist,0.0f,0.0f));
-                this_trans = glm::rotate(this_trans,glm::radians(angle),glm::vec3(0.0f,0.0f,1.0f));
-                this_trans = glm::translate(this_trans,glm::vec3(dist,0.0f,0.0f));
+                glm::vec3 rotation_axis = glm::cross(glm::vec3(0.0f,1.0f,0.0f),after_hit_velocity);
+
+                this_trans = glm::translate(this_trans,(dist)*glm::normalize(after_hit_velocity));
+                this_trans = glm::rotate(this_trans,glm::radians(angle),rotation_axis);
+                this_trans = glm::translate(this_trans,(-dist)*glm::normalize(after_hit_velocity));
 
             }
             shader->setMat4("model", this_trans);            
