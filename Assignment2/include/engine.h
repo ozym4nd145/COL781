@@ -17,7 +17,7 @@ class Engine{
         float startBallTrack;
         float lastSimTime;
         const float EPSILON=1e-5;
-        const float elasticity = 0.9;
+        const float elasticity = 0.95;
         Engine(Ball* b, Ball* bh, Pins* p, Track* t, Gutter* g, float startBallTrack): ball(b), ballHand(bh),
             pins(p), track(t), gutter(g), startBallTrack(startBallTrack),lastSimTime(-1.0f) {
             did_intersect = false;
@@ -99,23 +99,23 @@ class Engine{
                         (pins->hit_time)[j] = t;
                     }
 
-                    std::cout<<"I : "<<i;
-                    std::cout<<"\nJ : "<<j;
-                    std::cout<<"\npos1: "<<glm::to_string(pos1);
-                    std::cout<<"\npos2: "<<glm::to_string(pos2);
-                    std::cout<<"\nvel1: "<<glm::to_string(vel1);
-                    std::cout<<"\nvec2: "<<glm::to_string(vel2);
-                    std::cout<<"\npin_radius: "<<pin_radius;
-                    std::cout<<"\napproach_dir: "<<glm::to_string(approach_dir);
-                    std::cout<<"\np1_comp: "<<p1_comp;
-                    std::cout<<"\np2_comp: "<<p2_comp;
-                    std::cout<<"\nvel_app: "<<vel_approach;
-                    std::cout<<"\nvel_sep: "<<vel_sep;
-                    std::cout<<"\np1_new: "<<p1_new;
-                    std::cout<<"\np2_new: "<<p2_new;
-                    std::cout<<"\nvel1_new: "<<glm::to_string((pins->velocity)[i]);
-                    std::cout<<"\nvec2_new: "<<glm::to_string((pins->velocity)[j]);
-                    std::cout<<std::endl<<std::endl;
+                    // std::cout<<"I : "<<i;
+                    // std::cout<<"\nJ : "<<j;
+                    // std::cout<<"\npos1: "<<glm::to_string(pos1);
+                    // std::cout<<"\npos2: "<<glm::to_string(pos2);
+                    // std::cout<<"\nvel1: "<<glm::to_string(vel1);
+                    // std::cout<<"\nvec2: "<<glm::to_string(vel2);
+                    // std::cout<<"\npin_radius: "<<pin_radius;
+                    // std::cout<<"\napproach_dir: "<<glm::to_string(approach_dir);
+                    // std::cout<<"\np1_comp: "<<p1_comp;
+                    // std::cout<<"\np2_comp: "<<p2_comp;
+                    // std::cout<<"\nvel_app: "<<vel_approach;
+                    // std::cout<<"\nvel_sep: "<<vel_sep;
+                    // std::cout<<"\np1_new: "<<p1_new;
+                    // std::cout<<"\np2_new: "<<p2_new;
+                    // std::cout<<"\nvel1_new: "<<glm::to_string((pins->velocity)[i]);
+                    // std::cout<<"\nvec2_new: "<<glm::to_string((pins->velocity)[j]);
+                    // std::cout<<std::endl<<std::endl;
                 }
             }
         }
