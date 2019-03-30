@@ -18,12 +18,13 @@ class Pins{
         vector<bool> is_hit;
         vector<float> hit_time;
         vector<glm::vec3> velocity;
+        vector<glm::vec3> last_nonzero_velocity;
         vector<glm::vec3> position;
-        const float mass = 5.0f;
+        const float mass = 4.0f;
         // const float radius = 1.4f;
         const float radius = 0.7f;
-        const float deceleration = 2.0f;
-
+        const float deceleration = 1.0f;
+        const float EPSILON = 1e-4;
         Model *base_model;
         Shader *shader;
         
@@ -31,7 +32,7 @@ class Pins{
 
         Pins(const string obj_filename, Shader* sh, float tf, glm::vec3 center_pos=glm::vec3(0.0f,0.05f,-18.0f)): 
             shader(sh), time_to_fall(tf), is_hit(num_pins,false), hit_time(num_pins,-1.0f),
-            velocity(num_pins,glm::vec3(0.0f)), position(num_pins,glm::vec3(0.0f)) {
+            velocity(num_pins,glm::vec3(0.0f)),last_nonzero_velocity(num_pins,glm::vec3(0.0f)), position(num_pins,glm::vec3(0.0f)) {
             base_model = new Model(obj_filename);
             
             /**
@@ -71,15 +72,21 @@ class Pins{
                 if(is_hit[i]) {
                     t = min(t,hit_time[i]+time_to_fall);
                     float excess_angle = min((max_angle_fall/time_to_fall)*(t-hit_time[i]),max_angle_fall);
-
+                    glm::vec3 vel = velocity[i];
+                    float norm = glm::length(vel);
+                    if(norm > EPSILON) {
+                        last_nonzero_velocity[i] = velocity[i];
+                    } else {
+                        vel = last_nonzero_velocity[i];
+                    }
                     float dist = bottom_right_corner_dist;
                     float angle = excess_angle;
 
-                    glm::vec3 rotation_axis = glm::cross(glm::vec3(0.0f,1.0f,0.0f),velocity[i]);
+                    glm::vec3 rotation_axis = glm::cross(glm::vec3(0.0f,1.0f,0.0f),vel);
 
-                    this_trans = glm::translate(this_trans,(dist)*glm::normalize(velocity[i]));
+                    this_trans = glm::translate(this_trans,(dist)*glm::normalize(vel));
                     this_trans = glm::rotate(this_trans,glm::radians(angle),rotation_axis);
-                    this_trans = glm::translate(this_trans,(-dist)*glm::normalize(velocity[i]));
+                    this_trans = glm::translate(this_trans,(-dist)*glm::normalize(vel));
                 }
                 shader->setMat4("model", this_trans);            
                 base_model->Draw(*shader);

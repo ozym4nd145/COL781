@@ -3,7 +3,9 @@
 #include "ball.h"
 #include "track.h"
 #include "gutter.h"
+#include <irrKlang.h>
 
+using namespace irrklang;
 
 class Engine{
     private:
@@ -17,10 +19,13 @@ class Engine{
         float startBallTrack;
         float lastSimTime;
         const float EPSILON=1e-5;
-        const float elasticity = 0.95;
-        Engine(Ball* b, Ball* bh, Pins* p, Track* t, Gutter* g, float startBallTrack): ball(b), ballHand(bh),
-            pins(p), track(t), gutter(g), startBallTrack(startBallTrack),lastSimTime(-1.0f) {
+        const float elasticity = 0.9;
+        bool firstHit = false;
+        ISoundEngine *SoundEngine;
+        Engine(Ball* b, Ball* bh, Pins* p, Track* t, Gutter* g, float startBallTrack,ISoundEngine *SoundEngine): ball(b), ballHand(bh),
+            pins(p), track(t), gutter(g), startBallTrack(startBallTrack),lastSimTime(-1.0f),SoundEngine(SoundEngine) {
             did_intersect = false;
+            firstHit = false;
         }
 
         void update_position(float delta_t) {
@@ -64,6 +69,10 @@ class Engine{
                     (pins->is_hit)[i] = true;
                     (pins->hit_time)[i] = t;
                 }
+                if(!firstHit) {
+                    firstHit = true;
+                    SoundEngine->play2D("../resources/hit.wav", GL_FALSE);
+                }
             }
 
             // pins to pins
@@ -71,6 +80,8 @@ class Engine{
                 for(int j=i+1;j<(pins->position).size();j++) {
                     glm::vec3 pos1 = (pins->position)[i];
                     glm::vec3 pos2 = (pins->position)[j];
+                    float m1 = pin_mass+1;
+                    float m2 = pin_mass-1;
                     glm::vec3 vel1 = (pins->velocity)[i];
                     glm::vec3 vel2 = (pins->velocity)[j];
                     bool is_intersecting = check_circle_intersection(pos1,pin_radius,pos2,pin_radius);
@@ -79,14 +90,14 @@ class Engine{
                     glm::vec3 approach_dir = glm::normalize(pos2-pos1);
                     float p1_comp = glm::dot(approach_dir,vel1);
                     float p2_comp = glm::dot(approach_dir,vel2);
-                    float total_comp = p1_comp + p2_comp;
+                    float total_comp = m1*p1_comp + m2*p2_comp;
                     float vel_approach = p1_comp-p2_comp;
                     
                     if(vel_approach <= 0) continue; // this has already been hit
                     float vel_sep = elasticity*vel_approach;
                     
-                    float p1_new = (total_comp-vel_sep)/2.0f;
-                    float p2_new = (total_comp+vel_sep)/2.0f;
+                    float p1_new = (total_comp-vel_sep*m2)/(m1+m2);
+                    float p2_new = (total_comp+vel_sep*m1)/(m1+m2);
 
                     (pins->velocity)[i] += approach_dir*(p1_new-p1_comp);
                     (pins->velocity)[j] += approach_dir*(p2_new-p2_comp);

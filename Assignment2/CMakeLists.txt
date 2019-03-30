@@ -19,6 +19,8 @@ message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 find_package(ASSIMP REQUIRED)
 message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
 
+find_library(IrrKlang_LIB IrrKlang ${CMAKE_SOURCE_DIR}/lib)
+
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 find_package(OpenGL REQUIRED)
 add_definitions(${OPENGL_DEFINITIONS})
@@ -37,8 +39,9 @@ add_library(GLAD "src/glad.c")
 set(LIBS ${LIBS} GLAD)
 
 include_directories(${CMAKE_SOURCE_DIR}/include_lib ${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include_lib/irrKlang)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17 -L ${CMAKE_SOURCE_DIR}/lib/libIrrKlang.so")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -g -std=c++17")
 FILE(GLOB SRCFILES src/*.cpp src/*.c)
 add_executable(bowling ${SRCFILES} )
@@ -47,3 +50,5 @@ target_link_libraries(bowling ${LIBS})
 target_link_libraries(bowling ${OPENGL_LIBRARIES})
 target_link_libraries(bowling ${X11_LIBRARIES} m)
 target_link_libraries(bowling ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(bowling ${IrrKlang_LIB})
+

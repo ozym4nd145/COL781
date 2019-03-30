@@ -9,6 +9,8 @@
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
 
+#include <irrKlang.h>
+
 #include <iostream>
 #include "AnimatedModel.h"
 
@@ -39,6 +41,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+using namespace irrklang;
 
 int main(int argc, char** argv)
 {
@@ -91,7 +94,7 @@ int main(int argc, char** argv)
 
     // glLineWidth(LINE_WIDTH);
 
-    std::vector<glm::vec3> ball_bcurve_track_points = {glm::vec3(1.0f,1.0f,23.0f), glm::vec3(0.0f,0.0f,20.0f), glm::vec3(-2.0f,0.0f,5.0f), glm::vec3(-2.0f,0.0f,-8.0f), glm::vec3(-1.0f,0.0f,-18.0f)};
+    std::vector<glm::vec3> ball_bcurve_track_points = {glm::vec3(1.0f,1.0f,23.0f), glm::vec3(0.0f,0.0f,20.0f), glm::vec3(-2.0f,0.0f,5.0f), glm::vec3(-2.0f,0.0f,-8.0f), glm::vec3(-1.0f,0.0f,-20.0f)};
     std::vector<glm::vec3> ball_bcurve_hand_points = {glm::vec3(1.0f,1.0f,30.0f), glm::vec3(1.0f,1.0f,23.0f)};
 
 
@@ -116,10 +119,13 @@ int main(int argc, char** argv)
     Track track(std::string("../models/obj/track.obj"),&ourShader);
     Gutter gutter(std::string("../models/obj/gutter.obj"),&ourShader);
 
-    
-    Engine engine(&ballTrack,&ballHand,&pin,&track,&gutter,track_ball_start);
+    ISoundEngine *SoundEngine = createIrrKlangDevice();
+    SoundEngine->play2D("/home/ozym4nd145/Coding/Assignment/COL781/Assignment2/resources/breakout.wav", GL_TRUE);
+
+    Engine engine(&ballTrack,&ballHand,&pin,&track,&gutter,track_ball_start,SoundEngine);
 
     anim::AnimatedModel human("../resources/bowler/bowler.dae");
+
 
     // render loop
     // -----------

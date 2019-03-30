@@ -14,7 +14,7 @@ class Ball{
         Beizer *bcurve;
         const float RADIUS = 0.558623325916173f;
         const float CENTER_HT = RADIUS + 0.05f;
-        const float MASS = 10.0f;
+        const float MASS = 12.0f;
         const glm::mat4 orig_model_matrix = glm::translate(glm::mat4(1.0f),glm::vec3(0.0f,CENTER_HT,0.0f));
         
         const float speed;
