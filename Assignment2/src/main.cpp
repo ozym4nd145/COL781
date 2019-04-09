@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     const float speed_track_ball  = 12.0f;
     const float time_to_fall  = 1.0f;
     const float track_ball_start = 6.5f;
-    const bool camera_follows = true;
+    const bool camera_follows = false;
     glm::vec3 camera_offset = glm::vec3(0.0f,5.0f,12.0f);
     
     Ball ballHand(std::string("../models/obj/ball.obj"),&ourShader,bcurve_hand,speed_hand_ball);
