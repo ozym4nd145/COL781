@@ -9,7 +9,7 @@
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
 
-#include "particle.h"
+#include "watergun.h"
 
 #include <iostream>
 
@@ -84,11 +84,9 @@ int main(int argc, char** argv)
 
 
     Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
-    // Shader modelShader("../resources/shaders/model.vs", "../resources/shaders/model.fs");
 
-    Model ball(std::string("../models/obj/ball.obj"));
-
-    QuadParticleSystem particles{50000};
+    WaterGun blueGun(50000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.1,5.0f,10000);
+    WaterGun purpleGun(50000,{-5.0f,0.0f,-20.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},10.0f,0.2,3.0f,10000);
 
     // render loop
     // -----------
@@ -98,7 +96,7 @@ int main(int argc, char** argv)
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
-        float timePassed = currentFrame-initFrame;
+        // float timePassed = currentFrame-initFrame;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         // cout<<"Time passed: "<<timePassed<<endl;
@@ -122,15 +120,11 @@ int main(int argc, char** argv)
         particleShader.setMat4("projection", projection);
         particleShader.setMat4("view", view);
 
-        particles.Update(deltaTime,cameraPos);
+        blueGun.Update(deltaTime,cameraPos);
+        purpleGun.Update(deltaTime,cameraPos);
 
-        particles.Draw(particleShader);
-
-        // modelShader.use();
-        // modelShader.setMat4("projection", projection);
-        // modelShader.setMat4("view", view);
-        // modelShader.setMat4("model", glm::mat4(1.0f));
-        // ball.Draw(modelShader);
+        blueGun.Draw(particleShader);
+        purpleGun.Draw(particleShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
