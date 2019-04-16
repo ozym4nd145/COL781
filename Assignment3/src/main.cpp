@@ -10,6 +10,7 @@
 #include <learnopengl/camera.h>
 
 #include "watergun.h"
+#include "dust.h"
 
 #include <iostream>
 
@@ -85,8 +86,9 @@ int main(int argc, char** argv)
 
     Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
 
-    WaterGun blueGun(50000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.1,5.0f,10000);
-    WaterGun purpleGun(50000,{-5.0f,0.0f,-20.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},10.0f,0.2,3.0f,10000);
+    // WaterGun blueGun(100000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.1,5.0f,10000);
+    // WaterGun purpleGun(100000,{-5.0f,0.0f,-20.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},10.0f,0.2,3.0f,10000);
+    Dust redHoli(100000,{-5.0f,0.0f,-20.0f},{0.464f,0.5f,0.242f,0.3f},1.0f,20.0f,40000,2.0f);
 
     // render loop
     // -----------
@@ -96,7 +98,7 @@ int main(int argc, char** argv)
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
-        // float timePassed = currentFrame-initFrame;
+        float timePassed = currentFrame-initFrame;
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         // cout<<"Time passed: "<<timePassed<<endl;
@@ -120,11 +122,13 @@ int main(int argc, char** argv)
         particleShader.setMat4("projection", projection);
         particleShader.setMat4("view", view);
 
-        blueGun.Update(deltaTime,cameraPos);
-        purpleGun.Update(deltaTime,cameraPos);
+        // blueGun.Update(deltaTime,cameraPos);
+        // purpleGun.Update(deltaTime,cameraPos);
+        redHoli.Update(deltaTime,timePassed,cameraPos);
 
-        blueGun.Draw(particleShader);
-        purpleGun.Draw(particleShader);
+        // blueGun.Draw(particleShader);
+        // purpleGun.Draw(particleShader);
+        redHoli.Draw(particleShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
