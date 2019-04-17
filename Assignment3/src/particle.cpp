@@ -10,7 +10,7 @@ std::ostream &operator<<(std::ostream &os, Particle const &m) {
               <<"\tlife: "<<m.life<<"\tcamDist: "<<m.cameraDist<<std::endl;
 }
 
-ParticleSytem::ParticleSytem(const std::vector<glm::vec3>& vertices, int max_particles):
+ParticleSystem::ParticleSystem(const std::vector<glm::vec3>& vertices, int max_particles):
     vertices{vertices.begin(),vertices.end()},
     particles{max_particles},
     position{max_particles},
@@ -20,7 +20,7 @@ ParticleSytem::ParticleSytem(const std::vector<glm::vec3>& vertices, int max_par
     setupSystem();
 }
 
-ParticleSytem::ParticleSytem(int max_particles):
+ParticleSystem::ParticleSystem(int max_particles):
     particles{max_particles},
     position{max_particles},
     color{max_particles},
@@ -32,7 +32,7 @@ ParticleSytem::ParticleSytem(int max_particles):
     setupSystem();
 }
 
-void ParticleSytem::Draw(Shader shader) {
+void ParticleSystem::Draw(Shader shader) {
     int num_particles = 0;
     for(auto& particle: particles) {
         if(particle.life < 0) {
@@ -62,7 +62,7 @@ void ParticleSytem::Draw(Shader shader) {
     glBindVertexArray(0);
 }
 
-void ParticleSytem::setupSystem() {
+void ParticleSystem::setupSystem() {
     // create buffers/arrays
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO_vertex);
@@ -101,7 +101,7 @@ void ParticleSytem::setupSystem() {
     glBindVertexArray(0);
 }
 
-int ParticleSytem::findUnusedParticle() {
+int ParticleSystem::findUnusedParticle() {
     for(int i=lastUsedParticle;i<particles.size();i++) {
         if(particles[i].life <= 0) {
             lastUsedParticle = i;

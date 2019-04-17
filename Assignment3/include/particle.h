@@ -39,7 +39,7 @@ struct Particle {
 
 std::ostream &operator<<(std::ostream &os, Particle const &m);
 
-class ParticleSytem {
+class ParticleSystem {
     private:
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> position;
@@ -52,9 +52,9 @@ class ParticleSytem {
 
     public:
         std::vector<Particle> particles;
-        ParticleSytem(const std::vector<glm::vec3>& vertices, int max_particles);
+        ParticleSystem(const std::vector<glm::vec3>& vertices, int max_particles);
 
-        ParticleSytem(int max_particles);
+        ParticleSystem(int max_particles);
 
         void Draw(Shader shader);
 
