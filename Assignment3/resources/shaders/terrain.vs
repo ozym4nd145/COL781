@@ -15,7 +15,7 @@ uniform mat4 view;
 uniform mat4 projection;
 
 const float density = 0.007;
-const float gradient = 1.5;
+const float gradient = 1.0;
 
 void main()
 {
@@ -28,4 +28,5 @@ void main()
 
     float distanceFromCamera = length(positionRelativeCamera.xyz);
     visibility = exp(-pow((distanceFromCamera*density),gradient));
+    // visibility = 1.0f;
 }

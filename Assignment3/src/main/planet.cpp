@@ -25,7 +25,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(21.0f, 10.0f, 35.0f));
+Camera camera(glm::vec3(21.0f, 400.0f, 35.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -83,6 +83,8 @@ int main(int argc, char** argv)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    // glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+
 
 
     // Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
@@ -96,12 +98,21 @@ int main(int argc, char** argv)
                     // ,{2.0f,10.0f,5.0f},
                     // 1.0f,20.0f,5000,2.0f);
     int terrainSize = 800;
-    int terrainCount = 129;
-    Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,{"../resources/textures/blendMap.png", \
-                                       "../resources/textures/grass.png", \
-                                       "../resources/textures/grassFlowers.png", \
-                                       "../resources/textures/grass.png", \
-                                       "../resources/textures/path.png"},"../resources/textures/heightmap.png");
+    int terrainCount = 1000;
+    int terrainHeight = 100;
+    Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{"../resources/textures/grass.png"});
+    
+    cout<<"Min terrain height: "<<ground.min_terrain_height<<endl;
+    cout<<"Average terrain height: "<<ground.average_terrain_height<<endl;
+    cout<<"Max terrain height: "<<ground.max_terrain_height<<endl;
+
+    camera.Position.y = ground.average_terrain_height*1.2; // set camera height correctly
+
+    // Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{"../resources/textures/blendMap.png", \
+    //                                    "../resources/textures/grass.png", \
+    //                                    "../resources/textures/grassFlowers.png", \
+    //                                    "../resources/textures/mud.png", \
+    //                                    "../resources/textures/path.png"},"../resources/textures/heightmap.png");
     glm::vec3 skyColor{0.53, 0.81, 0.98};
 
     // render loop
@@ -127,7 +138,7 @@ int main(int argc, char** argv)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 500.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
         glm::vec3 cameraPos = camera.Position;
         glm::mat4 view = camera.GetViewMatrix();
 

@@ -27,12 +27,13 @@ void main()
     // properties
     vec3 norm = normalize(Normal);
     vec3 result = vec3(0.0);
+    vec2 tiledCoordinates = TexCoords*100;
 
-    if(num_texture_diffuse > 0) {
-        // assert(num_texture_diffuse==5);
+    if(num_texture_diffuse == 1) {
+        result = vec3(texture(texture_diffuse[0], tiledCoordinates));
+    } else if(num_texture_diffuse > 1) {
         vec3 blendMapTexture = vec3(texture(texture_diffuse[0], TexCoords));
         float backgroundAmount = 1 - (blendMapTexture[0]+blendMapTexture[1]+blendMapTexture[2]);
-        vec2 tiledCoordinates = TexCoords*100;
         vec3 backgroundTexture = backgroundAmount*vec3(texture(texture_diffuse[1], tiledCoordinates));
         vec3 firstTexture = blendMapTexture[0]*vec3(texture(texture_diffuse[2], tiledCoordinates));
         vec3 secondTexture = blendMapTexture[1]*vec3(texture(texture_diffuse[3], tiledCoordinates));
