@@ -39,23 +39,27 @@ add_library(GLAD "src/glad.c")
 set(LIBS ${LIBS} GLAD)
 
 include_directories(${CMAKE_SOURCE_DIR}/include_lib ${CMAKE_SOURCE_DIR}/include)
-# include_directories(${CMAKE_SOURCE_DIR}/include_lib/irrKlang)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -g -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -g -std=c++17")
 
 FILE(GLOB SRCFILES src/*.cpp src/*.c)
 
-add_executable(holi src/main/holi.cpp ${SRCFILES} )
-target_link_libraries(holi ${LIBS})
-target_link_libraries(holi ${OPENGL_LIBRARIES})
-target_link_libraries(holi ${X11_LIBRARIES} m)
-target_link_libraries(holi ${CMAKE_THREAD_LIBS_INIT})
-# target_link_libraries(holi ${IrrKlang_LIB})
+add_executable(fire src/main/fire.cpp ${SRCFILES} )
+target_link_libraries(fire ${LIBS})
+target_link_libraries(fire ${OPENGL_LIBRARIES})
+target_link_libraries(fire ${X11_LIBRARIES} m)
+target_link_libraries(fire ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(planet src/main/planet.cpp ${SRCFILES} )
 target_link_libraries(planet ${LIBS})
 target_link_libraries(planet ${OPENGL_LIBRARIES})
 target_link_libraries(planet ${X11_LIBRARIES} m)
 target_link_libraries(planet ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(planet ${IrrKlang_LIB})
+
+
+add_executable(holi src/main/holi.cpp ${SRCFILES} )
+target_link_libraries(holi ${LIBS})
+target_link_libraries(holi ${OPENGL_LIBRARIES})
+target_link_libraries(holi ${X11_LIBRARIES} m)
+target_link_libraries(holi ${CMAKE_THREAD_LIBS_INIT})

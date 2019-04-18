@@ -9,8 +9,10 @@
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
 
-#include "watergun.h"
-#include "dust.h"
+// #include "watergun.h"
+// #include "dust.h"
+
+#include "wall.h"
 
 #include <iostream>
 
@@ -24,7 +26,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(21.0f, 10.0f, 35.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 35.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -37,7 +39,7 @@ int main(int argc, char** argv)
 {
 
     // Necessary to position the camera at a position from where, we can view the complete scene.
-    camera.setYawPitch(-135.0f,-5.0f);
+    // camera.setYawPitch(-135.0f,-5.0f);
 
     // glfw: initialize and configure
     // ------------------------------
@@ -86,13 +88,15 @@ int main(int argc, char** argv)
 
     Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
 
-    WaterGun blueGun(100000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.1,5.0f,10000);
-    WaterGun purpleGun(100000,{-5.0f,0.0f,-20.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},10.0f,0.2,3.0f,10000);
-    Dust redHoli(100000,{-5.0f,0.0f,-20.0f},{0.464f,0.1f,0.242f,0.3f},
-                    {{-5.0f,-10.0f,-25.0f},{-5.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f}},
-                    {{0.0f,1.0f,0.0f},{5.0f,3.0f,0.0f},{-1.0,1.0f,0.0f}}
-                    ,{2.0f,10.0f,5.0f},
-                    1.0f,20.0f,5000,2.0f);
+    // WaterGun blueGun(100000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.1,5.0f,10000);
+    // WaterGun purpleGun(100000,{-5.0f,0.0f,-20.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},10.0f,0.2,3.0f,10000);
+    // Dust redHoli(100000,{-5.0f,0.0f,-20.0f},{0.464f,0.1f,0.242f,0.3f},
+    //                 {{-5.0f,-10.0f,-25.0f},{-5.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f}},
+    //                 {{0.0f,1.0f,0.0f},{5.0f,3.0f,0.0f},{-1.0,1.0f,0.0f}}
+    //                 ,{2.0f,10.0f,5.0f},
+    //                 1.0f,20.0f,5000,2.0f);
+    Wall wall_of_fire(1e5,5.0f,glm::vec3(0.0f),1.0f);
+    // glm::vec4(1.0f,0.647f,0.0f,1.0f)
 
     // render loop
     // -----------
@@ -126,13 +130,13 @@ int main(int argc, char** argv)
         particleShader.setMat4("projection", projection);
         particleShader.setMat4("view", view);
 
-        blueGun.Update(deltaTime,cameraPos);
-        purpleGun.Update(deltaTime,cameraPos);
-        redHoli.Update(deltaTime,timePassed,cameraPos);
+        // blueGun.Update(deltaTime,cameraPos);
+        // purpleGun.Update(deltaTime,cameraPos);
+        wall_of_fire.Update(deltaTime,timePassed,cameraPos);
 
-        blueGun.Draw(particleShader);
-        purpleGun.Draw(particleShader);
-        redHoli.Draw(particleShader);
+        // blueGun.Draw(particleShader);
+        // purpleGun.Draw(particleShader);
+        wall_of_fire.Draw(particleShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
