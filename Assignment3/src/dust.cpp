@@ -35,6 +35,7 @@ void Dust::Update(float deltaTime,float currentTime, const glm::vec3& cameraPosi
             glm::vec3 dir = glm::vec3((float)direction_dist(generator),(float)direction_dist(generator),(float)direction_dist(generator));
             
             p->speed = speed*glm::normalize(dir);
+            p->color = color;
         }
     // }
 

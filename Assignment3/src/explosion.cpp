@@ -51,7 +51,7 @@ void Explosion::Generate(float deltaTime, float currentTime,
 
         p->speed = speed * glm::normalize(dir);
 
-        p->color = glm::vec3(1.0f,0.75f,0.1f);
+        p->color = glm::vec4(1.0f,0.75f,0.1f,0.2f);
 
         // std::cout<<psystem->particles[particleIndex]<<std::endl;
     }

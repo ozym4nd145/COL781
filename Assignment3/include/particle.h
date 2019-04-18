@@ -26,7 +26,7 @@ struct Particle {
     Particle() {
         life = -1.0f;
         cameraDist = -1.0f;
-        color = {1.0f,0.75f,0.1f,0.5f};
+        color = {1.0f,0.75f,0.1f,0.2f};
         pos = {0,0,0};
         speed = {0,0,0};
     }

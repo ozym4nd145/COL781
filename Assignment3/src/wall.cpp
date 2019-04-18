@@ -44,7 +44,7 @@ void Wall::Update(float deltaTime, float currentTime,
                 glm::vec3 gravity_dir = glm::normalize(sphere_center - p->pos);
                 p->speed += gravity_dir * deltaTime * gravity_strength; 
                 p->pos += p->speed * (float)deltaTime;
-                p->color -= deltaTime*glm::vec3(0.2f,2.0f,2.0f);
+                p->color -= deltaTime*glm::vec4(0.2f,2.0f,2.0f,0.0f);
                 p->color = glm::clamp(p->color,0.0f,1.0f);
                 p->cameraDist = glm::length(p->pos - cameraPosition);
             } else {

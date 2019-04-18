@@ -34,6 +34,7 @@ void WaterGun::Update(float deltaTime,const glm::vec3& cameraPosition) {
         glm::vec3 dir = direction+(p1*(float)spread_dist(generator))+(p2*(float)spread_dist(generator));
         
         p->speed = speed*glm::normalize(dir);
+        p->color = color;
     }
 
     // Simulate all particles
@@ -54,6 +55,6 @@ void WaterGun::Update(float deltaTime,const glm::vec3& cameraPosition) {
 }
 
 void WaterGun::Draw(Shader shader) {
-    shader.setVec4("color",color);
+    // shader.setVec4("color",color);
     psystem.Draw(shader);
 }

@@ -48,7 +48,7 @@ void ParticleSystem::Draw(Shader shader) {
 
     for(int i=0;i<num_particles;i++) {
         position[i] = particles[i]->pos;
-        color[i] = 255.0f*particles[i]->color;
+        color[i] = particles[i]->color;
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO_pos);
@@ -100,7 +100,7 @@ void ParticleSystem::setupSystem() {
 
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_color);
-    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, 4*sizeof(float), (void*)0);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
 
     // glVertexAttribDivisor(0, 0);
     glVertexAttribDivisor(1, 1);
