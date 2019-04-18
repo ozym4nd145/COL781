@@ -10,6 +10,7 @@
 #include <learnopengl/camera.h>
 
 #include "wall.h"
+#include "skybox.h"
 
 #include <iostream>
 
@@ -81,16 +82,22 @@ int main(int argc, char** argv)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
-
     Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
-
     Shader modelShader("../resources/shaders/model.vs", "../resources/shaders/model.fs");
+    Shader skyboxShader("../resources/shaders/skybox.vs", "../resources/shaders/skybox.fs");
     
     Wall wall_of_fire(1e5,5.0f,glm::vec3(0.0f),1.0f);
-    
     Model moon("../models/moon.obj");
-    
+    vector<std::string> faces = {
+        "../resources/textures/night/nightRight.png",
+        "../resources/textures/night/nightLeft.png",
+        "../resources/textures/night/nightTop.png",
+        "../resources/textures/night/nightBottom.png",
+        "../resources/textures/night/nightFront.png",
+        "../resources/textures/night/nightBack.png"
+    };
+    SkyBox skybox(faces);
+
     // render loop
     // -----------
     float initFrame = glfwGetTime();
@@ -139,6 +146,14 @@ int main(int argc, char** argv)
         model = glm::scale(model, glm::vec3(5.0f/130.0f));	// it's a bit too big for our scene, so scale it down
         modelShader.setMat4("model", model);
         moon.Draw(modelShader);
+
+        glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+        skyboxShader.use();
+        view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+        skyboxShader.setMat4("view", view);
+        skyboxShader.setMat4("projection", projection);
+
+        skybox.Draw();
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
