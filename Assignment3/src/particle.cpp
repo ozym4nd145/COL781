@@ -56,8 +56,8 @@ void ParticleSystem::Draw(Shader shader) {
     glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles * sizeof(float) * 3, &position[0]);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO_color);
-    glBufferData(GL_ARRAY_BUFFER, color.size() * 3 * sizeof(uint8_t), NULL, GL_STREAM_DRAW); // Buffer orphaning
-    glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles * sizeof(uint8_t) * 3, &color[0]);
+    glBufferData(GL_ARRAY_BUFFER, color.size() * 4 * sizeof(float), NULL, GL_STREAM_DRAW); // Buffer orphaning
+    glBufferSubData(GL_ARRAY_BUFFER, 0, num_particles * sizeof(float) * 4, &color[0]);
 
     // draw mesh
     glBindVertexArray(VAO);
@@ -74,7 +74,7 @@ void ParticleSystem::setupSystem() {
     
     // create buffers/arrays
     glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO_vertex);
+    // glGenBuffers(1, &VBO_vertex);
     glGenBuffers(1, &VBO_pos);
     glGenBuffers(1, &VBO_color);
 
@@ -87,7 +87,7 @@ void ParticleSystem::setupSystem() {
     glBufferData(GL_ARRAY_BUFFER, position.size()*3*sizeof(float), NULL, GL_STREAM_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO_color);
-    glBufferData(GL_ARRAY_BUFFER, color.size()*3*sizeof(uint8_t), NULL, GL_STREAM_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, color.size()*4*sizeof(float), NULL, GL_STREAM_DRAW);
 
 
     // glEnableVertexAttribArray(0);
@@ -100,7 +100,7 @@ void ParticleSystem::setupSystem() {
 
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_color);
-    glVertexAttribPointer(2, 3, GL_UNSIGNED_BYTE, GL_TRUE, 3*sizeof(uint8_t), (void*)0);
+    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, 4*sizeof(float), (void*)0);
 
     // glVertexAttribDivisor(0, 0);
     glVertexAttribDivisor(1, 1);

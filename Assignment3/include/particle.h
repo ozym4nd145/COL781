@@ -18,7 +18,7 @@
 struct Particle {
     glm::vec3 pos;
 	glm::vec3 speed;
-    glm::vec3 color;
+    glm::vec4 color;
     float life;
     float cameraDist;
 
@@ -26,7 +26,7 @@ struct Particle {
     Particle() {
         life = -1.0f;
         cameraDist = -1.0f;
-        color = {1.0f,0.75f,0.1f};
+        color = {1.0f,0.75f,0.1f,0.5f};
         pos = {0,0,0};
         speed = {0,0,0};
     }
@@ -44,7 +44,7 @@ class ParticleSystem {
     private:
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> position;
-        std::vector<glm::u8vec3> color;
+        std::vector<glm::vec4> color;
         unsigned int VAO;
         unsigned int VBO_vertex, VBO_pos, VBO_color;
         int max_particles;
