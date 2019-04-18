@@ -27,6 +27,7 @@ void SkyBox::setup(){
 }
 
 void SkyBox::Draw(){
+    glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
     glBindVertexArray(skyboxVAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);

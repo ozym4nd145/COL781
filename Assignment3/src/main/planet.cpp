@@ -12,6 +12,8 @@
 // #include "watergun.h"
 // #include "dust.h"
 #include "terrain.h"
+#include "skybox.h"
+
 
 #include <iostream>
 
@@ -89,6 +91,17 @@ int main(int argc, char** argv)
 
     // Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
     Shader terrainShader("../resources/shaders/terrain.vs", "../resources/shaders/terrain.fs");
+    Shader skyboxShader("../resources/shaders/skybox.vs", "../resources/shaders/skybox.fs");
+    
+    vector<std::string> faces = {
+        "../resources/textures/skybox/right.jpg",
+        "../resources/textures/skybox/left.jpg",
+        "../resources/textures/skybox/top.jpg",
+        "../resources/textures/skybox/bottom.jpg",
+        "../resources/textures/skybox/front.jpg",
+        "../resources/textures/skybox/back.jpg"
+    };
+    SkyBox skybox(faces);
 
     // WaterGun blueGun(100000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.1,5.0f,10000);
     // WaterGun purpleGun(100000,{-5.0f,0.0f,-20.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},10.0f,0.2,3.0f,10000);
@@ -147,6 +160,14 @@ int main(int argc, char** argv)
         terrainShader.setMat4("projection",projection);
         terrainShader.setMat4("view",view);
         ground.Draw(terrainShader);
+
+        skyboxShader.use();
+        view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+        skyboxShader.setMat4("view", view);
+        skyboxShader.setMat4("projection", projection);
+
+        // skybox.Draw();
+
 
         // particleShader.use();
         // particleShader.setMat4("projection", projection);
