@@ -25,29 +25,29 @@ void WaterGun::Update(float deltaTime,const glm::vec3& cameraPosition) {
     int newparticles = (int)(volume_dist(generator)*std::min(0.016f,deltaTime));
 
     for(int i=0; i<newparticles; i++){
-        int particleIndex = psystem.findUnusedParticle();
-        psystem.particles[particleIndex].life = life_dist(generator);
-        psystem.particles[particleIndex].pos = center;
+        Particle *p = psystem.findUnusedParticle();
+        p->life = life_dist(generator);
+        p->pos = center;
 
         float speed = speed_dist(generator);
 
         glm::vec3 dir = direction+(p1*(float)spread_dist(generator))+(p2*(float)spread_dist(generator));
         
-        psystem.particles[particleIndex].speed = speed*glm::normalize(dir);
+        p->speed = speed*glm::normalize(dir);
     }
 
     // Simulate all particles
     for(int i=0; i<psystem.particles.size(); i++){
-        Particle& p = psystem.particles[i];
+        Particle* p = psystem.particles[i];
 
-        if(p.life > 0.0f){
-            p.life -= deltaTime;
-            if (p.life > 0.0f){
-                p.speed += glm::vec3(0.0f,-9.81f, 0.0f) * (float)deltaTime * 0.5f;
-                p.pos += p.speed * (float)deltaTime;
-                p.cameraDist = glm::length( p.pos - cameraPosition );
+        if(p->life > 0.0f){
+            p->life -= deltaTime;
+            if (p->life > 0.0f){
+                p->speed += glm::vec3(0.0f,-9.81f, 0.0f) * (float)deltaTime * 0.5f;
+                p->pos += p->speed * (float)deltaTime;
+                p->cameraDist = glm::length( p->pos - cameraPosition );
             } else {
-                p.cameraDist = -1.0f;
+                p->cameraDist = -1.0f;
             }
         }
     }

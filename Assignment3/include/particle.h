@@ -13,11 +13,12 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 
 struct Particle {
     glm::vec3 pos;
 	glm::vec3 speed;
-    glm::u8vec3 color;
+    glm::vec3 color;
     float life;
     float cameraDist;
 
@@ -25,15 +26,15 @@ struct Particle {
     Particle() {
         life = -1.0f;
         cameraDist = -1.0f;
-        color = {255,15,100};
+        color = {1.0f,0.75f,0.1f};
         pos = {0,0,0};
         speed = {0,0,0};
     }
     
-    bool operator<(const Particle& that) const {
-		// Sort in reverse order : far particles drawn first.
-		return this->cameraDist > that.cameraDist;
-    }
+    // bool operator<(const Particle& that) const {
+	// 	// Sort in reverse order : far particles drawn first.
+	// 	return this->cameraDist > that.cameraDist;
+    // }
 };
 
 
@@ -46,17 +47,19 @@ class ParticleSystem {
         std::vector<glm::u8vec3> color;
         unsigned int VAO;
         unsigned int VBO_vertex, VBO_pos, VBO_color;
-        int lastUsedParticle;
+        int max_particles;
+        
+        std::unordered_set<Particle*> unusedParticles;
 
         void setupSystem();
 
     public:
-        std::vector<Particle> particles;
+        std::vector<Particle*> particles;
         ParticleSystem(const std::vector<glm::vec3>& vertices, int max_particles);
 
         ParticleSystem(int max_particles);
 
         void Draw(Shader shader);
 
-        int findUnusedParticle();
+        Particle* findUnusedParticle();
 };
