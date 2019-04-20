@@ -106,7 +106,7 @@ int main(int argc, char** argv)
     SkyBox skybox(faces);
 
     LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
-        PointLight{100000.0f*glm::vec3(sin(PIE/6.0f)*cos(PIE/6.0f),sin(PIE/6.0f),cos(PIE/6.0f)*cos(PIE/6.0f)),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
+        PointLight{10000.0f*glm::vec3(sin(PIE/6.0f)*cos(PIE/6.0f),sin(PIE/6.0f),cos(PIE/6.0f)*cos(PIE/6.0f)),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
     });
 
     vector<glm::vec3> camera_points = {
@@ -115,11 +115,19 @@ int main(int argc, char** argv)
         // glm::vec3(-4.0f,0.0f,6.0f),
         // glm::vec3(-2.0f,1.0f,4.0f),
         glm::vec3(0.0f,1.75f,1.75f),
-        // glm::vec3(2.2f,3.2f,2.0f),
+        glm::vec3(0.0f,4.75f,0.0f),
+        glm::vec3(0.2f,1.2f,-2.0f),
+        // glm::vec3(0.0f,-1.9f,0.0f),
+        // glm::vec3(0.2f,-5.75f,-2.0f),
+        
+        
+        // glm::vec3(0.2f,0.2f,-2.0f),
+
     };
 
     Beizer bcurve(camera_points);
-    float total_time = 6.0f;
+    float movement_time = 10.0f;
+    float turn_time = 5.0f;
 
     // render loop
     // -----------
@@ -143,11 +151,13 @@ int main(int argc, char** argv)
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        float bcurve_t = min(timePassed/total_time,0.99f);
+        
+        float bcurve_t = min(timePassed/movement_time,0.99f);
         glm::vec3 camera_pres_pos = bcurve.get_pt(bcurve_t);
         // cout<<glm::to_string(camera_pres_pos)<<endl;
         camera.setPosition(camera_pres_pos);
-        camera.setYawPitch(bcurve_t*-150.0f + (1.0-bcurve_t)*-90.0f,bcurve_t*-60.0f);
+        float turn_t = min(timePassed/turn_time,0.99f);
+        camera.setYawPitch(turn_t*-170.0f + (1.0-turn_t)*-90.0f,turn_t*-60.0f);
 
 
         particleShader.use();
@@ -173,12 +183,13 @@ int main(int argc, char** argv)
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         // model = glm::translate(model, glm::vec3(2.3f, -3.6f, 0.0f)); // translate it down so it's at the center of the scene
-        // model = glm::scale(model, glm::vec3(5.0f/130.0f));	// it's a bit too big for our scene, so scale it down
+        // model = glm::scale(model, glm::vec3(1.0f/100.0f));	// it's a bit too big for our scene, so scale it down
         modelShader.setMat4("model", model);
         lightScene.configureLights(modelShader);
         modelShader.setFloat("shineDamper",1.0f);
         modelShader.setFloat("reflectivity",0.0f);
         modelShader.setVec3("viewPos",cameraPos);
+        modelShader.setFloat("heightScale",0.005);
 
         moon.Draw(modelShader);
 

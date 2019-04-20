@@ -6,6 +6,7 @@
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
+in mat3 TBN;
 
 out vec4 FragColor;
 
@@ -38,18 +39,44 @@ uniform float shineDamper;
 uniform float reflectivity;
 uniform vec3 ambientColor;
 
+uniform float heightScale;
+
 PointLightResult CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{ 
+    if(num_texture_height>0){
+        float height =  texture(texture_height[0], texCoords).r;     
+        return texCoords - viewDir.xy * (height * heightScale);        
+    }
+    else{
+        return texCoords;
+    }
+}
+
 
 void main()
 {    
+    vec2 texCoords = ParallaxMapping(TexCoords,  normalize(transpose(TBN)*(viewPos - FragPos)));       
+    if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
+        discard;
+    
     // properties
-    vec3 norm = normalize(Normal);
+    vec3 norm;
+    if(num_texture_normal > 0){
+        norm = texture(texture_normal[0], texCoords).rgb;
+        norm = normalize(norm * 2.0 - 1.0);   
+        norm = normalize(TBN * norm);
+    }
+    else{
+        norm = normalize(Normal);
+    }
     vec3 viewDir = normalize(viewPos - FragPos);
 
     vec4 diffuseColor = vec4(0.0);
 
     if(num_texture_diffuse > 0) {
-        diffuseColor = texture(texture_diffuse[0], TexCoords);
+        diffuseColor = texture(texture_diffuse[0], texCoords);
     } else {
         diffuseColor = vec4(0.2,0.8,0.0,1.0);
     }
