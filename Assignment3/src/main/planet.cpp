@@ -38,6 +38,9 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+
+const float PIE = 3.14159f;
+
 int main(int argc, char** argv)
 {
 
@@ -106,7 +109,8 @@ int main(int argc, char** argv)
     SkyBox skybox(faces);
 
     LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
-        PointLight{glm::vec3(-100.0f,1000.0f,-500.0f),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
+        // PointLight{glm::vec3(-100.0f,1000.0f,-500.0f),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
+        PointLight{100000.0f*glm::vec3(-sin(PIE/6.0f)*cos(PIE/6.0f),sin(PIE/6.0f),-cos(PIE/6.0f)*cos(PIE/6.0f)),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
     });
 
     int terrainSize = 500;
@@ -170,6 +174,9 @@ int main(int argc, char** argv)
         terrainShader.setMat4("projection",projection);
         terrainShader.setMat4("view",view);
         ground.Draw(terrainShader);
+
+        terrainShader.setFloat("shineDamper",100.0f);
+        terrainShader.setFloat("reflectivity",1.0f);
         water.Draw(terrainShader);
 
         skyboxShader.use();
