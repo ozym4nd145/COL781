@@ -15,6 +15,7 @@
 #include "wall.h"
 #include "skybox.h"
 #include "beizer.h"
+#include "light.h"
 
 #include <iostream>
 
@@ -36,6 +37,8 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+const float PIE = 3.14159f;
 
 int main(int argc, char** argv)
 {
@@ -102,6 +105,10 @@ int main(int argc, char** argv)
     };
     SkyBox skybox(faces);
 
+    LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
+        PointLight{100000.0f*glm::vec3(sin(PIE/6.0f)*cos(PIE/6.0f),sin(PIE/6.0f),cos(PIE/6.0f)*cos(PIE/6.0f)),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
+    });
+
     vector<glm::vec3> camera_points = {
         glm::vec3(0.0f,0.0f,10.0f),
         // glm::vec3(-2.0f,0.0f,8.0f),
@@ -138,7 +145,7 @@ int main(int argc, char** argv)
 
         float bcurve_t = min(timePassed/total_time,0.99f);
         glm::vec3 camera_pres_pos = bcurve.get_pt(bcurve_t);
-        cout<<glm::to_string(camera_pres_pos)<<endl;
+        // cout<<glm::to_string(camera_pres_pos)<<endl;
         camera.setPosition(camera_pres_pos);
         camera.setYawPitch(bcurve_t*-150.0f + (1.0-bcurve_t)*-90.0f,bcurve_t*-60.0f);
 
@@ -168,6 +175,11 @@ int main(int argc, char** argv)
         // model = glm::translate(model, glm::vec3(2.3f, -3.6f, 0.0f)); // translate it down so it's at the center of the scene
         // model = glm::scale(model, glm::vec3(5.0f/130.0f));	// it's a bit too big for our scene, so scale it down
         modelShader.setMat4("model", model);
+        lightScene.configureLights(modelShader);
+        modelShader.setFloat("shineDamper",1.0f);
+        modelShader.setFloat("reflectivity",0.0f);
+        modelShader.setVec3("viewPos",cameraPos);
+
         moon.Draw(modelShader);
 
         skyboxShader.use();
