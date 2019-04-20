@@ -12,7 +12,7 @@ Terrain::Terrain(int x, int z,float size,int vertexCount,float heightScale,std::
     vertexCount{exp2((int(log(vertexCount-1)/log(2))+1)) + 1}, // round to power of 2^x + 1
     heightScale{heightScale},
     generator{rd()},
-    rand_dist{0.0,1.0},
+    rand_dist{-1.0,1.0},
     sea_height{0.0f},
     grass_limit{0.0f},
     mountain_limit{0.0f},
@@ -182,9 +182,9 @@ void Terrain::setupTerrain(std::string& heightMapPath) {
     float average_terrain_height = sumHeight/heights.size();
     float median_height = heights[int(heights.size()*0.5)];
 
-    sea_height = heights[int(heights.size()*0.3)];
+    sea_height = heights[int(heights.size()*0.25)];
     grass_limit = heights[int(heights.size()*0.65)];
-    mountain_limit = heights[int(heights.size()*0.95)];
+    mountain_limit = heights[int(heights.size()*0.97)];
     snow_limit = heights[heights.size()-1];
 
     cout<<"min_height: "<<min_terrain_height<<endl;

@@ -55,7 +55,7 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
 
     vec4 diffuseColor = vec4(0.0);
-    vec2 tiledCoordinates = TexCoords*100;
+    vec2 tiledCoordinates = TexCoords*50;
 
     if(num_texture_diffuse == 1) {
         diffuseColor = texture(texture_diffuse[0], tiledCoordinates);

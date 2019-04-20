@@ -29,7 +29,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(21.0f, 400.0f, 35.0f));
+Camera camera;
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 {
 
     // Necessary to position the camera at a position from where, we can view the complete scene.
-    camera.setYawPitch(-135.0f,-5.0f);
+    // camera.setYawPitch(-135.0f,-5.0f);
 
     // glfw: initialize and configure
     // ------------------------------
@@ -106,13 +106,13 @@ int main(int argc, char** argv)
     SkyBox skybox(faces);
 
     LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
-        PointLight{glm::vec3(1000.0f,1000.0f,1000.0f),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
+        PointLight{glm::vec3(-100.0f,1000.0f,-500.0f),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
     });
 
     int terrainSize = 500;
     int waterSize = 4000;
     int terrainCount = 1000;
-    int terrainHeight = 175;
+    int terrainHeight = 100;
     Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{
                                         "../resources/textures/grass.png",
                                         "../resources/textures/water.jpg",
@@ -125,9 +125,10 @@ int main(int argc, char** argv)
     //                                    "../resources/textures/mud.png", \
     //                                    "../resources/textures/path.png"},"../resources/textures/heightmap.png");
 
-    camera.Position.y = ground.mountain_limit; // set camera height correctly
+    camera.Position.y = ground.grass_limit; // set camera height correctly
 
-    glm::vec3 skyColor{0.53, 0.81, 0.98};
+    // glm::vec3 skyColor{0.53, 0.81, 0.98};
+    glm::vec3 skyColor{0.27,0.42,0.58};
 
     Water water(glm::vec3(-waterSize/2,ground.sea_height,-waterSize/2),waterSize,5,{"../resources/textures/water.jpg"});
 
@@ -175,8 +176,7 @@ int main(int argc, char** argv)
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
         skyboxShader.setMat4("view", view);
         skyboxShader.setMat4("projection", projection);
-
-        // skybox.Draw();
+        skybox.Draw();
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
