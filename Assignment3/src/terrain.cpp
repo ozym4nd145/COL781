@@ -29,13 +29,20 @@ Terrain::Terrain(int x, int z,float size,int vertexCount,float heightScale,std::
 }
 
 void Terrain::Draw(Shader shader) {
+    // for(int i=-2;i<3;i++) {
+        // for(int j=-2;j<3;j++) {
+            // shader.setMat4("model",glm::translate(modelTransformation,{i*(size-10),0,j*(size-10)}));
+            // mesh->Draw(shader);
+        // }
+    // }
     shader.setMat4("model",modelTransformation);
     mesh->Draw(shader);
 }
 
 
 
-void Terrain::generateTerrain(std::vector<Vertex>& vertices,int level,float scale) {
+void Terrain::generateTerrain(std::vector<Vertex>& vertices,int level,float scale,std::vector<int>& visit) {
+
     if(level <= 1) return;
 
     // diamonds
@@ -47,6 +54,8 @@ void Terrain::generateTerrain(std::vector<Vertex>& vertices,int level,float scal
             float bottomR = vertices[get(i+level,j+level)].Position[1];
             float mid = (topL+topR+bottomL+bottomR)/4 + scale*rand_dist(generator);
             vertices[get(i+level/2,j+level/2)].Position[1] = mid;
+            
+            visit[get(i+level/2,j+level/2)]++;
         }
     }
 
@@ -58,7 +67,10 @@ void Terrain::generateTerrain(std::vector<Vertex>& vertices,int level,float scal
         float lSide = vertices[get(i+level/2,(vertexCount-1)-level/2)].Position[1];
         float mid = (top+bottom+rSide+lSide)/4 + scale*rand_dist(generator);
         vertices[get(i+level/2,0)].Position[1] = mid;
+        visit[get(i+level/2,0)]++;
+
         vertices[get(i+level/2,(vertexCount-1))].Position[1] = mid;
+        visit[get(i+level/2,(vertexCount-1))]++;
     }
     for(int j=0;j<vertexCount-1;j+=level) {
         float left = vertices[get(0,j)].Position[1];
@@ -67,7 +79,10 @@ void Terrain::generateTerrain(std::vector<Vertex>& vertices,int level,float scal
         float bSide = vertices[get((vertexCount-1)-level/2,j+level/2)].Position[1];
         float mid = (tSide+bSide+left+right)/4 + scale*rand_dist(generator);
         vertices[get(0,j+level/2)].Position[1] = mid;
+        visit[get(0,j+level/2)]++;
+
         vertices[get((vertexCount-1),j+level/2)].Position[1] = mid;
+        visit[get((vertexCount-1),j+level/2)]++;
     }
 
     // square
@@ -81,16 +96,18 @@ void Terrain::generateTerrain(std::vector<Vertex>& vertices,int level,float scal
                 float topR = vertices[get(i-level/2,j+level/2)].Position[1];
                 float topMid = (cur+top+topR+topL)/4 + scale*rand_dist(generator);
                 vertices[get(i-level/2,j)].Position[1] = topMid;
+                visit[get(i-level/2,j)]++;
             }
             if((i+(level/2))<vertexCount) {
                 float bottomL = vertices[get(i+level/2,j-level/2)].Position[1];
                 float leftMid = (cur+left+bottomL+topL)/4 + scale*rand_dist(generator);
                 vertices[get(i,j-level/2)].Position[1] = leftMid;
+                visit[get(i,j-level/2)]++;
             }
         }
     }
 
-    return generateTerrain(vertices,level/2,scale/2);
+    return generateTerrain(vertices,level/2,scale/2,visit);
 }
 
 
@@ -145,27 +162,50 @@ void Terrain::setupTerrain(std::string& heightMapPath) {
         }
     }
 
-    generateTerrain(vertices,vertexCount-1,heightScale);
+    std::vector<int> visit(vertices.size(),0);
+    generateTerrain(vertices,vertexCount-1,heightScale,visit);
     
     int count=0;
     for(int i=0;i<vertexCount;i++) {
         for(int j=0;j<vertexCount;j++) {
-            float height = vertices[get(i,j)].Position[1];
+            vertices[get(i,j)].Normal = calculateNormal(i,j,vertices);
+            float height = getHeight(i,j,vertices);
             min_terrain_height = std::min(height,min_terrain_height);
             max_terrain_height = std::max(height,max_terrain_height);
             average_terrain_height += height;
             count++;
+
+            // cout<<visit[get(i,j)]<<",";
         }
+        // cout<<endl;
     }
+    // cout<<endl;
     average_terrain_height /= count;
 
     mesh = new Mesh(vertices,indices,diffuseTexture);
 }
 
+glm::vec3 Terrain::calculateNormal(int i, int j,const std::vector<Vertex>& vertices) {
+    float left = getHeight(i - 1, j, vertices);
+    float right = getHeight(i + 1, j, vertices);
+    float bottom = getHeight(i, j - 1, vertices);
+    float top = getHeight(i, j + 1, vertices);
+
+    glm::vec3 normal{left - right, 2.0f, bottom - top};
+    return glm::normalize(normal);
+}
+
+float Terrain::getHeight(int x, int z, const std::vector<Vertex>& vertices)
+{
+    if (x < 0 || x > vertexCount || z < 0 || z > vertexCount) {
+        return 0;
+    }
+    return vertices[get(x, z)].Position[1];
+}
 
 float Terrain::getHeight(int x, int z, const stb::image& image)
 {
-    if (x < 0 || x > image.height() || z < 0 || z > image.height()) {
+    if (x < 0 || x > image.width() || z < 0 || z > image.height()) {
         return 0;
     }
 

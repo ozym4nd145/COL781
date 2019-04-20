@@ -35,7 +35,10 @@ class Terrain {
         std::uniform_real_distribution<float> rand_dist;
 
         void setupTerrain(std::string& heightMapPath);
-        void generateTerrain(std::vector<Vertex>& vertices,int level,float scale);
+        void generateTerrain(std::vector<Vertex>& vertices,int level,float scale,std::vector<int>& visit);
+        float getHeight(int x, int z, const std::vector<Vertex>& vertices);
+        glm::vec3 calculateNormal(int i, int j,const std::vector<Vertex>& vertices);
+
         inline int get(int i,int j) {return i*vertexCount+j;}
     public:
         float min_terrain_height;

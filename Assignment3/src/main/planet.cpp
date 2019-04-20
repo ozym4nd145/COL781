@@ -13,6 +13,8 @@
 // #include "dust.h"
 #include "terrain.h"
 #include "skybox.h"
+#include "light.h"
+#include "water.h"
 
 
 #include <iostream>
@@ -103,6 +105,11 @@ int main(int argc, char** argv)
     };
     SkyBox skybox(faces);
 
+    // LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
+    LightScene lightScene(glm::vec3(0.0f),{
+        PointLight{glm::vec3(1000.0f,1000.0f,1000.0f),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
+    });
+
     // WaterGun blueGun(100000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.1,5.0f,10000);
     // WaterGun purpleGun(100000,{-5.0f,0.0f,-20.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},10.0f,0.2,3.0f,10000);
     // Dust redHoli(100000,{-5.0f,0.0f,-20.0f},{0.464f,0.1f,0.242f,0.3f},
@@ -110,23 +117,35 @@ int main(int argc, char** argv)
                     // {{0.0f,1.0f,0.0f},{5.0f,3.0f,0.0f},{-1.0,1.0f,0.0f}}
                     // ,{2.0f,10.0f,5.0f},
                     // 1.0f,20.0f,5000,2.0f);
-    int terrainSize = 800;
-    int terrainCount = 1000;
+    int terrainSize = 400;
+    int waterSize = 4000;
+    int terrainCount = 400;
     int terrainHeight = 100;
-    Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{"../resources/textures/grass.png"});
-    
+    Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{
+                                        "../resources/textures/grass.png",
+                                        "../resources/textures/water.jpg",
+                                        "../resources/textures/rock.jpg",
+                                        "../resources/textures/snow.jpg",
+                                        },"../resources/textures/heightmap.png");
+    // Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{"../resources/textures/blendMap.png", \
+    //                                    "../resources/textures/grass.png", \
+    //                                    "../resources/textures/grassFlowers.png", \
+    //                                    "../resources/textures/mud.png", \
+    //                                    "../resources/textures/path.png"},"../resources/textures/heightmap.png");
+
     cout<<"Min terrain height: "<<ground.min_terrain_height<<endl;
     cout<<"Average terrain height: "<<ground.average_terrain_height<<endl;
     cout<<"Max terrain height: "<<ground.max_terrain_height<<endl;
 
     camera.Position.y = ground.average_terrain_height*1.2; // set camera height correctly
 
-    // Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{"../resources/textures/blendMap.png", \
-    //                                    "../resources/textures/grass.png", \
-    //                                    "../resources/textures/grassFlowers.png", \
-    //                                    "../resources/textures/mud.png", \
-    //                                    "../resources/textures/path.png"},"../resources/textures/heightmap.png");
     glm::vec3 skyColor{0.53, 0.81, 0.98};
+    float seaLevel = 0.95*ground.average_terrain_height;
+    float grassLevel = 1.1*ground.average_terrain_height;
+    float mountainLevel = 1.25*ground.average_terrain_height;
+
+    Water water(glm::vec3(-waterSize/2,seaLevel,-waterSize/2),waterSize,5,{"../resources/textures/water.jpg"});
+
 
     // render loop
     // -----------
@@ -156,9 +175,18 @@ int main(int argc, char** argv)
         glm::mat4 view = camera.GetViewMatrix();
 
         terrainShader.use();
+        lightScene.configureLights(terrainShader);
+        terrainShader.setFloat("seaLevel",seaLevel);
+        terrainShader.setFloat("grassLevel",grassLevel);
+        terrainShader.setFloat("mountainLevel",mountainLevel);
+
         terrainShader.setVec3("skyColor",skyColor);
+        terrainShader.setFloat("shineDamper",1.0f);
+        terrainShader.setFloat("reflectivity",0.0f);
+        terrainShader.setVec3("viewPos",cameraPos);
         terrainShader.setMat4("projection",projection);
         terrainShader.setMat4("view",view);
+        water.Draw(terrainShader);
         ground.Draw(terrainShader);
 
         skyboxShader.use();
