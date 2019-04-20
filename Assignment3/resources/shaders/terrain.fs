@@ -63,6 +63,7 @@ void main()
         vec4 waterTexture = texture(texture_diffuse[1], tiledCoordinates);
         vec4 rockTexture = texture(texture_diffuse[2], tiledCoordinates);
         vec4 snowTexture = texture(texture_diffuse[3], tiledCoordinates);
+        float level = 0;
         if(FragPos.y <= seaLevel) {
             diffuseColor = waterTexture;
         } else if (FragPos.y <= grassLevel) {
@@ -82,7 +83,7 @@ void main()
         // vec4 thirdTexture = blendMapTexture[2]*texture(texture_diffuse[4], tiledCoordinates);
         // diffuseColor = backgroundTexture+firstTexture+secondTexture+thirdTexture;
     } else {
-        diffuseColor = vec4(0.7,0.2,0.0,1.0);
+        diffuseColor = vec4(0.2,0.8,0.0,1.0);
     }
     
     vec3 totalDiffuse = ambientColor;
@@ -94,7 +95,7 @@ void main()
         totalSpecular += result.specular;
     }
     
-    // totalDiffuse = max(totalDiffuse, 0.4);
+    totalDiffuse = max(totalDiffuse, 0.4);
 
     FragColor = vec4(totalDiffuse, 1.0) * diffuseColor + vec4(totalSpecular, 1.0);
     FragColor = mix(vec4(skyColor, 1.0), FragColor, visibility);

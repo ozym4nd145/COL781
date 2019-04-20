@@ -12,10 +12,7 @@ Terrain::Terrain(int x, int z,float size,int vertexCount,float heightScale,std::
     vertexCount{exp2((int(log(vertexCount-1)/log(2))+1)) + 1}, // round to power of 2^x + 1
     heightScale{heightScale},
     generator{rd()},
-    rand_dist{0.0,1.0},
-    min_terrain_height{0.0f},
-    max_terrain_height{0.0f},
-    average_terrain_height{0.0f}
+    rand_dist{0.0,1.0}
 {
     assert(vertexCount > 1);
     cout<<"Vertex Count: "<<this->vertexCount<<endl;
@@ -36,6 +33,10 @@ void Terrain::Draw(Shader shader) {
         // }
     // }
     shader.setMat4("model",modelTransformation);
+    shader.setFloat("seaLevel",sea_height);
+    shader.setFloat("grassLevel",grass_height);
+    shader.setFloat("mountainLevel",mountain_height);
+
     mesh->Draw(shader);
 }
 
@@ -114,13 +115,8 @@ void Terrain::generateTerrain(std::vector<Vertex>& vertices,int level,float scal
 void Terrain::setupTerrain(std::string& heightMapPath) {
     stb::image heightMap{heightMapPath, 4};
 
-    cout<<"Vertex Count: "<<vertexCount<<endl;
-
     int numVertices = vertexCount*vertexCount;
     int numIndices = 6*(vertexCount - 1)*(vertexCount - 1);
-
-    cout<<"num vertex: "<<numVertices<<endl;
-    cout<<"num index: "<<numIndices<<endl;
 
     vector<Vertex> vertices(numVertices);
     vector<unsigned int> indices(numIndices);
@@ -143,9 +139,6 @@ void Terrain::setupTerrain(std::string& heightMapPath) {
         }
     }
 
-    cout<<"vertex size: "<<vertices.size()<<endl;
-    cout<<"indices size: "<<indices.size()<<endl;
-
     for(int idx = 0, x=0;x<vertexCount-1;x++) {
         for(int z=0;z<vertexCount-1;z++) {
             int topLeft = (z*vertexCount)+x;
@@ -165,22 +158,36 @@ void Terrain::setupTerrain(std::string& heightMapPath) {
     std::vector<int> visit(vertices.size(),0);
     generateTerrain(vertices,vertexCount-1,heightScale,visit);
     
-    int count=0;
+    int count = 0;
+    float sumHeight = 0;
+    vector<float> heights;
     for(int i=0;i<vertexCount;i++) {
         for(int j=0;j<vertexCount;j++) {
             vertices[get(i,j)].Normal = calculateNormal(i,j,vertices);
             float height = getHeight(i,j,vertices);
-            min_terrain_height = std::min(height,min_terrain_height);
-            max_terrain_height = std::max(height,max_terrain_height);
-            average_terrain_height += height;
-            count++;
-
-            // cout<<visit[get(i,j)]<<",";
+            sumHeight += height;
+            heights.push_back(height);
         }
         // cout<<endl;
     }
     // cout<<endl;
-    average_terrain_height /= count;
+    std::sort(heights.begin(),heights.end());
+    float min_terrain_height = heights[0];
+    float max_terrain_height = heights[heights.size()-1];
+    float average_terrain_height = sumHeight/heights.size();
+    float median_height = heights[int(heights.size()*0.5)];
+
+    sea_height = heights[int(heights.size()*0.35)];
+    grass_height = heights[int(heights.size()*0.7)];
+    mountain_height = heights[int(heights.size()*0.95)];
+
+    cout<<"min_height: "<<min_terrain_height<<endl;
+    cout<<"max_height: "<<max_terrain_height<<endl;
+    cout<<"average_height: "<<average_terrain_height<<endl;
+    cout<<"median_height: "<<median_height<<endl;
+    cout<<"sea_height: "<<sea_height<<endl;
+    cout<<"grass_height: "<<grass_height<<endl;
+    cout<<"mountain_height: "<<mountain_height<<endl;
 
     mesh = new Mesh(vertices,indices,diffuseTexture);
 }

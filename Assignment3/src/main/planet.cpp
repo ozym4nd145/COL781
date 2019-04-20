@@ -105,18 +105,10 @@ int main(int argc, char** argv)
     };
     SkyBox skybox(faces);
 
-    // LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
-    LightScene lightScene(glm::vec3(0.0f),{
+    LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
         PointLight{glm::vec3(1000.0f,1000.0f,1000.0f),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
     });
 
-    // WaterGun blueGun(100000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.1,5.0f,10000);
-    // WaterGun purpleGun(100000,{-5.0f,0.0f,-20.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},10.0f,0.2,3.0f,10000);
-    // Dust redHoli(100000,{-5.0f,0.0f,-20.0f},{0.464f,0.1f,0.242f,0.3f},
-                    // {{-5.0f,-10.0f,-25.0f},{-5.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f}},
-                    // {{0.0f,1.0f,0.0f},{5.0f,3.0f,0.0f},{-1.0,1.0f,0.0f}}
-                    // ,{2.0f,10.0f,5.0f},
-                    // 1.0f,20.0f,5000,2.0f);
     int terrainSize = 400;
     int waterSize = 4000;
     int terrainCount = 400;
@@ -133,18 +125,11 @@ int main(int argc, char** argv)
     //                                    "../resources/textures/mud.png", \
     //                                    "../resources/textures/path.png"},"../resources/textures/heightmap.png");
 
-    cout<<"Min terrain height: "<<ground.min_terrain_height<<endl;
-    cout<<"Average terrain height: "<<ground.average_terrain_height<<endl;
-    cout<<"Max terrain height: "<<ground.max_terrain_height<<endl;
-
-    camera.Position.y = ground.average_terrain_height*1.2; // set camera height correctly
+    camera.Position.y = ground.mountain_height; // set camera height correctly
 
     glm::vec3 skyColor{0.53, 0.81, 0.98};
-    float seaLevel = 0.95*ground.average_terrain_height;
-    float grassLevel = 1.1*ground.average_terrain_height;
-    float mountainLevel = 1.25*ground.average_terrain_height;
 
-    Water water(glm::vec3(-waterSize/2,seaLevel,-waterSize/2),waterSize,5,{"../resources/textures/water.jpg"});
+    Water water(glm::vec3(-waterSize/2,ground.sea_height,-waterSize/2),waterSize,5,{"../resources/textures/water.jpg"});
 
 
     // render loop
@@ -176,9 +161,6 @@ int main(int argc, char** argv)
 
         terrainShader.use();
         lightScene.configureLights(terrainShader);
-        terrainShader.setFloat("seaLevel",seaLevel);
-        terrainShader.setFloat("grassLevel",grassLevel);
-        terrainShader.setFloat("mountainLevel",mountainLevel);
 
         terrainShader.setVec3("skyColor",skyColor);
         terrainShader.setFloat("shineDamper",1.0f);
@@ -186,8 +168,8 @@ int main(int argc, char** argv)
         terrainShader.setVec3("viewPos",cameraPos);
         terrainShader.setMat4("projection",projection);
         terrainShader.setMat4("view",view);
-        water.Draw(terrainShader);
         ground.Draw(terrainShader);
+        water.Draw(terrainShader);
 
         skyboxShader.use();
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
@@ -195,19 +177,6 @@ int main(int argc, char** argv)
         skyboxShader.setMat4("projection", projection);
 
         // skybox.Draw();
-
-
-        // particleShader.use();
-        // particleShader.setMat4("projection", projection);
-        // particleShader.setMat4("view", view);
-
-        // // blueGun.Update(deltaTime,cameraPos);
-        // // purpleGun.Update(deltaTime,cameraPos);
-        // redHoli.Update(deltaTime,timePassed,cameraPos);
-
-        // // blueGun.Draw(particleShader);
-        // // purpleGun.Draw(particleShader);
-        // redHoli.Draw(particleShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
