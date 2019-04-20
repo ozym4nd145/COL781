@@ -29,9 +29,9 @@ Ring::Ring(ParticleSystem* psys, glm::vec3 sphere_center, float sphere_radius,
     std::uniform_real_distribution<double> theta_dist{0.0f, 360.0f};
     std::normal_distribution<double> end_time_dist{5.0f, 1.0f};
 
-    const float speed = 2.0f;
+    const float speed = 1.0f;
     const float life = 0.5f;
-    const int volume = 1000.0f; 
+    const int volume = 10000.0f; 
 
     for (int i = 0; i < num_explosion; i++) {
         float phi = glm::radians(explosion_displacement_dist(generator));
