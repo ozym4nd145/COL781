@@ -42,8 +42,9 @@ uniform vec3 ambientColor;
 uniform vec3 skyColor;
 
 uniform float seaLevel;
-uniform float grassLevel;
-uniform float mountainLevel;
+uniform float grassLimit;
+uniform float mountainLimit;
+uniform float snowLimit;
 
 PointLightResult CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
@@ -63,17 +64,41 @@ void main()
         vec4 waterTexture = texture(texture_diffuse[1], tiledCoordinates);
         vec4 rockTexture = texture(texture_diffuse[2], tiledCoordinates);
         vec4 snowTexture = texture(texture_diffuse[3], tiledCoordinates);
-        float level = 0;
-        if(FragPos.y <= seaLevel) {
+
+        float height = FragPos.y;
+        float mountainMid = (grassLimit+mountainLimit)/2;
+        float snowMid = (mountainLimit+snowLimit)/2;
+
+        // if(height <= seaLevel) {
+        //     diffuseColor = waterTexture;
+        // } else if (height <= grassLimit) {
+        //     diffuseColor = grassTexture;
+        // } else if (height <= mountainLimit) {
+        //     diffuseColor = rockTexture;
+        // } else {
+        //     diffuseColor = snowTexture;
+        // }
+        if(height <= seaLevel) {
             diffuseColor = waterTexture;
-        } else if (FragPos.y <= grassLevel) {
-            diffuseColor = grassTexture;
-        } else if (FragPos.y <= mountainLevel) {
-            diffuseColor = rockTexture;
+        } else if (height <= mountainMid) {
+            float ratio = 0.0;
+            if(height <= grassLimit) {
+                ratio = ((height-seaLevel)/(grassLimit-seaLevel))*0.5;
+            } else {
+                ratio = 0.5+((height-grassLimit)/(mountainMid-grassLimit))*0.5;
+            }
+            diffuseColor = mix(grassTexture,rockTexture,ratio);
+        } else if (height <= snowMid) {
+            float ratio = 0.0;
+            if(height <= mountainLimit) {
+                ratio = ((height-mountainMid)/(mountainLimit-mountainMid))*0.5;
+            } else {
+                ratio = 0.5+((height-mountainLimit)/(snowMid-mountainLimit))*0.5;
+            }
+            diffuseColor = mix(rockTexture,snowTexture,ratio);
         } else {
             diffuseColor = snowTexture;
         }
-
         // // BLEND MAP
         // vec4 blendMapTexture = texture(texture_diffuse[0], TexCoords);
         // float backgroundAmount = 1 - (blendMapTexture[0]+blendMapTexture[1]+blendMapTexture[2]);

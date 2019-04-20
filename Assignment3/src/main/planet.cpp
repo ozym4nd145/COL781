@@ -109,10 +109,10 @@ int main(int argc, char** argv)
         PointLight{glm::vec3(1000.0f,1000.0f,1000.0f),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
     });
 
-    int terrainSize = 400;
+    int terrainSize = 500;
     int waterSize = 4000;
-    int terrainCount = 400;
-    int terrainHeight = 100;
+    int terrainCount = 1000;
+    int terrainHeight = 175;
     Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{
                                         "../resources/textures/grass.png",
                                         "../resources/textures/water.jpg",
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
     //                                    "../resources/textures/mud.png", \
     //                                    "../resources/textures/path.png"},"../resources/textures/heightmap.png");
 
-    camera.Position.y = ground.mountain_height; // set camera height correctly
+    camera.Position.y = ground.mountain_limit; // set camera height correctly
 
     glm::vec3 skyColor{0.53, 0.81, 0.98};
 

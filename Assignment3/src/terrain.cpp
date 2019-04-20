@@ -12,7 +12,11 @@ Terrain::Terrain(int x, int z,float size,int vertexCount,float heightScale,std::
     vertexCount{exp2((int(log(vertexCount-1)/log(2))+1)) + 1}, // round to power of 2^x + 1
     heightScale{heightScale},
     generator{rd()},
-    rand_dist{0.0,1.0}
+    rand_dist{0.0,1.0},
+    sea_height{0.0f},
+    grass_limit{0.0f},
+    mountain_limit{0.0f},
+    snow_limit{0.0f}
 {
     assert(vertexCount > 1);
     cout<<"Vertex Count: "<<this->vertexCount<<endl;
@@ -34,8 +38,9 @@ void Terrain::Draw(Shader shader) {
     // }
     shader.setMat4("model",modelTransformation);
     shader.setFloat("seaLevel",sea_height);
-    shader.setFloat("grassLevel",grass_height);
-    shader.setFloat("mountainLevel",mountain_height);
+    shader.setFloat("grassLimit",grass_limit);
+    shader.setFloat("mountainLimit",mountain_limit);
+    shader.setFloat("snowLimit",snow_limit);
 
     mesh->Draw(shader);
 }
@@ -177,17 +182,19 @@ void Terrain::setupTerrain(std::string& heightMapPath) {
     float average_terrain_height = sumHeight/heights.size();
     float median_height = heights[int(heights.size()*0.5)];
 
-    sea_height = heights[int(heights.size()*0.35)];
-    grass_height = heights[int(heights.size()*0.7)];
-    mountain_height = heights[int(heights.size()*0.95)];
+    sea_height = heights[int(heights.size()*0.3)];
+    grass_limit = heights[int(heights.size()*0.65)];
+    mountain_limit = heights[int(heights.size()*0.95)];
+    snow_limit = heights[heights.size()-1];
 
     cout<<"min_height: "<<min_terrain_height<<endl;
     cout<<"max_height: "<<max_terrain_height<<endl;
     cout<<"average_height: "<<average_terrain_height<<endl;
     cout<<"median_height: "<<median_height<<endl;
     cout<<"sea_height: "<<sea_height<<endl;
-    cout<<"grass_height: "<<grass_height<<endl;
-    cout<<"mountain_height: "<<mountain_height<<endl;
+    cout<<"grass_limit: "<<grass_limit<<endl;
+    cout<<"mountain_limit: "<<mountain_limit<<endl;
+    cout<<"snow_limit: "<<snow_limit<<endl;
 
     mesh = new Mesh(vertices,indices,diffuseTexture);
 }

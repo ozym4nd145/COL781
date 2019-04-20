@@ -42,8 +42,9 @@ class Terrain {
         inline int get(int i,int j) {return i*vertexCount+j;}
     public:
         float sea_height;
-        float grass_height;
-        float mountain_height;
+        float grass_limit;
+        float mountain_limit;
+        float snow_limit;
 
         Terrain(int x, int z,float size=800,int vertexCount=128,float heightScale=10,std::vector<std::string> diffuseTexture={},std::string heightMapPath="");
         void Draw(Shader shader);
