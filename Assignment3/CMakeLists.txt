@@ -40,8 +40,8 @@ set(LIBS ${LIBS} GLAD)
 
 include_directories(${CMAKE_SOURCE_DIR}/include_lib ${CMAKE_SOURCE_DIR}/include)
 
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -g -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -g -std=c++17")
 
 FILE(GLOB SRCFILES src/*.cpp src/*.c)
 

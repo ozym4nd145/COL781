@@ -1,3 +1,6 @@
+#define GLM_ENABLE_EXPERIMENTAL 1
+#include <glm/gtx/string_cast.hpp>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -11,6 +14,7 @@
 
 #include "wall.h"
 #include "skybox.h"
+#include "beizer.h"
 
 #include <iostream>
 
@@ -24,7 +28,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 35.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 10.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -86,8 +90,8 @@ int main(int argc, char** argv)
     Shader modelShader("../resources/shaders/model.vs", "../resources/shaders/model.fs");
     Shader skyboxShader("../resources/shaders/skybox.vs", "../resources/shaders/skybox.fs");
     
-    Wall wall_of_fire(1e5,5.0f,glm::vec3(0.0f),1.0f);
-    Model moon("../models/moon.obj");
+    Wall wall_of_fire(1e5,1.75f,glm::vec3(0.0f),1.0f);
+    Model moon("../models/my_moon/moon.obj");
     vector<std::string> faces = {
         "../resources/textures/night/nightRight.png",
         "../resources/textures/night/nightLeft.png",
@@ -97,6 +101,18 @@ int main(int argc, char** argv)
         "../resources/textures/night/nightBack.png"
     };
     SkyBox skybox(faces);
+
+    vector<glm::vec3> camera_points = {
+        glm::vec3(0.0f,0.0f,10.0f),
+        // glm::vec3(-2.0f,0.0f,8.0f),
+        // glm::vec3(-4.0f,0.0f,6.0f),
+        // glm::vec3(-2.0f,1.0f,4.0f),
+        glm::vec3(0.0f,1.75f,1.75f),
+        // glm::vec3(2.2f,3.2f,2.0f),
+    };
+
+    Beizer bcurve(camera_points);
+    float total_time = 6.0f;
 
     // render loop
     // -----------
@@ -120,6 +136,13 @@ int main(int argc, char** argv)
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        float bcurve_t = min(timePassed/total_time,0.99f);
+        glm::vec3 camera_pres_pos = bcurve.get_pt(bcurve_t);
+        cout<<glm::to_string(camera_pres_pos)<<endl;
+        camera.setPosition(camera_pres_pos);
+        camera.setYawPitch(bcurve_t*-150.0f + (1.0-bcurve_t)*-90.0f,bcurve_t*-60.0f);
+
+
         particleShader.use();
 
         // view/projection transformations
@@ -142,8 +165,8 @@ int main(int argc, char** argv)
 
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(2.3f, -3.6f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(5.0f/130.0f));	// it's a bit too big for our scene, so scale it down
+        // model = glm::translate(model, glm::vec3(2.3f, -3.6f, 0.0f)); // translate it down so it's at the center of the scene
+        // model = glm::scale(model, glm::vec3(5.0f/130.0f));	// it's a bit too big for our scene, so scale it down
         modelShader.setMat4("model", model);
         moon.Draw(modelShader);
 
