@@ -120,7 +120,7 @@ void main()
         totalSpecular += result.specular;
     }
     
-    totalDiffuse = max(totalDiffuse, 0.4);
+    totalDiffuse = max(totalDiffuse, 0.2);
 
     FragColor = vec4(totalDiffuse, 1.0) * diffuseColor + vec4(totalSpecular, 1.0);
     FragColor = mix(vec4(skyColor, 1.0), FragColor, visibility);
