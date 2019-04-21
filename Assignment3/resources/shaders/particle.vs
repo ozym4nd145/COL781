@@ -15,6 +15,6 @@ void main()
     FragPos = aCenterPos;
     FragColorParticle = aColor;
 
-    gl_PointSize = 3.0;
+    gl_PointSize = 5.0;
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }

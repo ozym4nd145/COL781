@@ -1,8 +1,10 @@
 #define GLM_ENABLE_EXPERIMENTAL 1
 #include <glm/gtx/string_cast.hpp>
 
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <deque>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,6 +18,8 @@
 #include "skybox.h"
 #include "beizer.h"
 #include "light.h"
+#include "fbo.h"
+#include "quad.h"
 
 #include <iostream>
 
@@ -92,7 +96,8 @@ int main(int argc, char** argv)
     Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
     Shader modelShader("../resources/shaders/model.vs", "../resources/shaders/model.fs");
     Shader skyboxShader("../resources/shaders/skybox.vs", "../resources/shaders/skybox.fs");
-    
+    Shader screenShader("../resources/shaders/fbo.vs","../resources/shaders/fbo.fs");
+
     Wall wall_of_fire(1e5,1.75f,glm::vec3(0.0f),1.0f);
     Model moon("../models/my_moon/moon.obj");
     vector<std::string> faces = {
@@ -129,11 +134,31 @@ int main(int argc, char** argv)
     Beizer bcurve_view(camera_yaw_pitch);
     float movement_time = 17.0f;
 
+    glm::vec3 backgroundColor{0.1f,0.1f,0.1f};
+
+
+    deque<FBO*> fbos;
+    const int NUM_ACCUM=5;
+    for(int i=0;i<NUM_ACCUM;i++) {
+        FBO* fbo = new FBO(SCR_WIDTH,SCR_HEIGHT);
+        fbo->mount();
+        glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2], 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        fbos.push_back(fbo);
+    }
+
+    Quad screen;
+
+
     // render loop
     // -----------
     float initFrame = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
+        FBO* curFBO = fbos.front();
+        fbos.pop_front();
+        fbos.push_back(curFBO);
+
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
@@ -148,7 +173,9 @@ int main(int argc, char** argv)
 
         // render
         // ------
-        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+        curFBO->mount();
+
+        glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         
@@ -197,6 +224,20 @@ int main(int argc, char** argv)
         skyboxShader.setMat4("projection", projection);
 
         skybox.Draw();
+
+        // fbo unmount
+        curFBO->unmount();
+        glClearColor(0.0,0.0,0.0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        screenShader.use();
+        glDisable(GL_DEPTH_TEST);
+        
+        for(auto fbo: fbos) {
+            screen.Draw(screenShader,{fbo->getTexture().id});
+        }
+
+
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

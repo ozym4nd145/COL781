@@ -8,9 +8,12 @@
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
+#include <deque>
 
 #include "watergun.h"
 #include "dust.h"
+#include "fbo.h"
+#include "quad.h"
 
 #include <iostream>
 
@@ -85,6 +88,7 @@ int main(int argc, char** argv)
 
 
     Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
+    Shader screenShader("../resources/shaders/fbo.vs","../resources/shaders/fbo.fs");
 
     WaterGun greenGun(10000,{20.0f,0.0f,-20.0f},{-1.0f,1.0f,0.0f},{0.54f, 0.38f, 0.15f,0.2f},15.0f,0.1,5.0f,5000);
     WaterGun blueGun(10000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.2,5.0f,5000);
@@ -98,11 +102,27 @@ int main(int argc, char** argv)
     // glm::vec3 backgroundColor{0.27,0.42,0.58};
     glm::vec3 backgroundColor{0.1f,0.1f,0.1f};
 
+    deque<FBO*> fbos;
+    const int NUM_ACCUM=10;
+    for(int i=0;i<NUM_ACCUM;i++) {
+        FBO* fbo = new FBO(SCR_WIDTH,SCR_HEIGHT);
+        fbo->mount();
+        glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2], 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        fbos.push_back(fbo);
+    }
+
+    Quad screen;
+
     // render loop
     // -----------
     float initFrame = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
+        FBO* curFBO = fbos.front();
+        fbos.pop_front();
+        fbos.push_back(curFBO);
+
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
@@ -117,6 +137,8 @@ int main(int argc, char** argv)
 
         // render
         // ------
+        curFBO->mount();
+
         glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -139,6 +161,19 @@ int main(int argc, char** argv)
         purpleGun.Draw(particleShader);
         greenGun.Draw(particleShader);
         // redHoli.Draw(particleShader);
+
+        // fbo unmount
+        curFBO->unmount();
+
+        glClearColor(0.0,0.0,0.0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        screenShader.use();
+        glDisable(GL_DEPTH_TEST);
+        
+        for(auto fbo: fbos) {
+            screen.Draw(screenShader,{fbo->getTexture().id});
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

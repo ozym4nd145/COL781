@@ -8,6 +8,7 @@
 #include <learnopengl/shader.h>
 #include <learnopengl/model.h>
 #include <learnopengl/camera.h>
+#include <deque>
 
 // #include "watergun.h"
 // #include "dust.h"
@@ -15,6 +16,8 @@
 #include "skybox.h"
 #include "light.h"
 #include "water.h"
+#include "fbo.h"
+#include "quad.h"
 
 
 #include <iostream>
@@ -94,10 +97,10 @@ int main(int argc, char** argv)
 
 
 
-    // Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
     Shader terrainShader("../resources/shaders/terrain.vs", "../resources/shaders/terrain.fs");
     Shader skyboxShader("../resources/shaders/skybox.vs", "../resources/shaders/skybox.fs");
-    
+    Shader screenShader("../resources/shaders/fbo.vs","../resources/shaders/fbo.fs");
+
     vector<std::string> faces = {
         "../resources/textures/skybox/right.jpg",
         "../resources/textures/skybox/left.jpg",
@@ -109,7 +112,6 @@ int main(int argc, char** argv)
     SkyBox skybox(faces);
 
     LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
-        // PointLight{glm::vec3(-100.0f,1000.0f,-500.0f),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
         PointLight{100000.0f*glm::vec3(-sin(PIE/6.0f)*cos(PIE/6.0f),sin(PIE/6.0f),-cos(PIE/6.0f)*cos(PIE/6.0f)),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
     });
 
@@ -123,25 +125,35 @@ int main(int argc, char** argv)
                                         "../resources/textures/rock.jpg",
                                         "../resources/textures/snow.jpg",
                                         },"../resources/textures/heightmap.png");
-    // Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{"../resources/textures/blendMap.png", \
-    //                                    "../resources/textures/grass.png", \
-    //                                    "../resources/textures/grassFlowers.png", \
-    //                                    "../resources/textures/mud.png", \
-    //                                    "../resources/textures/path.png"},"../resources/textures/heightmap.png");
 
-    camera.Position.y = ground.grass_limit; // set camera height correctly
+    camera.Position.y = (ground.grass_limit+ground.mountain_limit)/2.0f; // set camera height correctly
 
     // glm::vec3 skyColor{0.53, 0.81, 0.98};
     glm::vec3 skyColor{0.27,0.42,0.58};
 
     Water water(glm::vec3(-waterSize/2,ground.sea_height,-waterSize/2),waterSize,5,{"../resources/textures/water.jpg"});
 
+    deque<FBO*> fbos;
+    const int NUM_ACCUM=10;
+    for(int i=0;i<NUM_ACCUM;i++) {
+        FBO* fbo = new FBO(SCR_WIDTH,SCR_HEIGHT);
+        fbo->mount();
+        glClearColor(skyColor[0],skyColor[1],skyColor[2], 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        fbos.push_back(fbo);
+    }
+
+    Quad screen;
 
     // render loop
     // -----------
     float initFrame = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
+        FBO* curFBO = fbos.front();
+        fbos.pop_front();
+        fbos.push_back(curFBO);
+
         // per-frame time logic
         // --------------------
         float currentFrame = glfwGetTime();
@@ -154,8 +166,7 @@ int main(int argc, char** argv)
         // -----
         processInput(window);
 
-        // render
-        // ------
+        curFBO->mount();
         glClearColor(skyColor[0],skyColor[1],skyColor[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -179,11 +190,24 @@ int main(int argc, char** argv)
         terrainShader.setFloat("reflectivity",1.0f);
         water.Draw(terrainShader);
 
-        skyboxShader.use();
-        view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
-        skyboxShader.setMat4("view", view);
-        skyboxShader.setMat4("projection", projection);
-        skybox.Draw();
+        // skyboxShader.use();
+        // view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+        // skyboxShader.setMat4("view", view);
+        // skyboxShader.setMat4("projection", projection);
+        // skybox.Draw();
+
+        // fbo unmount
+        curFBO->unmount();
+
+        glClearColor(0.0,0.0,0.0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        screenShader.use();
+        glDisable(GL_DEPTH_TEST);
+        
+        for(auto fbo: fbos) {
+            screen.Draw(screenShader,{fbo->getTexture().id});
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
