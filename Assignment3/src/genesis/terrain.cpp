@@ -19,7 +19,6 @@ Terrain::Terrain(int x, int z,float size,int vertexCount,float heightScale,std::
     snow_limit{0.0f}
 {
     assert(vertexCount > 1);
-    cout<<"Vertex Count: "<<this->vertexCount<<endl;
 
     modelTransformation = glm::translate(modelTransformation,{x,0,z});
     for(auto& texturePath: diffuseTexture) {
@@ -30,12 +29,6 @@ Terrain::Terrain(int x, int z,float size,int vertexCount,float heightScale,std::
 }
 
 void Terrain::Draw(Shader shader) {
-    // for(int i=-2;i<3;i++) {
-        // for(int j=-2;j<3;j++) {
-            // shader.setMat4("model",glm::translate(modelTransformation,{i*(size-10),0,j*(size-10)}));
-            // mesh->Draw(shader);
-        // }
-    // }
     shader.setMat4("model",modelTransformation);
     shader.setFloat("seaLevel",sea_height);
     shader.setFloat("grassLimit",grass_limit);
@@ -125,9 +118,6 @@ void Terrain::setupTerrain(std::string& heightMapPath) {
 
     vector<Vertex> vertices(numVertices);
     vector<unsigned int> indices(numIndices);
-
-    cout<<"vertex size: "<<vertices.size()<<endl;
-    cout<<"indices size: "<<indices.size()<<endl;
 
     for(int idx = 0, i=0;i<vertexCount;i++) {
         for(int j=0;j<vertexCount;j++,idx++) {

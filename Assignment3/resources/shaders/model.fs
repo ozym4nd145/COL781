@@ -46,7 +46,7 @@ PointLightResult CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 { 
     if(num_texture_height>0){
-        float height =  texture(texture_height[0], texCoords).r;     
+        float height =  length(texture(texture_height[0], texCoords).rgb);
         return texCoords - viewDir.xy * (height * heightScale);        
     }
     else{

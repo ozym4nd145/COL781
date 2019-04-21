@@ -1,4 +1,8 @@
 #version 330 core
+
+#define NR_TEXTURE 5
+
+
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
@@ -14,9 +18,15 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform float heightScale;
+uniform sampler2D texture_height[NR_TEXTURE];
+
+
 void main()
 {
-    FragPos = vec3(model * vec4(aPos, 1.0));
+    vec3 newPos = aPos + length(texture(texture_height[0], aTexCoords).xyz)*heightScale*aNormal;
+    // vec3 newPos = aPos;
+    FragPos = vec3(model * vec4(newPos, 1.0));
     Normal = mat3(transpose(inverse(model))) * aNormal; 
     TexCoords = aTexCoords;
 
