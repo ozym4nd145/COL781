@@ -293,7 +293,6 @@ int main(int argc, char** argv)
 
             spaceSkyBox.Draw();
         }
-        
         if(mixRatio > 0.0f) {
             if(mixRatio<1.0f) {
                 camera.setPosition(glm::vec3(0.0f,(ground.grass_limit*0.3+0.7*ground.mountain_limit),0.0f));

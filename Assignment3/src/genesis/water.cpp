@@ -29,8 +29,6 @@ Water::Water(glm::vec3 position,float size,int vertexCount,std::vector<std::stri
 {
     assert(vertexCount > 1);
 
-    cout<<"position: "<<glm::to_string(position)<<endl;
-
     for(auto& texturePath: diffuseTexture) {
         this->diffuseTexture.push_back(Texture{Model::TextureFromFile(texturePath.c_str(),"."),"texture_diffuse",texturePath});
     }

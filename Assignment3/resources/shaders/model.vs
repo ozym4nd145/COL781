@@ -18,14 +18,14 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-// uniform float heightScale;
-// uniform sampler2D texture_height[NR_TEXTURE];
+uniform float heightScale;
+uniform sampler2D texture_height[NR_TEXTURE];
 
 
 void main()
 {
-    // vec3 newPos = aPos + texture(texture_height[0], aTexCoords).r*heightScale*aNormal;
-    vec3 newPos = aPos;
+    vec3 newPos = aPos + length(texture(texture_height[0], aTexCoords).xyz)*heightScale*aNormal;
+    // vec3 newPos = aPos;
     FragPos = vec3(model * vec4(newPos, 1.0));
     Normal = mat3(transpose(inverse(model))) * aNormal; 
     TexCoords = aTexCoords;
