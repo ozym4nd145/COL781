@@ -151,8 +151,8 @@ int main(int argc, char** argv)
 
     std::random_device rd;  //Will be used to obtain a seed for the random number engine
     int seed = rd();
-    cout<<"Seed: "<<seed<<endl;
-    seed = 1050625;
+    // cout<<"Seed: "<<seed<<endl;
+    seed = 88132480;
 
     int terrainSize = 500;
     int waterSize = 4000;
@@ -297,7 +297,7 @@ int main(int argc, char** argv)
         if(mixRatio > 0.0f) {
             if(mixRatio<1.0f) {
                 camera.setPosition(glm::vec3(0.0f,(ground.grass_limit*0.3+0.7*ground.mountain_limit),0.0f));
-                camera.setYawPitch(-90.0f,0.0f);
+                camera.setYawPitch(-287.7f,-2.70001f);
             }
 
             planetFBO.mount();
