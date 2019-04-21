@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 cmake_policy(VERSION 2.8)
 
-project (Bowling)
+project (Particle)
 
 #  IF(NOT CMAKE_BUILD_TYPE)
   #  SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
@@ -19,12 +19,10 @@ message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 find_package(ASSIMP REQUIRED)
 message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
 
-# find_library(IrrKlang_LIB IrrKlang ${CMAKE_SOURCE_DIR}/lib)
-
-# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 find_package(OpenGL REQUIRED)
 add_definitions(${OPENGL_DEFINITIONS})
 find_package(X11 REQUIRED)
+
 # note that the order is important for setting the libs
 # use pkg-config --libs $(pkg-config --print-requires --print-requires-private glfw3) in a terminal to confirm
 set(LIBS ${GLFW3_LIBRARY} X11 Xrandr Xinerama Xi Xxf86vm Xcursor GL dl pthread ${ASSIMP_LIBRARY})
@@ -32,34 +30,32 @@ set(LIBS ${GLFW3_LIBRARY} X11 Xrandr Xinerama Xi Xxf86vm Xcursor GL dl pthread $
 set (CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
 
 # first create relevant static libraries requried for other projects
-add_library(STB_IMAGE "src/stb_image.cpp")
+add_library(STB_IMAGE "src/libs/stb_image.cpp")
 set(LIBS ${LIBS} STB_IMAGE)
 
-add_library(GLAD "src/glad.c")
+add_library(GLAD "src/libs/glad.c")
 set(LIBS ${LIBS} GLAD)
+
+FILE(GLOB COMMON_SRC ${CMAKE_SOURCE_DIR}/src/common/*.cpp)
+add_library(app_lib ${COMMON_SRC})
+
+set(LIBS ${LIBS} app_lib)
+set(LIBS ${LIBS} ${OPENGL_LIBRARIES})
+set(LIBS ${LIBS} ${X11_LIBRARIES})
+set(LIBS ${LIBS} m)
+set(LIBS ${LIBS} ${CMAKE_THREAD_LIBS_INIT})
+
 
 include_directories(${CMAKE_SOURCE_DIR}/include_lib ${CMAKE_SOURCE_DIR}/include)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -std=c++17")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -g -std=c++17")
-
-FILE(GLOB SRCFILES src/*.cpp src/*.c)
-
-add_executable(fire src/main/fire.cpp ${SRCFILES} )
-target_link_libraries(fire ${LIBS})
-target_link_libraries(fire ${OPENGL_LIBRARIES})
-target_link_libraries(fire ${X11_LIBRARIES} m)
-target_link_libraries(fire ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(planet src/main/planet.cpp ${SRCFILES} )
-target_link_libraries(planet ${LIBS})
-target_link_libraries(planet ${OPENGL_LIBRARIES})
-target_link_libraries(planet ${X11_LIBRARIES} m)
-target_link_libraries(planet ${CMAKE_THREAD_LIBS_INIT})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -O3 -w -std=c++17")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_STANDARD} -g -w -std=c++17")
 
 
-add_executable(holi src/main/holi.cpp ${SRCFILES} )
+FILE(GLOB GENESIS_SRC src/genesis/*.cpp)
+add_executable(genesis ${GENESIS_SRC})
+target_link_libraries(genesis ${LIBS})
+
+FILE(GLOB HOLI_SRC src/holi/*.cpp)
+add_executable(holi ${HOLI_SRC})
 target_link_libraries(holi ${LIBS})
-target_link_libraries(holi ${OPENGL_LIBRARIES})
-target_link_libraries(holi ${X11_LIBRARIES} m)
-target_link_libraries(holi ${CMAKE_THREAD_LIBS_INIT})
