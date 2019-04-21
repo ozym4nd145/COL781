@@ -47,6 +47,26 @@ float lastFrame = 0.0f;
 
 const float PIE = 3.14159f;
 
+float calculateMixRatio(float curTime,float start, float duration) {
+    float ratio = min(max((curTime-start)/duration,0.0f),1.0f);
+    // cout<<ratio<<endl;
+    ratio *= 5.0f;
+    // cout<<ratio<<endl;
+    ratio -= 2.5f;
+    // cout<<ratio<<endl;
+    ratio = 1.0f/(1.0f+exp(-ratio));
+    // cout<<ratio<<endl;
+    ratio -= 0.5f;
+    // cout<<ratio<<endl;
+    ratio *= 1.2f;
+    // cout<<ratio<<endl;
+    ratio += 0.5f;
+    // cout<<ratio<<endl;
+    ratio = min(max(ratio,0.0f),1.0f);
+    // cout<<ratio<<endl;
+    return ratio;
+}
+
 int main(int argc, char** argv)
 {
 
@@ -147,7 +167,7 @@ int main(int argc, char** argv)
         glm::vec3(0.0f,2.75f,5.75f),
         glm::vec3(0.0f,5.1f,0.0f),
         glm::vec3(0.0f,0.1f,-5.0f),
-        glm::vec3(0.0f,-2.1f,0.0f),
+        glm::vec3(0.0f,-1.8f,0.0f),
     };
     vector<glm::vec3> camera_yaw_pitch = {
         glm::vec3(-90.0f,0.0f,0.0f),
@@ -156,6 +176,8 @@ int main(int argc, char** argv)
         glm::vec3(-130.0f,-60.0f,0.0f),
         glm::vec3(-110.0f,-120.0f,0.0f),
         glm::vec3(-90.0f,-180.0f,0.0f),
+        glm::vec3(-90.0f,-160.0f,0.0f),
+        glm::vec3(-90.0f,-140.0f,0.0f),
     };
 
     Beizer bcurve_loc(camera_points);
@@ -189,7 +211,9 @@ int main(int argc, char** argv)
 
     Quad screen;
 
-
+    cout<<"mixratio: "<<calculateMixRatio(0,movement_time-transition_time,transition_time)<<endl;
+    cout<<"mixratio: "<<calculateMixRatio(movement_time-transition_time,movement_time-transition_time,transition_time)<<endl;
+    cout<<"mixratio: "<<calculateMixRatio(movement_time,movement_time-transition_time,transition_time)<<endl;
     // render loop
     // -----------
     float initFrame = glfwGetTime();
@@ -211,7 +235,7 @@ int main(int argc, char** argv)
         // -----
         processInput(window);
 
-        float mixRatio = min(max((timePassed-(movement_time-transition_time))/transition_time,0.0f),1.0f);
+        float mixRatio = calculateMixRatio(timePassed,movement_time-transition_time-0.5f,transition_time);
         
         // render
         // ------
