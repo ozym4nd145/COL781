@@ -27,7 +27,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 35.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, -30.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -90,16 +90,15 @@ int main(int argc, char** argv)
     Shader particleShader("../resources/shaders/particle.vs", "../resources/shaders/particle.fs");
     Shader screenShader("../resources/shaders/fbo.vs","../resources/shaders/fbo.fs");
 
-    WaterGun greenGun(10000,{20.0f,0.0f,-20.0f},{-1.0f,1.0f,0.0f},{0.54f, 0.38f, 0.15f,0.2f},15.0f,0.1,5.0f,5000);
-    WaterGun blueGun(10000,{0.0f,0.0f,-20.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.2,5.0f,5000);
-    WaterGun purpleGun(10000,{-20.0f,0.0f,-20.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},15.0f,0.1,5.0f,5000);
-    // Dust redHoli(100000,{-15.0f,0.0f,-20.0f},{0.464f,0.1f,0.242f,0.3f},
-    //                 {{-5.0f,-10.0f,-25.0f},{-5.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f}},
-    //                 {{0.0f,1.0f,0.0f},{5.0f,3.0f,0.0f},{-1.0,1.0f,0.0f}}
-    //                 ,{2.0f,10.0f,5.0f},
-    //                 1.0f,20.0f,5000,2.0f);
+    WaterGun greenGun(10000,{20.0f,0.0f,-80.0f},{-1.0f,1.0f,0.0f},{0.54f, 0.38f, 0.15f,0.2f},15.0f,0.1,3.0f,5000);
+    WaterGun blueGun(10000,{0.0f,0.0f,-80.0f},{0.0f,1.0f,0.0f},{0.0f,0.464f,0.742f,0.2f},20.0f,0.2,3.0f,5000);
+    WaterGun purpleGun(10000,{-20.0f,0.0f,-80.0f},{1.0f,1.0f,0.0f},{0.464f,0.0f,0.742f,0.3f},15.0f,0.1,3.0f,5000);
+    Dust redHoli(100000,{0.0f,0.0f,20.0f},{0.464f,0.1f,0.242f,0.3f},
+                    {{0.0f,-10.0f,20.0f},{5.0f,10.0f,20.0f},{-25.0f,15.0f,20.0f},{-15.0f,5.0f,10.0f}},
+                    {{0.0f,1.0f,0.0f},{-3.0f,1.0f,0.0f},{1.0,-0.5f,-1.0f},{0.2,1.5f,-1.0f}}
+                    ,{2.0f,4.0f,6.0f,3.0f},
+                    1.0f,20.0f,10000,30.0f);
 
-    // glm::vec3 backgroundColor{0.27,0.42,0.58};
     glm::vec3 backgroundColor{0.1f,0.1f,0.1f};
 
     deque<FBO*> fbos;
@@ -145,7 +144,7 @@ int main(int argc, char** argv)
         particleShader.use();
 
         // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 4000.0f);
         glm::vec3 cameraPos = camera.Position;
 
         glm::mat4 view = camera.GetViewMatrix();
@@ -155,12 +154,12 @@ int main(int argc, char** argv)
         blueGun.Update(deltaTime,cameraPos);
         purpleGun.Update(deltaTime,cameraPos);
         greenGun.Update(deltaTime,cameraPos);
-        // redHoli.Update(deltaTime,timePassed,cameraPos);
+        redHoli.Update(deltaTime,timePassed,cameraPos);
 
         blueGun.Draw(particleShader);
         purpleGun.Draw(particleShader);
         greenGun.Draw(particleShader);
-        // redHoli.Draw(particleShader);
+        redHoli.Draw(particleShader);
 
         // fbo unmount
         curFBO->unmount();
@@ -169,6 +168,7 @@ int main(int argc, char** argv)
         glClear(GL_COLOR_BUFFER_BIT);
         
         screenShader.use();
+        screenShader.setFloat("opacity",0.8f);
         glDisable(GL_DEPTH_TEST);
         
         for(auto fbo: fbos) {
