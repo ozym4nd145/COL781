@@ -282,7 +282,7 @@ int main(int argc, char** argv)
             modelShader.setFloat("shineDamper",1.0f);
             modelShader.setFloat("reflectivity",0.0f);
             modelShader.setVec3("viewPos",cameraPos);
-            modelShader.setFloat("heightScale",0.01);
+            modelShader.setFloat("heightScale",0.01f);
 
             moon.Draw(modelShader);
 
