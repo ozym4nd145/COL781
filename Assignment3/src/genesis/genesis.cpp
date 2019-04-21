@@ -136,12 +136,12 @@ int main(int argc, char** argv)
     SkyBox spaceSkyBox(spaceFaces);
 
     vector<std::string> dayFaces = {
-        "../resources/textures/sor_sea/left.JPG",
-        "../resources/textures/sor_sea/right.JPG",
-        "../resources/textures/sor_sea/top.JPG",
-        "../resources/textures/sor_sea/bottom.JPG",
-        "../resources/textures/sor_sea/front.JPG",
-        "../resources/textures/sor_sea/back.JPG"
+        "../resources/textures/sor/left.JPG",
+        "../resources/textures/sor/right.JPG",
+        "../resources/textures/sor/top.JPG",
+        "../resources/textures/sor/bottom.JPG",
+        "../resources/textures/sor/front.JPG",
+        "../resources/textures/sor/back.JPG"
     };
     SkyBox daySkyBox(dayFaces);
 
