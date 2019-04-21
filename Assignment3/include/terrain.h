@@ -30,7 +30,6 @@ class Terrain {
         const float max_height = 80;
         const float heightScale;
 
-        std::random_device rd;  //Will be used to obtain a seed for the random number engine
         std::mt19937 generator;
         std::uniform_real_distribution<float> rand_dist;
 
@@ -46,7 +45,7 @@ class Terrain {
         float mountain_limit;
         float snow_limit;
 
-        Terrain(int x, int z,float size=800,int vertexCount=128,float heightScale=10,std::vector<std::string> diffuseTexture={},std::string heightMapPath="");
+        Terrain(int x, int z,float size=800,int vertexCount=128,float heightScale=10,std::vector<std::string> diffuseTexture={},std::string heightMapPath="",int seed=3141);
         void Draw(Shader shader);
         float getHeight(int x, int z, const stb::image& image);
 };

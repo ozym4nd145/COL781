@@ -149,6 +149,11 @@ int main(int argc, char** argv)
         PointLight{10000.0f*glm::vec3(sin(PIE/6.0f)*cos(PIE/6.0f),sin(PIE/6.0f),cos(PIE/6.0f)*cos(PIE/6.0f)),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
     });
 
+    std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    int seed = rd();
+    cout<<"Seed: "<<seed<<endl;
+    seed = 1050625;
+
     int terrainSize = 500;
     int waterSize = 4000;
     int terrainCount = 1000;
@@ -158,7 +163,7 @@ int main(int argc, char** argv)
                                         "../resources/textures/water.jpg",
                                         "../resources/textures/rock.jpg",
                                         "../resources/textures/snow.jpg",
-                                        },"../resources/textures/heightmap.png");
+                                        },"../resources/textures/heightmap.png",seed);
     Water water(glm::vec3(-waterSize/2,ground.sea_height,-waterSize/2),waterSize,5,{"../resources/textures/water.jpg"});
 
 
@@ -211,6 +216,7 @@ int main(int argc, char** argv)
     }
 
     Quad screen;
+    
 
     // render loop
     // -----------
@@ -234,7 +240,6 @@ int main(int argc, char** argv)
         processInput(window);
 
         float mixRatio = calculateMixRatio(timePassed,movement_time-transition_time-0.5f,transition_time);
-        
         // render
         // ------
         if(mixRatio < 1.0f) {
@@ -291,7 +296,7 @@ int main(int argc, char** argv)
         
         if(mixRatio > 0.0f) {
             if(mixRatio<1.0f) {
-                camera.setPosition(glm::vec3(0.0f,ground.mountain_limit,0.0f));
+                camera.setPosition(glm::vec3(0.0f,(ground.grass_limit*0.3+0.7*ground.mountain_limit),0.0f));
                 camera.setYawPitch(-90.0f,0.0f);
             }
 
@@ -378,7 +383,16 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+        camera.setYawPitch(-90,0);
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+    {
+        std::cout<<"Yaw => "<<camera.Yaw<<std::endl;
+        std::cout<<"Pitch => "<<camera.Pitch<<std::endl;
+    }
 }
+
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
