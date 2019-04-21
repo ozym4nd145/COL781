@@ -36,10 +36,6 @@ void FBO::setupFBO() {
 
 }
 
-FBO::~FBO() {
-    glDeleteFramebuffers(1, &framebuffer);
-}
-
 void FBO::mount() {
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)

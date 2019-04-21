@@ -200,7 +200,7 @@ int main(int argc, char** argv)
     glClearColor(skyColor[0],skyColor[1],skyColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const int NUM_ACCUM=1;
+    const int NUM_ACCUM=5;
     for(int i=0;i<NUM_ACCUM;i++) {
         FBO* fbo = new FBO(SCR_WIDTH,SCR_HEIGHT);
         fbo->mount();
@@ -260,8 +260,8 @@ int main(int argc, char** argv)
             particleShader.setMat4("projection", projection);
             particleShader.setMat4("view", view);
 
-            if(timePassed > 1.0f){
-                wall_of_fire.Update(deltaTime,timePassed-1.0f,cameraPos);
+            if(timePassed > 0.5f){
+                wall_of_fire.Update(deltaTime,timePassed-0.5f,cameraPos);
                 wall_of_fire.Draw(particleShader);
             }
 
@@ -293,7 +293,7 @@ int main(int argc, char** argv)
         
         if(mixRatio > 0.0f) {
             if(mixRatio<1.0f) {
-                camera.setPosition(glm::vec3(0.0f,(ground.grass_limit+ground.mountain_limit)/2.0f,0.0f));
+                camera.setPosition(glm::vec3(0.0f,ground.mountain_limit,0.0f));
                 camera.setYawPitch(-90.0f,0.0f);
             }
 

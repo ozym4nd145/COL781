@@ -12,7 +12,6 @@ class FBO {
         int screenY;
     public:
         FBO(int screenX, int screenY);
-        ~FBO();
         void setupFBO();
         Texture getTexture();
         void mount();
