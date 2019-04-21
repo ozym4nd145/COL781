@@ -21,7 +21,7 @@ void Wall::Update(float deltaTime, float currentTime,
     float new_ring_phi_mid = last_ring_phi + 7*ring_width_dist(generator)*deltaTime;
     float new_ring_phi_spread = 2*ring_width_dist(generator);
 
-    if(new_ring_phi_mid > 90.0f)
+    if(new_ring_phi_mid > 10.0f)
         made_once = true;
     if(!made_once){
         Ring* new_r = new Ring(&psystem, sphere_center, sphere_radius, new_ring_phi_mid,new_ring_phi_spread, (float)explosion_radius_dist(generator), currentTime);

@@ -178,7 +178,7 @@ int main(int argc, char** argv)
     glClearColor(skyColor[0],skyColor[1],skyColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const int NUM_ACCUM=5;
+    const int NUM_ACCUM=1;
     for(int i=0;i<NUM_ACCUM;i++) {
         FBO* fbo = new FBO(SCR_WIDTH,SCR_HEIGHT);
         fbo->mount();
@@ -236,8 +236,10 @@ int main(int argc, char** argv)
             particleShader.setMat4("projection", projection);
             particleShader.setMat4("view", view);
 
-            wall_of_fire.Update(deltaTime,timePassed,cameraPos);
-            wall_of_fire.Draw(particleShader);
+            if(timePassed > 1.0f){
+                wall_of_fire.Update(deltaTime,timePassed-1.0f,cameraPos);
+                wall_of_fire.Draw(particleShader);
+            }
 
 
             modelShader.use();
@@ -319,7 +321,7 @@ int main(int argc, char** argv)
         
 
         screenShader.use();
-        screenShader.setFloat("opacity",0.4f);
+        screenShader.setFloat("opacity",0.8f);
         glDisable(GL_DEPTH_TEST);
         
         for(auto fbo: motionBlurFBOs) {

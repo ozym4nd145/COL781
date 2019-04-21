@@ -13,8 +13,8 @@ Explosion::Explosion(ParticleSystem* psy, glm::vec3 center, glm::vec3 direction,
       init_radius{init_radius},
       speed_dist{speed, speed},
       dir_dist{0.0, 0.1f},
+      volume_dist{volume,0.1*volume},
       life_dist{life, 0.1 * life},
-      volume_dist{volume, 0.1 * volume},
       uniform_0_1_dist{0.0f, 1.0f},
       end_time{end_time}
 {
@@ -33,7 +33,9 @@ void Explosion::Generate(float deltaTime, float currentTime,
     if (currentTime > end_time)
         return;
 
-    int newparticles = (int)(volume_dist(generator)*std::min(0.0016f,deltaTime));
+    float screen_area = 800*600*3.14159265359f*init_radius*init_radius*glm::dot(glm::normalize(normal_direction),-1.0f*glm::normalize(init_point - cameraPosition));
+    int newparticles = (int)(volume_dist(generator)*std::min(0.0016f,deltaTime)*screen_area);
+    // std::cout<<screen_area<<" --> "<<newparticles<<std::endl;
 
 
     for (int i = 0; i < newparticles; i++) {

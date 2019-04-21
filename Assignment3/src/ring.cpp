@@ -15,7 +15,7 @@ Ring::Ring(ParticleSystem* psys, glm::vec3 sphere_center, float sphere_radius,
       explosion_radius{explosion_radius},
       explosion_displacement_dist{phi_mid - phi_spread / 2.0,
                                   phi_mid + phi_spread / 2.0},
-      density{15.0f} {
+      density{25.0f} {
 
     // cout<<"****** Making ring ******"<<endl;
     // cout<<phi_mid<<" --> "<<phi_spread<<endl;
@@ -31,7 +31,7 @@ Ring::Ring(ParticleSystem* psys, glm::vec3 sphere_center, float sphere_radius,
 
     const float speed = 1.0f;
     const float life = 0.5f;
-    const int volume = 10000.0f; 
+    const int volume = 200.0f; 
 
     for (int i = 0; i < num_explosion; i++) {
         float phi = glm::radians(explosion_displacement_dist(generator));
