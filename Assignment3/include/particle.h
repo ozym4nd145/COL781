@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <random>
 #include <learnopengl/shader.h>
 
 #include <string>
@@ -51,6 +52,12 @@ class ParticleSystem {
         
         std::unordered_set<Particle*> unusedParticles;
 
+        std::random_device rd;  //Will be used to obtain a seed for the random number engine
+        std::mt19937 generator;
+
+        std::uniform_int_distribution<int> particle_number_dist;
+        std::uniform_real_distribution<double> uniform_0_1_dist;
+        
         void setupSystem();
 
     public:

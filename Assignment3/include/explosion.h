@@ -6,7 +6,6 @@
 class Explosion {
    private:
     ParticleSystem* psystem;
-    glm::vec3 init_point;  // xyz co-ordinates of explosion center
     glm::vec3 normal_direction;
     float end_time;
 
@@ -26,6 +25,7 @@ class Explosion {
     bool made_once = false; 
 
    public:
+    glm::vec3 init_point;  // xyz co-ordinates of explosion center
     Explosion(ParticleSystem* psy, glm::vec3 center, glm::vec3 direction,
               float init_radius, float speed, float life, int volume, float end_time);
     void Generate(float deltaTime, float currentTime,

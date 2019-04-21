@@ -15,7 +15,7 @@ Ring::Ring(ParticleSystem* psys, glm::vec3 sphere_center, float sphere_radius,
       explosion_radius{explosion_radius},
       explosion_displacement_dist{phi_mid - phi_spread / 2.0,
                                   phi_mid + phi_spread / 2.0},
-      density{25.0f} {
+      density{50.0f} {
 
     // cout<<"****** Making ring ******"<<endl;
     // cout<<phi_mid<<" --> "<<phi_spread<<endl;
@@ -50,6 +50,8 @@ Ring::Ring(ParticleSystem* psys, glm::vec3 sphere_center, float sphere_radius,
 
 void Ring::Update(float deltaTime,float currentTime,const glm::vec3& cameraPosition){
     for(auto e: explosions){
-        e->Generate(deltaTime,currentTime,cameraPosition);
+        float check = glm::dot(glm::normalize(e->init_point-sphere_center),glm::normalize(cameraPosition-sphere_center));
+        if(check>=0.0f)
+            e->Generate(deltaTime,currentTime,cameraPosition);
     }
 }

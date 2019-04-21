@@ -27,6 +27,8 @@ void Dust::Update(float deltaTime,float currentTime, const glm::vec3& cameraPosi
 
         for(int i=0; i<newparticles; i++){
             Particle *p = psystem.findUnusedParticle();
+            if(p==NULL)
+                break;
             p->life = life_dist(generator);
             p->pos = center;
 

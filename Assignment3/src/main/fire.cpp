@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Genesis - The Wrath of Khan", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -136,12 +136,12 @@ int main(int argc, char** argv)
     SkyBox spaceSkyBox(spaceFaces);
 
     vector<std::string> dayFaces = {
-        "../resources/textures/skybox/right.jpg",
-        "../resources/textures/skybox/left.jpg",
-        "../resources/textures/skybox/top.jpg",
-        "../resources/textures/skybox/bottom.jpg",
-        "../resources/textures/skybox/front.jpg",
-        "../resources/textures/skybox/back.jpg"
+        "../resources/textures/sor_sea/left.JPG",
+        "../resources/textures/sor_sea/right.JPG",
+        "../resources/textures/sor_sea/top.JPG",
+        "../resources/textures/sor_sea/bottom.JPG",
+        "../resources/textures/sor_sea/front.JPG",
+        "../resources/textures/sor_sea/back.JPG"
     };
     SkyBox daySkyBox(dayFaces);
 
@@ -186,7 +186,8 @@ int main(int argc, char** argv)
     float transition_time = 5.0f;
 
     glm::vec3 spaceColor{0.1f,0.1f,0.1f};
-    glm::vec3 skyColor{0.27,0.42,0.58};
+    glm::vec3 skyColor{0.53, 0.81, 0.98};
+    // glm::vec3 skyColor{0.27,0.42,0.58};
 
 
     deque<FBO*> motionBlurFBOs;
@@ -244,7 +245,7 @@ int main(int argc, char** argv)
             glClearColor(spaceColor[0],spaceColor[1],spaceColor[2], 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
-            float bcurve_t = min(timePassed/movement_time,0.99f);
+            float bcurve_t = min((timePassed)/movement_time,0.99f);
             glm::vec3 camera_pres_pos = bcurve_loc.get_pt(bcurve_t);
             glm::vec3 camera_pres_dir = bcurve_view.get_pt(bcurve_t);
             camera.setPosition(camera_pres_pos);
@@ -260,8 +261,8 @@ int main(int argc, char** argv)
             particleShader.setMat4("projection", projection);
             particleShader.setMat4("view", view);
 
-            if(timePassed > 0.5f){
-                wall_of_fire.Update(deltaTime,timePassed-0.5f,cameraPos);
+            if(timePassed > 0.2f){
+                wall_of_fire.Update(deltaTime,timePassed-0.2f,cameraPos);
                 wall_of_fire.Draw(particleShader);
             }
 
@@ -320,11 +321,11 @@ int main(int argc, char** argv)
             terrainShader.setFloat("reflectivity",1.0f);
             water.Draw(terrainShader);
 
-            skyboxShader.use();
-            view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
-            skyboxShader.setMat4("view", view);
-            skyboxShader.setMat4("projection", projection);
-            daySkyBox.Draw();
+            // skyboxShader.use();
+            // view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+            // skyboxShader.setMat4("view", view);
+            // skyboxShader.setMat4("projection", projection);
+            // daySkyBox.Draw();
         }
 
         curFBO->mount();

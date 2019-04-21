@@ -2,6 +2,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "particle.h"
+#include <random>
 
 std::ostream &operator<<(std::ostream &os, Particle const &m) { 
     return os << "Pos: "<<glm::to_string(m.pos)<<std::endl \
@@ -15,10 +16,13 @@ bool compare(const Particle* p1, const Particle *p2){
 }
 
 ParticleSystem::ParticleSystem(const std::vector<glm::vec3>& vertices, int max_particles):
-    vertices{vertices.begin(),vertices.end()},
+    vertices{vertices.begin(),vertices.end()},  
     position{max_particles},
     color{max_particles},
-    max_particles{max_particles}
+    max_particles{max_particles},
+    generator(rd()),
+    particle_number_dist{0,max_particles-1},
+    uniform_0_1_dist{0.0,1.0}
 {
     setupSystem();
 }
@@ -26,7 +30,10 @@ ParticleSystem::ParticleSystem(const std::vector<glm::vec3>& vertices, int max_p
 ParticleSystem::ParticleSystem(int max_particles):
     position{max_particles},
     color{max_particles},
-    max_particles{max_particles}
+    max_particles{max_particles},
+    generator(rd()),
+    particle_number_dist{0,max_particles-1},
+    uniform_0_1_dist{0.0,1.0}
 {
     vertices = {
         {0.0f, 0.0f, 0.0f}
@@ -50,6 +57,8 @@ void ParticleSystem::Draw(Shader shader) {
         position[i] = particles[i]->pos;
         color[i] = particles[i]->color;
     }
+
+    // std::cout<<"Num particles --> "<<num_particles<<std::endl;
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO_pos);
     glBufferData(GL_ARRAY_BUFFER, position.size() * 3 * sizeof(float), NULL, GL_STREAM_DRAW); // Buffer orphaning
@@ -112,8 +121,13 @@ void ParticleSystem::setupSystem() {
 
 Particle* ParticleSystem::findUnusedParticle() {
     if(unusedParticles.size() == 0) {
-        int idx = rand()%(int)(particles.size());
-        return particles[idx];
+        double to_give = uniform_0_1_dist(generator);
+        if(to_give>=0.5f){
+            int idx = particle_number_dist(generator);
+            return particles[idx];
+        } 
+        else
+            return NULL;
     }
 
     auto itr = unusedParticles.begin();

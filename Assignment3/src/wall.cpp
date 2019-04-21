@@ -21,7 +21,7 @@ void Wall::Update(float deltaTime, float currentTime,
     float new_ring_phi_mid = last_ring_phi + 7*ring_width_dist(generator)*deltaTime;
     float new_ring_phi_spread = 2*ring_width_dist(generator);
 
-    if(new_ring_phi_mid > 10.0f)
+    if(new_ring_phi_mid > 30.0f)
         made_once = true;
     if(!made_once){
         Ring* new_r = new Ring(&psystem, sphere_center, sphere_radius, new_ring_phi_mid,new_ring_phi_spread, (float)explosion_radius_dist(generator), currentTime);
@@ -41,6 +41,11 @@ void Wall::Update(float deltaTime, float currentTime,
         if (p->life > 0.0f) {
             p->life -= deltaTime;
             if (p->life > 0.0f && glm::length(p->color) > 0.06f) {
+                float check = glm::dot(glm::normalize(p->pos-sphere_center),glm::normalize(cameraPosition-sphere_center));
+                if(check<0.0f){
+                    p->cameraDist = -1.0f;
+                    continue;
+                }
                 glm::vec3 gravity_dir = glm::normalize(sphere_center - p->pos);
                 p->speed += gravity_dir * deltaTime * gravity_strength; 
                 p->pos += p->speed * (float)deltaTime;

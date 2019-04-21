@@ -34,12 +34,23 @@ void Explosion::Generate(float deltaTime, float currentTime,
         return;
 
     float screen_area = 800*600*3.14159265359f*init_radius*init_radius*glm::dot(glm::normalize(normal_direction),-1.0f*glm::normalize(init_point - cameraPosition));
-    int newparticles = (int)(volume_dist(generator)*std::min(0.0016f,deltaTime)*screen_area);
+
+    // float screen_area = 800*600*3.14159265359f*init_radius*init_radius;
+    screen_area /= glm::length(init_point-cameraPosition);
+    // glm::dot(glm::normalize(normal_direction),-1.0f*glm::normalize(init_point - cameraPosition));
+    if(glm::length(cameraPosition - init_point) <= 1.0f){
+        screen_area *= 4;
+        // cout<<"Entering if"<<endl;
+    }
+    // screen_area=100.0f;
+    int newparticles = (int)(volume_dist(generator)*std::min(0.016f,deltaTime)*screen_area);
     // std::cout<<screen_area<<" --> "<<newparticles<<std::endl;
 
 
     for (int i = 0; i < newparticles; i++) {
         Particle* p = psystem->findUnusedParticle();
+        if(p==NULL)
+            break;
         p->life = life_dist(generator);
         float r = init_radius * sqrt(uniform_0_1_dist(generator));
         float theta = uniform_0_1_dist(generator) * 2 * 3.14159265359f;
