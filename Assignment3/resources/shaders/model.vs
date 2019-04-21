@@ -27,7 +27,7 @@ void main()
     // then retrieve perpendicular vector B with the cross product of T and N
     vec3 B = cross(N, T);
 
-    mat3 TBN = mat3(T, B, N);
+    TBN = mat3(T, B, N);
 
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }

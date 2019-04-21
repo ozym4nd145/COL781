@@ -74,7 +74,7 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
 
     vec4 diffuseColor = vec4(0.0);
-
+    
     if(num_texture_diffuse > 0) {
         diffuseColor = texture(texture_diffuse[0], texCoords);
     } else {
