@@ -201,7 +201,7 @@ int main(int argc, char** argv)
     glClearColor(skyColor[0],skyColor[1],skyColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const int NUM_ACCUM=5;
+    const int NUM_ACCUM=10;
     for(int i=0;i<NUM_ACCUM;i++) {
         FBO* fbo = new FBO(SCR_WIDTH,SCR_HEIGHT);
         fbo->mount();
@@ -212,9 +212,6 @@ int main(int argc, char** argv)
 
     Quad screen;
 
-    cout<<"mixratio: "<<calculateMixRatio(0,movement_time-transition_time,transition_time)<<endl;
-    cout<<"mixratio: "<<calculateMixRatio(movement_time-transition_time,movement_time-transition_time,transition_time)<<endl;
-    cout<<"mixratio: "<<calculateMixRatio(movement_time,movement_time-transition_time,transition_time)<<endl;
     // render loop
     // -----------
     float initFrame = glfwGetTime();

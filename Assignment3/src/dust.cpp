@@ -1,5 +1,9 @@
+#define GLM_ENABLE_EXPERIMENTAL 1
+#include <glm/gtx/string_cast.hpp>
+
 #include "dust.h"
 #include <algorithm>
+
 
 Dust::Dust(int max_particles,glm::vec3 center,glm::vec4 color,const std::vector<glm::vec3>& windPoint,const std::vector<glm::vec3>& windDirection,const std::vector<float>& windSpeed,float speed,float life,int volume,float timeLimit):
     center{center},
@@ -8,7 +12,7 @@ Dust::Dust(int max_particles,glm::vec3 center,glm::vec4 color,const std::vector<
     windPoint{windPoint.begin(),windPoint.end()},
     windDirection{windDirection.begin(),windDirection.end()},
     windSpeed{windSpeed.begin(),windSpeed.end()},
-    speed_dist{speed,0.5*speed},
+    speed_dist{speed,1.5*speed},
     life_dist{life,0.1*life},
     volume_dist{volume,0.1*volume},
     direction_dist{-1.0f,1.0f},
@@ -56,7 +60,7 @@ void Dust::Update(float deltaTime,float currentTime, const glm::vec3& cameraPosi
                     glm::vec3 dir = windDirection[j];
                     float ws = windSpeed[j];
                     float dist = glm::length(glm::cross((p->pos - point),dir));
-                    float effective_ws = ws/(1+0.1*(dist*dist));
+                    float effective_ws = ws/(1+0.05*(dist*dist));
                     p->speed += dir * (float)deltaTime * effective_ws; // wind
                 }
 
