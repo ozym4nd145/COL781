@@ -5,13 +5,13 @@
 #include<iostream>
 using namespace std;
 
-Terrain::Terrain(int x, int z,float size,int vertexCount,float heightScale,std::vector<std::string> diffuseTexture,std::string heightMapPath):
+Terrain::Terrain(int x, int z,float size,int vertexCount,float heightScale,std::vector<std::string> diffuseTexture,std::string heightMapPath, int seed):
     modelTransformation{glm::mat4(1.0f)},
     mesh{nullptr},
     size{size},
     vertexCount{exp2((int(log(vertexCount-1)/log(2))+1)) + 1}, // round to power of 2^x + 1
     heightScale{heightScale},
-    generator{rd()},
+    generator{seed},
     rand_dist{-1.0,1.0},
     sea_height{0.0f},
     grass_limit{0.0f},
