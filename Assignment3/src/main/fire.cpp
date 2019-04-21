@@ -20,6 +20,9 @@
 #include "light.h"
 #include "fbo.h"
 #include "quad.h"
+#include "terrain.h"
+#include "water.h"
+
 
 #include <iostream>
 
@@ -97,10 +100,12 @@ int main(int argc, char** argv)
     Shader modelShader("../resources/shaders/model.vs", "../resources/shaders/model.fs");
     Shader skyboxShader("../resources/shaders/skybox.vs", "../resources/shaders/skybox.fs");
     Shader screenShader("../resources/shaders/fbo.vs","../resources/shaders/fbo.fs");
+    Shader terrainShader("../resources/shaders/terrain.vs", "../resources/shaders/terrain.fs");
 
     Wall wall_of_fire(1e5,1.75f,glm::vec3(0.0f),1.0f);
     Model moon("../models/my_moon/moon.obj");
-    vector<std::string> faces = {
+
+    vector<std::string> spaceFaces = {
         "../resources/textures/night/nightRight.png",
         "../resources/textures/night/nightLeft.png",
         "../resources/textures/night/nightTop.png",
@@ -108,11 +113,34 @@ int main(int argc, char** argv)
         "../resources/textures/night/nightFront.png",
         "../resources/textures/night/nightBack.png"
     };
-    SkyBox skybox(faces);
+    SkyBox spaceSkyBox(spaceFaces);
+
+    vector<std::string> dayFaces = {
+        "../resources/textures/skybox/right.jpg",
+        "../resources/textures/skybox/left.jpg",
+        "../resources/textures/skybox/top.jpg",
+        "../resources/textures/skybox/bottom.jpg",
+        "../resources/textures/skybox/front.jpg",
+        "../resources/textures/skybox/back.jpg"
+    };
+    SkyBox daySkyBox(dayFaces);
 
     LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
         PointLight{10000.0f*glm::vec3(sin(PIE/6.0f)*cos(PIE/6.0f),sin(PIE/6.0f),cos(PIE/6.0f)*cos(PIE/6.0f)),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
     });
+
+    int terrainSize = 500;
+    int waterSize = 4000;
+    int terrainCount = 1000;
+    int terrainHeight = 100;
+    Terrain ground(-terrainSize/2,-terrainSize/2,terrainSize,terrainCount,terrainHeight,{
+                                        "../resources/textures/grass.png",
+                                        "../resources/textures/water.jpg",
+                                        "../resources/textures/rock.jpg",
+                                        "../resources/textures/snow.jpg",
+                                        },"../resources/textures/heightmap.png");
+    Water water(glm::vec3(-waterSize/2,ground.sea_height,-waterSize/2),waterSize,5,{"../resources/textures/water.jpg"});
+
 
     vector<glm::vec3> camera_points = {
         glm::vec3(0.0f,0.0f,10.0f),
@@ -133,18 +161,30 @@ int main(int argc, char** argv)
     Beizer bcurve_loc(camera_points);
     Beizer bcurve_view(camera_yaw_pitch);
     float movement_time = 17.0f;
+    float transition_time = 5.0f;
 
-    glm::vec3 backgroundColor{0.1f,0.1f,0.1f};
+    glm::vec3 spaceColor{0.1f,0.1f,0.1f};
+    glm::vec3 skyColor{0.27,0.42,0.58};
 
 
-    deque<FBO*> fbos;
+    deque<FBO*> motionBlurFBOs;
+    FBO fireFBO(SCR_WIDTH,SCR_HEIGHT);
+    fireFBO.mount();
+    glClearColor(spaceColor[0],spaceColor[1],spaceColor[2], 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    FBO planetFBO(SCR_WIDTH,SCR_HEIGHT);
+    planetFBO.mount();
+    glClearColor(skyColor[0],skyColor[1],skyColor[2], 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     const int NUM_ACCUM=5;
     for(int i=0;i<NUM_ACCUM;i++) {
         FBO* fbo = new FBO(SCR_WIDTH,SCR_HEIGHT);
         fbo->mount();
-        glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2], 1.0f);
+        glClearColor(spaceColor[0],spaceColor[1],spaceColor[2], 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        fbos.push_back(fbo);
+        motionBlurFBOs.push_back(fbo);
     }
 
     Quad screen;
@@ -155,9 +195,9 @@ int main(int argc, char** argv)
     float initFrame = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
-        FBO* curFBO = fbos.front();
-        fbos.pop_front();
-        fbos.push_back(curFBO);
+        FBO* curFBO = motionBlurFBOs.front();
+        motionBlurFBOs.pop_front();
+        motionBlurFBOs.push_back(curFBO);
 
         // per-frame time logic
         // --------------------
@@ -171,69 +211,118 @@ int main(int argc, char** argv)
         // -----
         processInput(window);
 
+        float mixRatio = min(max((timePassed-(movement_time-transition_time))/transition_time,0.0f),1.0f);
+        
         // render
         // ------
-        curFBO->mount();
+        if(mixRatio < 1.0f) {
+            fireFBO.mount();
+            glClearColor(spaceColor[0],spaceColor[1],spaceColor[2], 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
+            float bcurve_t = min(timePassed/movement_time,0.99f);
+            glm::vec3 camera_pres_pos = bcurve_loc.get_pt(bcurve_t);
+            glm::vec3 camera_pres_dir = bcurve_view.get_pt(bcurve_t);
+            camera.setPosition(camera_pres_pos);
+            camera.setYawPitch(camera_pres_dir.x,camera_pres_dir.y);
 
-        glClearColor(backgroundColor[0],backgroundColor[1],backgroundColor[2], 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            particleShader.use();
 
+            // view/projection transformations
+            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+            glm::vec3 cameraPos = camera.Position;
+
+            glm::mat4 view = camera.GetViewMatrix();
+            particleShader.setMat4("projection", projection);
+            particleShader.setMat4("view", view);
+
+            wall_of_fire.Update(deltaTime,timePassed,cameraPos);
+            wall_of_fire.Draw(particleShader);
+
+
+            modelShader.use();
+
+            // view/projection transformations
+            modelShader.setMat4("projection", projection);
+            modelShader.setMat4("view", view);
+
+            // render the loaded model
+            glm::mat4 model = glm::mat4(1.0f);
+            modelShader.setMat4("model", model);
+            lightScene.configureLights(modelShader);
+            modelShader.setFloat("shineDamper",1.0f);
+            modelShader.setFloat("reflectivity",0.0f);
+            modelShader.setVec3("viewPos",cameraPos);
+            modelShader.setFloat("heightScale",0.01);
+
+            moon.Draw(modelShader);
+
+            skyboxShader.use();
+            view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+            skyboxShader.setMat4("view", view);
+            skyboxShader.setMat4("projection", projection);
+
+            spaceSkyBox.Draw();
+        }
         
-        float bcurve_t = min(timePassed/movement_time,0.99f);
-        glm::vec3 camera_pres_pos = bcurve_loc.get_pt(bcurve_t);
-        glm::vec3 camera_pres_dir = bcurve_view.get_pt(bcurve_t);
-        camera.setPosition(camera_pres_pos);
-        camera.setYawPitch(camera_pres_dir.x,camera_pres_dir.y);
+        if(mixRatio > 0.0f) {
+            if(mixRatio<1.0f) {
+                camera.setPosition(glm::vec3(0.0f,(ground.grass_limit+ground.mountain_limit)/2.0f,0.0f));
+                camera.setYawPitch(-90.0f,0.0f);
+            }
 
-        particleShader.use();
+            planetFBO.mount();
+            glClearColor(skyColor[0],skyColor[1],skyColor[2], 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::vec3 cameraPos = camera.Position;
+            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+            glm::vec3 cameraPos = camera.Position;
+            glm::mat4 view = camera.GetViewMatrix();
 
-        glm::mat4 view = camera.GetViewMatrix();
-        particleShader.setMat4("projection", projection);
-        particleShader.setMat4("view", view);
+            terrainShader.use();
+            lightScene.configureLights(terrainShader);
 
-        wall_of_fire.Update(deltaTime,timePassed,cameraPos);
-        wall_of_fire.Draw(particleShader);
+            terrainShader.setVec3("skyColor",skyColor);
+            terrainShader.setFloat("shineDamper",1.0f);
+            terrainShader.setFloat("reflectivity",0.0f);
+            terrainShader.setVec3("viewPos",cameraPos);
+            terrainShader.setMat4("projection",projection);
+            terrainShader.setMat4("view",view);
+            ground.Draw(terrainShader);
+
+            terrainShader.setFloat("shineDamper",100.0f);
+            terrainShader.setFloat("reflectivity",1.0f);
+            water.Draw(terrainShader);
+
+            skyboxShader.use();
+            view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+            skyboxShader.setMat4("view", view);
+            skyboxShader.setMat4("projection", projection);
+            daySkyBox.Draw();
+        }
+
+        curFBO->mount();
+        glClearColor(0.0,0.0,0.0, 1.0f);
+        glDisable(GL_DEPTH_TEST);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        screenShader.use();
+        screenShader.setFloat("opacity",1.0f);
+        screen.Draw(screenShader,{fireFBO.getTexture().id});
+        screenShader.setFloat("opacity",mixRatio);
+        screen.Draw(screenShader,{planetFBO.getTexture().id});
 
 
-        modelShader.use();
-
-        // view/projection transformations
-        modelShader.setMat4("projection", projection);
-        modelShader.setMat4("view", view);
-
-        // render the loaded model
-        glm::mat4 model = glm::mat4(1.0f);
-        // model = glm::translate(model, glm::vec3(2.3f, -3.6f, 0.0f)); // translate it down so it's at the center of the scene
-        // model = glm::scale(model, glm::vec3(1.0f/100.0f));	// it's a bit too big for our scene, so scale it down
-        modelShader.setMat4("model", model);
-        lightScene.configureLights(modelShader);
-        modelShader.setFloat("shineDamper",1.0f);
-        modelShader.setFloat("reflectivity",0.0f);
-        modelShader.setVec3("viewPos",cameraPos);
-        modelShader.setFloat("heightScale",0.01);
-
-        moon.Draw(modelShader);
-
-        skyboxShader.use();
-        view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
-        skyboxShader.setMat4("view", view);
-        skyboxShader.setMat4("projection", projection);
-
-        skybox.Draw();
-
-        // fbo unmount
         curFBO->unmount();
         glClearColor(0.0,0.0,0.0, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
+
         screenShader.use();
+        screenShader.setFloat("opacity",0.4f);
         glDisable(GL_DEPTH_TEST);
         
-        for(auto fbo: fbos) {
+        for(auto fbo: motionBlurFBOs) {
             screen.Draw(screenShader,{fbo->getTexture().id});
         }
 

@@ -101,18 +101,18 @@ int main(int argc, char** argv)
     Shader skyboxShader("../resources/shaders/skybox.vs", "../resources/shaders/skybox.fs");
     Shader screenShader("../resources/shaders/fbo.vs","../resources/shaders/fbo.fs");
 
-    vector<std::string> faces = {
+    vector<std::string> dayFaces = {
         "../resources/textures/skybox/right.jpg",
         "../resources/textures/skybox/left.jpg",
         "../resources/textures/skybox/top.jpg",
         "../resources/textures/skybox/bottom.jpg",
-        "../resources/textures/skybox/front.jpg",
-        "../resources/textures/skybox/back.jpg"
+        "../resources/textures/skybox/back.jpg",
+        "../resources/textures/skybox/front.jpg"
     };
-    SkyBox skybox(faces);
+    SkyBox daySkyBox(dayFaces);
 
     LightScene lightScene(glm::vec3(0.1f,0.1f,0.1f),{
-        PointLight{100000.0f*glm::vec3(-sin(PIE/6.0f)*cos(PIE/6.0f),sin(PIE/6.0f),-cos(PIE/6.0f)*cos(PIE/6.0f)),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
+        PointLight{100000.0f*glm::vec3(sin(PIE/6.0f)*cos(PIE/6.0f),sin(PIE/6.0f),cos(PIE/6.0f)*cos(PIE/6.0f)),glm::vec3(1.0f,1.0f,1.0f),glm::vec3(1.0f,0.0f,0.0f)}
     });
 
     int terrainSize = 500;
@@ -194,7 +194,7 @@ int main(int argc, char** argv)
         // view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
         // skyboxShader.setMat4("view", view);
         // skyboxShader.setMat4("projection", projection);
-        // skybox.Draw();
+        // daySkyBox.Draw();
 
         // fbo unmount
         curFBO->unmount();
