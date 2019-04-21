@@ -111,23 +111,23 @@ int main(int argc, char** argv)
 
     vector<glm::vec3> camera_points = {
         glm::vec3(0.0f,0.0f,10.0f),
-        // glm::vec3(-2.0f,0.0f,8.0f),
-        // glm::vec3(-4.0f,0.0f,6.0f),
-        // glm::vec3(-2.0f,1.0f,4.0f),
-        glm::vec3(0.0f,1.75f,1.75f),
-        glm::vec3(0.0f,4.75f,0.0f),
-        glm::vec3(0.2f,1.2f,-2.0f),
-        // glm::vec3(0.0f,-1.9f,0.0f),
-        // glm::vec3(0.2f,-5.75f,-2.0f),
-        
-        
-        // glm::vec3(0.2f,0.2f,-2.0f),
-
+        glm::vec3(0.0f,2.75f,5.75f),
+        glm::vec3(0.0f,5.1f,0.0f),
+        glm::vec3(0.0f,0.1f,-5.0f),
+        glm::vec3(0.0f,-2.1f,0.0f),
+    };
+    vector<glm::vec3> camera_yaw_pitch = {
+        glm::vec3(-90.0f,0.0f,0.0f),
+        glm::vec3(-110.0f,-10.0f,0.0f),
+        glm::vec3(-140.0f,-30.0f,0.0f),
+        glm::vec3(-130.0f,-60.0f,0.0f),
+        glm::vec3(-110.0f,-120.0f,0.0f),
+        glm::vec3(-90.0f,-180.0f,0.0f),
     };
 
-    Beizer bcurve(camera_points);
-    float movement_time = 10.0f;
-    float turn_time = 5.0f;
+    Beizer bcurve_loc(camera_points);
+    Beizer bcurve_view(camera_yaw_pitch);
+    float movement_time = 17.0f;
 
     // render loop
     // -----------
@@ -153,12 +153,10 @@ int main(int argc, char** argv)
 
         
         float bcurve_t = min(timePassed/movement_time,0.99f);
-        glm::vec3 camera_pres_pos = bcurve.get_pt(bcurve_t);
-        // cout<<glm::to_string(camera_pres_pos)<<endl;
+        glm::vec3 camera_pres_pos = bcurve_loc.get_pt(bcurve_t);
+        glm::vec3 camera_pres_dir = bcurve_view.get_pt(bcurve_t);
         camera.setPosition(camera_pres_pos);
-        float turn_t = min(timePassed/turn_time,0.99f);
-        camera.setYawPitch(turn_t*-170.0f + (1.0-turn_t)*-90.0f,turn_t*-60.0f);
-
+        camera.setYawPitch(camera_pres_dir.x,camera_pres_dir.y);
 
         particleShader.use();
 
